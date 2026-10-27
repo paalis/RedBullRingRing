@@ -113,10 +113,11 @@ CREW.forEach((d, i) => {
 });
 
 // ---------- Flyreiser ----------
+const BIKE_ICON = '<svg class="sport-mark" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1 6h4.5M0 9h5.5M1.5 12h4"/><g transform="translate(1.6 0) skewX(-10)"><circle class="sm-thin" cx="12.4" cy="12.4" r="3.6"/><circle class="sm-thin" cx="24.6" cy="12.4" r="3.6"/><path class="sm-thin" d="M12.4 12.4l4-6h6.2l2 5.8M16.4 6.4l2.2 6 4-6M15 4.6h3M21.4 4.2h2.6"/></g></svg>';
 const passes = document.querySelector(".passes");
 function leg(label, f) {
   if (Array.isArray(f)) {
-    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">🚲 ${seg.layover}</p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
+    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">${BIKE_ICON}<span>${seg.layover}</span></p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
   }
   if (!f) {
     return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Ikke booket ennå</p></div>`;

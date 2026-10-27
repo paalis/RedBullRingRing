@@ -24,7 +24,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; overflow-x: clip; }
 body {
   margin: 0;
   background: var(--bg);
@@ -32,7 +32,7 @@ body {
   font-size: 17px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 a { color: inherit; }
 img, video, svg { display: block; max-width: 100%; }
@@ -190,7 +190,8 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
   background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
   transition: transform .25s ease, border-color .25s ease;
 }
-.session:hover { transform: translateX(6px); border-color: #444456; }
+@media (hover: hover) { .session:hover { transform: translateX(6px); border-color: #444456; } }
+.session-body { min-width: 0; }
 .session-date {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
   background: var(--bg-3); border-right: 1px solid var(--line); padding: 18px 8px; text-transform: uppercase;
@@ -269,8 +270,10 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .chips .chip-icon { display: inline-flex; align-items: center; gap: 6px; }
 .chips .ticket-mark { width: 21px; height: 14px; }
 .sport-mark { width: 32px; height: 19px; flex: none; overflow: visible; }
+.sport-mark-narrow { width: 26px; }
 .sm-fill { fill: var(--red-hot); }
 .sm-stroke { fill: none; stroke: var(--red-hot); stroke-width: 2.1; stroke-linecap: round; }
+.sm-thin { fill: none; stroke: var(--red-hot); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .sm-speed { fill: none; stroke: var(--red); stroke-width: 1.5; stroke-linecap: round; opacity: .6; }
 .legs .leg-icon { display: inline-flex; align-items: center; gap: 6px; }
 .ticket .ticket-kicker { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
@@ -314,9 +317,9 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .pass-line { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .pass-line span { font-size: 12px; line-height: 1; color: var(--muted); font-weight: 600; }
 .pass-line i { display: block; width: 100%; height: 0; border-top: 2px dotted var(--muted); position: relative; }
-.pass-line i::after { content: "✈"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--bg-2); padding: 0 6px; font-style: normal; font-size: 13px; line-height: 1; }
+.pass-line i::after { content: "\2708\FE0E"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--bg-2); padding: 0 6px; font-style: normal; font-size: 13px; line-height: 1; }
 .pass-airline { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
-.pass-layover { margin: 0; padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--yellow); background: rgba(255,210,0,.06); border-top: 2px dashed var(--line); }
+.pass-layover { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--yellow); background: rgba(255,210,0,.06); border-top: 2px dashed var(--line); }
 .pass-layover + .pass-leg { border-top: 0; }
 .pass-tbc { margin: 0; font-weight: 700; color: var(--muted); }
 .session-home .session-tag { color: var(--green); border-color: var(--green); }
