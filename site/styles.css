@@ -154,6 +154,10 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
   padding: 8px 16px; font: 700 13px/1 "Titillium", sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
 }
 .intro-replay:hover { border-color: var(--red); }
+.play-mark { width: 30px; height: 20px; flex: none; }
+.play-badge { fill: var(--red); transition: fill .2s; }
+.play-tri { fill: #fff; }
+.intro-replay:hover .play-badge { fill: var(--red-hot); }
 
 /* ---------- KERB ---------- */
 .kerb {
