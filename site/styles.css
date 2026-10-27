@@ -253,6 +253,8 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .track-line { fill: none; stroke: var(--text); stroke-width: 6; stroke-linejoin: round; }
 .car { fill: var(--red-hot); filter: drop-shadow(0 0 8px var(--red)); }
 .turns text { fill: var(--muted); font-weight: 900; font-size: 20px; }
+.ga-zone { fill: #0b6b3d; stroke: #0b6b3d; stroke-width: 16; stroke-linejoin: round; }
+.ga-label { fill: #eafff3; font-weight: 900; font-size: 14px; letter-spacing: .14em; text-anchor: middle; }
 .finish { stroke: #fff; stroke-width: 6; stroke-dasharray: 3 3; }
 .track figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; }
 .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; margin: 32px 0 0; }
