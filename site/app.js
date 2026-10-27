@@ -166,7 +166,7 @@ STAYS.forEach((s) => {
   li.id = `stay-${s.id}`;
   li.innerHTML = `
     <header class="stay-head">
-      <span class="stay-city"><svg class="sport-mark stay-mark stay-mark-head" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1.5 6.5h5M0.5 9.5h6M2.5 12.5h4"/><g transform="translate(2 0) skewX(-12)"><g transform="translate(1.5 -2.6)"><path class="sm-fill" d="M10 5.5h2.2v6h11.6a1.6 1.6 0 0 1 1.6 1.6V17h-2.2v-2.2H12.2V17H10z"/><rect class="sm-fill" x="13.6" y="7.6" width="4.6" height="2.8" rx="1"/><path class="sm-fill" d="M19.4 7.6h3.4a2.6 2.6 0 0 1 2.6 2.6v.2h-6z"/></g></g></svg>${esc(s.city)}</span>
+      <span class="stay-city"><svg class="sport-mark stay-mark stay-mark-head" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1 6h4.5M0 9h5.5M1.5 12h4"/><g transform="translate(1.6 0) skewX(-10)"><path class="sm-fill" d="M8 3h2.3v7.4h17.9V16h-2.3v-2.4H10.3V16H8z"/><rect class="sm-fill" x="11.2" y="6.9" width="4.2" height="2.7" rx="1"/><path class="sm-fill" d="M16.4 6.9h8.3a3.5 3.5 0 0 1 3.5 2.7H16.4z"/></g></svg>${esc(s.city)}</span>
       <span class="stay-nights">${s.nights} ${s.nights === 1 ? "natt" : "netter"}</span>
     </header>
     <div class="stay-body">
