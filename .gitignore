@@ -1,0 +1,7 @@
+# brag-slim mellomfiler (frames, lyd, stills)
+brag-output/work/frames/
+brag-output/work/stills/
+brag-output/work/*.wav
+brag-output/work/*.png
+brag-output/work/*.jpg
+.vercel
