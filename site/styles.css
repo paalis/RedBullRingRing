@@ -321,7 +321,7 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .stays { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
 .stay { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; scroll-margin-top: 90px; }
 .stay:target { outline: 2px solid var(--yellow); }
-.stay-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 20px; background: var(--bg-3); }
+.stay-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 20px; background: var(--bg-3); }
 .stay.is-booked .stay-head { background: var(--red); }
 .stay-city { font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .stay-nights { font-weight: 600; font-size: 14px; }
@@ -339,7 +339,12 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .stay-name { margin: 2px 0 0; font-weight: 900; font-size: 20px; text-transform: uppercase; }
 .stay-meta { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
 .stay-link { display: inline-block; margin-top: 8px; font-weight: 700; font-size: 14px; color: var(--text); text-decoration: none; border-bottom: 2px solid var(--red); }
-.stay-chip a { color: inherit; text-decoration: none; }
+.stay-chip a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.stay-mark { width: 21px; height: 14px; flex: none; }
+.stay-city { display: inline-flex; align-items: center; gap: 10px; }
+.stay-mark-head { width: 30px; height: 20px; }
+.stay.is-booked .stay-mark-head .play-badge { fill: #fff; }
+.stay.is-booked .stay-mark-head .play-tri { fill: var(--red); }
 .stay-chip:hover { border-color: var(--red); }
 
 /* ---------- CHECKLIST ---------- */

@@ -166,7 +166,7 @@ STAYS.forEach((s) => {
   li.id = `stay-${s.id}`;
   li.innerHTML = `
     <header class="stay-head">
-      <span class="stay-city">${esc(s.city)}</span>
+      <span class="stay-city"><svg class="stay-mark stay-mark-head" viewBox="0 0 34 22" aria-hidden="true"><path class="play-badge" d="M8 0h26l-8 22H0z"/><path class="play-tri" d="M10 5.5h2.2v6h11.6a1.6 1.6 0 0 1 1.6 1.6V17h-2.2v-2.2H12.2V17H10z"/><rect class="play-tri" x="13.6" y="7.6" width="4.6" height="2.8" rx="1"/><path class="play-tri" d="M19.4 7.6h3.4a2.6 2.6 0 0 1 2.6 2.6v.2h-6z"/></svg>${esc(s.city)}</span>
       <span class="stay-nights">${s.nights} ${s.nights === 1 ? "natt" : "netter"}</span>
     </header>
     <div class="stay-body">
@@ -178,7 +178,7 @@ STAYS.forEach((s) => {
     </div>`;
   staysEl.append(li);
   if (booked) {
-    document.querySelectorAll(`.stay-chip a[data-stay="${s.id}"]`).forEach((a) => (a.textContent = `🏨 ${booked.name}`));
+    document.querySelectorAll(`.stay-chip a[data-stay="${s.id}"] .stay-label`).forEach((el) => (el.textContent = booked.name));
   }
 });
 
