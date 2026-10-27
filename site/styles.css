@@ -268,6 +268,13 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .ticket-mark { width: 26px; height: 17px; flex: none; }
 .chips .chip-icon { display: inline-flex; align-items: center; gap: 6px; }
 .chips .ticket-mark { width: 21px; height: 14px; }
+.sport-mark { width: 32px; height: 19px; flex: none; overflow: visible; }
+.sport-mark-narrow { width: 26px; }
+.sm-fill { fill: var(--red-hot); }
+.sm-stroke { fill: none; stroke: var(--red-hot); stroke-width: 2.1; stroke-linecap: round; }
+.sm-thin { fill: none; stroke: var(--red-hot); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.sm-speed { fill: none; stroke: var(--red); stroke-width: 1.5; stroke-linecap: round; opacity: .6; }
+.legs .leg-icon { display: inline-flex; align-items: center; gap: 6px; }
 .ticket .ticket-kicker { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
 .ticket .ticket-title { font-weight: 900; font-size: 28px; text-transform: uppercase; color: var(--text); margin: 2px 0 6px; }
 
@@ -309,9 +316,9 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .pass-line { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .pass-line span { font-size: 12px; line-height: 1; color: var(--muted); font-weight: 600; }
 .pass-line i { display: block; width: 100%; height: 0; border-top: 2px dotted var(--muted); position: relative; }
-.pass-line i::after { content: "✈"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--bg-2); padding: 0 6px; font-style: normal; font-size: 13px; line-height: 1; }
+.pass-line i::after { content: "\2708\FE0E"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--bg-2); padding: 0 6px; font-style: normal; font-size: 13px; line-height: 1; }
 .pass-airline { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
-.pass-layover { margin: 0; padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--yellow); background: rgba(255,210,0,.06); border-top: 2px dashed var(--line); }
+.pass-layover { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--yellow); background: rgba(255,210,0,.06); border-top: 2px dashed var(--line); }
 .pass-layover + .pass-leg { border-top: 0; }
 .pass-tbc { margin: 0; font-weight: 700; color: var(--muted); }
 .session-home .session-tag { color: var(--green); border-color: var(--green); }
@@ -321,7 +328,7 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .stays { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
 .stay { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; scroll-margin-top: 90px; }
 .stay:target { outline: 2px solid var(--yellow); }
-.stay-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 20px; background: var(--bg-3); }
+.stay-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 20px; background: var(--bg-3); }
 .stay.is-booked .stay-head { background: var(--red); }
 .stay-city { font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
 .stay-nights { font-weight: 600; font-size: 14px; }
@@ -339,7 +346,11 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .stay-name { margin: 2px 0 0; font-weight: 900; font-size: 20px; text-transform: uppercase; }
 .stay-meta { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
 .stay-link { display: inline-block; margin-top: 8px; font-weight: 700; font-size: 14px; color: var(--text); text-decoration: none; border-bottom: 2px solid var(--red); }
-.stay-chip a { color: inherit; text-decoration: none; }
+.stay-chip a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.stay-city { display: inline-flex; align-items: center; gap: 10px; }
+.stay-mark-head { width: 40px; height: 24px; }
+.stay.is-booked .stay-mark-head .sm-fill { fill: #fff; }
+.stay.is-booked .stay-mark-head .sm-speed { stroke: #fff; }
 .stay-chip:hover { border-color: var(--red); }
 
 /* ---------- CHECKLIST ---------- */

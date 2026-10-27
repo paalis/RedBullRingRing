@@ -113,10 +113,11 @@ CREW.forEach((d, i) => {
 });
 
 // ---------- Flyreiser ----------
+const BIKE_ICON = '<svg class="sport-mark" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1 6h4.5M0 9h5.5M1.5 12h4"/><g transform="translate(1.6 0) skewX(-10)"><circle class="sm-thin" cx="12.4" cy="12.4" r="3.6"/><circle class="sm-thin" cx="24.6" cy="12.4" r="3.6"/><path class="sm-thin" d="M12.4 12.4l4-6h6.2l2 5.8M16.4 6.4l2.2 6 4-6M15 4.6h3M21.4 4.2h2.6"/></g></svg>';
 const passes = document.querySelector(".passes");
 function leg(label, f) {
   if (Array.isArray(f)) {
-    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">🚲 ${seg.layover}</p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
+    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">${BIKE_ICON}<span>${seg.layover}</span></p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
   }
   if (!f) {
     return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Ikke booket ennå</p></div>`;
@@ -166,7 +167,7 @@ STAYS.forEach((s) => {
   li.id = `stay-${s.id}`;
   li.innerHTML = `
     <header class="stay-head">
-      <span class="stay-city">${esc(s.city)}</span>
+      <span class="stay-city"><svg class="sport-mark stay-mark stay-mark-head" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1 6h4.5M0 9h5.5M1.5 12h4"/><g transform="translate(1.6 0) skewX(-10)"><path class="sm-fill" d="M8 3h2.3v7.4h17.9V16h-2.3v-2.4H10.3V16H8z"/><rect class="sm-fill" x="11.2" y="6.9" width="4.2" height="2.7" rx="1"/><path class="sm-fill" d="M16.4 6.9h8.3a3.5 3.5 0 0 1 3.5 2.7H16.4z"/></g></svg>${esc(s.city)}</span>
       <span class="stay-nights">${s.nights} ${s.nights === 1 ? "natt" : "netter"}</span>
     </header>
     <div class="stay-body">
@@ -178,7 +179,7 @@ STAYS.forEach((s) => {
     </div>`;
   staysEl.append(li);
   if (booked) {
-    document.querySelectorAll(`.stay-chip a[data-stay="${s.id}"]`).forEach((a) => (a.textContent = `🏨 ${booked.name}`));
+    document.querySelectorAll(`.stay-chip a[data-stay="${s.id}"] .stay-label`).forEach((el) => (el.textContent = booked.name));
   }
 });
 
