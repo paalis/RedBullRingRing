@@ -45,6 +45,28 @@ const STAYS = [
   { id: "wien-2", city: "Wien",  dates: "Søn 11. – man 12. juli", nights: 1, note: "Siste natt. Nær flyplassen er et pluss – første fly går 09:25.", options: [] },
 ];
 
+// Leiebil. Felt som er tomme vises som "–". `status`: "planlegges" eller "booket".
+const CAR = {
+  status: "planlegges",
+  company: "",
+  model: "",
+  size: "Plass til 4 + bagasje",
+  price: "",
+  url: "",
+  drivers: [],
+  pickup: { when: "Lør 10. juli, tidlig morgen", where: "Wien – sentrum eller flyplassen", suggested: true },
+  dropoff: { when: "Man 12. juli, ca. 07:00", where: "Wien flyplass (VIE)", note: "Tre av oss flyr 09:25, Håvard 16:35", suggested: true },
+  todo: [
+    { text: "Velge utleiefirma og bilstørrelse", done: false },
+    { text: "Hente i sentrum eller på flyplassen?", done: false },
+    { text: "Levere søndag kveld eller på VIE mandag morgen?", done: false },
+    { text: "Hvem kjører – førerkort og ekstra sjåfør", done: false },
+    { text: "Vignett (motorveiavgift) inkludert i leien?", done: false },
+    { text: "Parkering ved Red Bull Ring – må den forhåndskjøpes?", done: false },
+    { text: "Forsikring og egenandel", done: false },
+  ],
+};
+
 const PACKING = [
   "Pass / ID",
   "Flybillett",
@@ -182,6 +204,52 @@ STAYS.forEach((s) => {
     document.querySelectorAll(`.stay-chip a[data-stay="${s.id}"] .stay-label`).forEach((el) => (el.textContent = booked.name));
   }
 });
+
+// ---------- Leiebil ----------
+const CAR_ICON = '<svg class="sport-mark" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1 6h4.5M0 9h5.5M1.5 12h4"/><g transform="translate(1.6 0) skewX(-10)"><path class="sm-fill" fill-rule="evenodd" d="M8 13.6v-2c0-.8.6-1.4 1.4-1.5l3.2-.5 3-3c.5-.5 1.2-.8 1.9-.8h4.1c.7 0 1.4.3 1.8.9l2.2 2.9 1.8.4c.9.2 1.5 1 1.5 1.9v1.7h-1.9a2.8 2.8 0 0 0-5.6 0h-5.6a2.8 2.8 0 0 0-5.6 0zM16.4 7.4l-2.2 2.2h5.2V7.2h-2.2z M20.6 7.2v2.4H24l-1.6-2z"/><circle class="sm-fill" cx="13" cy="13.8" r="2.2"/><circle class="sm-fill" cx="24.2" cy="13.8" r="2.2"/></g></svg>';
+const val = (v) => (v ? esc(v) : '<span class="car-tbc">–</span>');
+function carStop(label, s) {
+  return `
+    <div class="car-stop">
+      <p class="car-label">${label}${s.suggested ? ' <span class="car-hint">forslag</span>' : ""}</p>
+      <p class="car-when">${val(s.when)}</p>
+      <p class="car-where">${val(s.where)}</p>
+      ${s.note ? `<p class="car-note">${esc(s.note)}</p>` : ""}
+    </div>`;
+}
+{
+  const booked = CAR.status === "booket";
+  const done = CAR.todo.filter((t) => t.done).length;
+  document.querySelector(".car-board").innerHTML = `
+    <article class="car-card${booked ? " is-booked" : ""}">
+      <header class="car-head">
+        <span class="car-title">${CAR_ICON} Leiebil</span>
+        <span class="car-status">${booked ? "Booket" : "Planlegges"}</span>
+      </header>
+      <dl class="car-facts">
+        <div><dt>Utleier</dt><dd>${val(CAR.company)}</dd></div>
+        <div><dt>Bil</dt><dd>${val(CAR.model)}</dd></div>
+        <div><dt>Størrelse</dt><dd>${val(CAR.size)}</dd></div>
+        <div><dt>Pris</dt><dd>${val(CAR.price)}</dd></div>
+        <div class="car-wide"><dt>Sjåfører</dt><dd>${CAR.drivers.length ? CAR.drivers.map(esc).join(" · ") : val("")}</dd></div>
+      </dl>
+      ${CAR.url ? `<a class="stay-link" href="${esc(CAR.url)}" target="_blank" rel="noopener">Se bestillingen →</a>` : ""}
+    </article>
+    <article class="car-card car-route">
+      ${carStop("Henting", CAR.pickup)}
+      <div class="car-arrow" aria-hidden="true"><i></i><span>Wien → Graz → Spielberg → Wien</span></div>
+      ${carStop("Levering", CAR.dropoff)}
+    </article>
+    <article class="car-card">
+      <header class="car-head car-head-plain">
+        <span class="car-title">Å avklare</span>
+        <span class="car-status">${done} / ${CAR.todo.length}</span>
+      </header>
+      <ul class="car-todo">
+        ${CAR.todo.map((t) => `<li class="${t.done ? "is-done" : ""}"><span class="car-check" aria-hidden="true"></span>${esc(t.text)}</li>`).join("")}
+      </ul>
+    </article>`;
+}
 
 // ---------- Pakkeliste ----------
 const STORE_KEY = "rbr27-pack";
