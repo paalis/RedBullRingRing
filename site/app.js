@@ -14,8 +14,8 @@ const FLIGHTS = [
   {
     base: "Trondheim",
     who: ["Filip", "Pål André"],
-    out: { date: "Tor 8. juli", from: "TRD", dep: "17:10", to: "VIE", arr: "22:20", airline: "KLM Cityhopper + 1", stops: "1 bytte", dur: "5 t 10 min" },
-    ret: { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "TRD", arr: "22:50", airline: "KLM + 1", stops: "1 bytte", dur: "13 t 25 min" },
+    out: { date: "Tor 8. juli", from: "TRD", dep: "17:10", to: "VIE", arr: "22:20", airline: "KLM Cityhopper + 1", stops: "1 bytte (AMS)", dur: "5 t 10 min" },
+    ret: { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "TRD", arr: "22:50", airline: "KLM + 1", stops: "1 bytte (AMS)", dur: "13 t 25 min" },
   },
   {
     base: "Kristiansand",
