@@ -5,7 +5,7 @@ const CREW = [
   { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600" },
   { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000" },
   { name: "Fører 3",    fullName: "Navn kommer",              code: "OSL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2" },
-  { name: "Fører 4",    fullName: "Navn kommer",              code: "KRS", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff" },
+  { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff" },
 ];
 
 // Flyreiser per hjemby. `out`/`ret` = null betyr ikke booket ennå.
@@ -17,7 +17,12 @@ const FLIGHTS = [
     ret: { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "TRD", arr: "22:50", airline: "KLM + 1", stops: "1 bytte", dur: "13 t 25 min" },
   },
   { base: "Oslo", who: ["Fører 3"], out: null, ret: null },
-  { base: "Kristiansand", who: ["Fører 4"], out: null, ret: null },
+  {
+    base: "Kristiansand",
+    who: ["Håvard"],
+    out: { date: "Tor 8. juli", from: "KRS", dep: "10:10", to: "VIE", arr: "15:55", stops: "1 bytte (OSL)", dur: "5 t 45 min" },
+    ret: { date: "Man 12. juli", from: "VIE", dep: "16:35", to: "OSL", arr: "18:50", stops: "Direkte", dur: "2 t 15 min" },
+  },
 ];
 
 const PACKING = [
@@ -99,7 +104,7 @@ function leg(label, f) {
         <div class="pass-line"><span>${f.stops}</span><i></i><span>${f.dur}</span></div>
         <div class="pass-to"><b>${f.to}</b><span>${f.arr}</span></div>
       </div>
-      <p class="pass-airline">${f.airline}</p>
+      ${f.airline ? `<p class="pass-airline">${f.airline}</p>` : ""}
     </div>`;
 }
 FLIGHTS.forEach((g) => {
