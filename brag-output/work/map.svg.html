@@ -1,0 +1,24 @@
+<svg viewBox="0 0 640 600" role="img" aria-labelledby="map-title">
+          <title id="map-title">Skjematisk kart over ruten fra Norge til Wien, Graz og Spielberg</title>
+          <defs>
+            <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M32 0H0V32" fill="none" stroke="currentColor" stroke-opacity=".07"/>
+            </pattern>
+          </defs>
+          <rect width="640" height="600" fill="url(#grid)"/>
+
+          <!-- flights -->
+          <path class="route route-fly" d="M150 70 C 360 110, 520 260, 540 430"/>
+          <path class="route route-fly" d="M175 175 C 360 220, 500 320, 540 430"/>
+          <path class="route route-fly" d="M115 250 C 300 300, 470 360, 540 430"/>
+          <!-- ground -->
+          <path class="route route-ground" d="M540 430 C 525 470, 505 500, 490 520"/>
+          <path class="route route-ground route-car" d="M490 520 C 470 520, 450 512, 430 505"/>
+
+          <g class="city city-no"><circle cx="150" cy="70" r="7"/><text x="166" y="66">Trondheim</text><text class="code" x="166" y="82">TRD</text></g>
+          <g class="city city-no"><circle cx="175" cy="175" r="7"/><text x="191" y="171">Oslo</text><text class="code" x="191" y="187">OSL</text></g>
+          <g class="city city-no"><circle cx="115" cy="250" r="7"/><text x="131" y="246">Kristiansand</text><text class="code" x="131" y="262">KRS</text></g>
+          <g class="city city-hub"><circle cx="540" cy="430" r="10"/><text x="560" y="428">Wien</text><text class="code" x="560" y="444">VIE</text></g>
+          <g class="city"><circle cx="490" cy="520" r="7"/><text x="506" y="540">Graz</text></g>
+          <g class="city city-track"><circle cx="430" cy="505" r="9"/><text x="330" y="545">Spielberg</text><text class="code" x="330" y="561">RED BULL RING</text></g>
+        </svg>

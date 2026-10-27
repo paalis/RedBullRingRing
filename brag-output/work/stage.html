@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/site/styles.css">
+<style>
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+  * { animation: none !important; transition: none !important; }
+  .stage { position: relative; width: 1920px; height: 1080px; overflow: hidden;
+    background: radial-gradient(ellipse 70% 60% at 50% 55%, #1a0d10 0%, var(--bg) 70%); }
+  .scene { position: absolute; inset: 0; display: none; }
+  .kick { font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-size: 30px; }
+  .big { font-weight: 900; text-transform: uppercase; line-height: .95; letter-spacing: -.01em; }
+  .skew { display: inline-block; transform: skewX(-8deg); transform-origin: left; }
+
+  /* S1 lights */
+  #s1 { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 70px; }
+  .gantry { display: flex; gap: 40px; padding: 34px 46px; background: #050507; border-radius: 26px; border: 2px solid #22222c; }
+  .gantry i { width: 130px; height: 130px; border-radius: 50%; background: #2a0a0a; box-shadow: inset 0 0 0 8px #111; display: block; }
+  .gantry i.on { background: radial-gradient(circle at 40% 38%, #ff6a5c, var(--red-hot) 45%, #b00400); box-shadow: inset 0 0 0 8px #111, 0 0 60px var(--red), 0 0 140px rgba(225,6,0,.5); }
+  #s1 .kick { display: flex; align-items: center; gap: 18px; }
+  #s1 .flag { width: 54px; height: 36px; border-radius: 4px; background: linear-gradient(var(--red) 0 33.3%, #fff 0 66.6%, var(--red) 0); }
+
+  /* S2 map */
+  #s2 .copy { position: absolute; left: 140px; top: 330px; width: 760px; }
+  #s2 h2 { font-size: 150px; }
+  #s2 .copy p { margin: 30px 0 0; font-size: 40px; color: #d8d8e0; font-weight: 600; }
+  #s2 .mapwrap { position: absolute; right: 90px; top: 60px; width: 1030px; height: 966px; }
+  #s2 .mapwrap svg { width: 100%; height: 100%; color: var(--text); }
+  #s2 .city text { font-size: 22px; }
+  #s2 .city .code { font-size: 14px; }
+  #s2 .city { opacity: 0; }
+  #s2 .route-fly { stroke: #d8d8e0; stroke-width: 4; stroke-dasharray: 3 12; }
+  #s2 .route-ground { stroke-width: 7; }
+
+  /* S3 track */
+  #s3 .trackwrap { position: absolute; left: 40px; top: 110px; width: 1200px; }
+  #s3 .trackwrap svg { width: 100%; height: auto; overflow: visible; }
+  #s3 .copy { position: absolute; left: 1240px; top: 190px; width: 620px; }
+  #s3 h2 { font-size: 120px; margin-top: 14px; }
+  #s3 .stat { margin-top: 34px; border-top: 2px solid var(--line); padding-top: 20px; opacity: 0; }
+  #s3 .stat b { display: block; font-size: 110px; font-weight: 900; line-height: 1; }
+  #s3 .stat span { font-size: 28px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  #s3 .car { r: 14; }
+  #s3 .turns text { font-size: 26px; }
+
+  /* S4 title */
+  #s4 { display: none; flex-direction: column; justify-content: center; padding-left: 150px; }
+  #s4 h1 { font-size: 220px; display: flex; flex-direction: column; gap: 0; }
+  #s4 h1 span { opacity: 0; }
+  #s4 h1 .red { color: var(--red); }
+  #s4 .date { margin-top: 46px; display: flex; align-items: center; gap: 26px; opacity: 0; }
+  #s4 .date b { font-size: 56px; font-weight: 900; letter-spacing: .02em; }
+  #s4 .brandbox { position: absolute; right: 150px; bottom: 130px; opacity: 0; display: flex; align-items: baseline; }
+  #s4 .brandbox .brand-mark, #s4 .brandbox .brand-year { font-size: 72px; }
+  #s4 .lightsrow { position: absolute; right: 150px; top: 140px; display: flex; gap: 22px; }
+  #s4 .lightsrow i { width: 46px; height: 46px; border-radius: 50%; background: #2a0a0a; box-shadow: inset 0 0 0 5px #111; display: block; }
+  .kerbbar { position: absolute; left: 0; right: 0; bottom: 0; height: 30px;
+    background: repeating-linear-gradient(120deg, var(--red) 0 56px, #fff 56px 112px); }
+
+  /* Wipe */
+  .wipe { position: absolute; top: -200px; height: 1480px; width: 5000px; background: var(--bg); transform-origin: center; display: none; z-index: 10; }
+  .wipe::before, .wipe::after { content: ""; position: absolute; top: 0; bottom: 0; width: 90px;
+    background: repeating-linear-gradient(0deg, var(--red) 0 70px, #fff 70px 140px); }
+  .wipe::before { right: 0; }
+  .wipe::after { left: 0; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <section class="scene" id="s1">
+    <div class="gantry"><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="kick"><span class="flag"></span>Østerrikes Grand Prix · Spielberg</p>
+  </section>
+
+  <section class="scene" id="s2">
+    <div class="copy">
+      <p class="kick" style="color:var(--red);margin:0 0 18px">Strategi</p>
+      <h2 class="big"><span class="skew">Tre byer.</span><br><span class="skew">Ett mål.</span></h2>
+      <p>Trondheim · Oslo · Kristiansand → Wien → Graz → Red Bull Ring</p>
+    </div>
+    <div class="mapwrap"><svg viewBox="0 0 640 600" role="img" aria-labelledby="map-title">
+          <title id="map-title">Skjematisk kart over ruten fra Norge til Wien, Graz og Spielberg</title>
+          <defs>
+            <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+              <path d="M32 0H0V32" fill="none" stroke="currentColor" stroke-opacity=".07"/>
+            </pattern>
+          </defs>
+          <rect width="640" height="600" fill="url(#grid)"/>
+
+          <!-- flights -->
+          <path class="route route-fly" d="M150 70 C 360 110, 520 260, 540 430"/>
+          <path class="route route-fly" d="M175 175 C 360 220, 500 320, 540 430"/>
+          <path class="route route-fly" d="M115 250 C 300 300, 470 360, 540 430"/>
+          <!-- ground -->
+          <path class="route route-ground" d="M540 430 C 525 470, 505 500, 490 520"/>
+          <path class="route route-ground route-car" d="M490 520 C 470 520, 450 512, 430 505"/>
+
+          <g class="city city-no"><circle cx="150" cy="70" r="7"/><text x="166" y="66">Trondheim</text><text class="code" x="166" y="82">TRD</text></g>
+          <g class="city city-no"><circle cx="175" cy="175" r="7"/><text x="191" y="171">Oslo</text><text class="code" x="191" y="187">OSL</text></g>
+          <g class="city city-no"><circle cx="115" cy="250" r="7"/><text x="131" y="246">Kristiansand</text><text class="code" x="131" y="262">KRS</text></g>
+          <g class="city city-hub"><circle cx="540" cy="430" r="10"/><text x="560" y="428">Wien</text><text class="code" x="560" y="444">VIE</text></g>
+          <g class="city"><circle cx="490" cy="520" r="7"/><text x="506" y="540">Graz</text></g>
+          <g class="city city-track"><circle cx="430" cy="505" r="9"/><text x="330" y="545">Spielberg</text><text class="code" x="330" y="561">RED BULL RING</text></g>
+        </svg></div>
+  </section>
+
+  <section class="scene" id="s3">
+    <div class="trackwrap"><svg viewBox="0 0 600 420" role="img" aria-labelledby="track-title">
+          <title id="track-title">Skjematisk banekart over Red Bull Ring</title>
+          <path class="track-base" d="M110 345 L 380 318 Q 425 312 438 278 L 516 88 Q 532 42 496 54 L 300 178 Q 268 198 284 226 Q 296 252 262 262 L 210 262 Q 176 260 160 236 L 132 196 Q 104 160 82 196 L 70 300 Q 66 350 110 345 Z"/>
+          <path class="track-line" d="M110 345 L 380 318 Q 425 312 438 278 L 516 88 Q 532 42 496 54 L 300 178 Q 268 198 284 226 Q 296 252 262 262 L 210 262 Q 176 260 160 236 L 132 196 Q 104 160 82 196 L 70 300 Q 66 350 110 345 Z"/>
+          <circle class="car" r="7"/>
+          <g class="turns">
+            <text x="448" y="306">1</text>
+            <text x="540" y="62">3</text>
+            <text x="262" y="196">4</text>
+            <text x="300" y="276">6</text>
+            <text x="150" y="268">7</text>
+            <text x="98" y="160">8</text>
+            <text x="44" y="300">9</text>
+            <text x="74" y="372">10</text>
+          </g>
+          <line class="finish" x1="226" y1="322" x2="229" y2="346"/>
+        </svg></div>
+    <div class="copy">
+      <p class="kick" style="color:var(--red);margin:0">Spielberg, Steiermark</p>
+      <h2 class="big"><span class="skew">Red Bull Ring</span></h2>
+      <div class="stat"><b>71</b><span>runder</span></div>
+      <div class="stat"><b>4,318</b><span>km per runde</span></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s4">
+    <div class="lightsrow"><i></i><i></i><i></i><i></i><i></i></div>
+    <h1 class="big"><span class="skew">4 kamerater.</span><span class="skew">3 byer.</span><span class="skew red">1 løp.</span></h1>
+    <div class="date"><span class="flag-at" style="width:60px;height:40px"></span><b>8.–11. juli 2027</b></div>
+    <div class="brandbox"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></div>
+    <div class="kerbbar"></div>
+  </section>
+
+  <div class="wipe" id="wipe"></div>
+</div>
+
+<script>
+const W = 1920;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeInOut = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+// Prepare map routes as masks so the dotted flight paths can "draw" in.
+const mapSvg = $('#s2 svg');
+const NS = 'http://www.w3.org/2000/svg';
+const defs = mapSvg.querySelector('defs');
+const routes = $$('.route', mapSvg);
+routes.forEach((r, i) => {
+  const m = document.createElementNS(NS, 'mask'); m.id = 'rm' + i;
+  m.setAttribute('maskUnits', 'userSpaceOnUse');
+  const p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', r.getAttribute('d'));
+  p.setAttribute('fill', 'none'); p.setAttribute('stroke', '#fff'); p.setAttribute('stroke-width', '24');
+  p.setAttribute('pathLength', '1'); p.setAttribute('stroke-dasharray', '1 1');
+  m.append(p); defs.append(m);
+  r.setAttribute('mask', `url(#rm${i})`);
+  r._m = p;
+});
+const cities = $$('.city', mapSvg); // TRD, OSL, KRS, VIE, Graz, Spielberg
+const trackLine = $('#s3 .track-line');
+const trackLen = trackLine.getTotalLength();
+trackLine.setAttribute('pathLength', '1');
+trackLine.setAttribute('stroke-dasharray', '1 1');
+const car = $('#s3 .car');
+
+function show(id, on) { $(id).style.display = on ? (id === '#s4' ? 'flex' : (id === '#s1' ? 'flex' : 'block')) : 'none'; }
+function pop(el, t, at, dur = .22, from = 1.25) {
+  const p = easeOut(prog(t, at, at + dur));
+  el.style.opacity = p;
+  el.style.transform = `scale(${from - (from - 1) * p})`;
+}
+
+window.render = function (t) {
+  show('#s1', t < 3); show('#s2', t >= 3 && t < 6); show('#s3', t >= 6 && t < 8.5); show('#s4', t >= 8.5);
+
+  // S1 – lights on beats, push-in
+  const lights = $$('#s1 .gantry i');
+  lights.forEach((l, i) => l.classList.toggle('on', t >= 0.5 + i * 0.5));
+  $('#s1').style.transform = `scale(${1 + 0.06 * prog(t, 0, 3)})`;
+  $('#s1 .kick').style.opacity = easeOut(prog(t, 0.1, 0.6));
+
+  // S2 – route map
+  const u2 = t - 3;
+  $('#s2 .copy').style.opacity = easeOut(prog(u2, 0, .3));
+  $('#s2 .copy').style.transform = `translateX(${-60 * (1 - easeOut(prog(u2, 0, .4)))}px)`;
+  $('#s2 .mapwrap').style.transform = `scale(${1.04 - .04 * easeOut(prog(u2, 0, 3))})`;
+  [0, 1, 2].forEach((i) => {
+    cities[i].style.opacity = easeOut(prog(u2, i * .5, i * .5 + .2));
+    routes[i]._m.setAttribute('stroke-dashoffset', 1 - easeInOut(prog(u2, i * .5, i * .5 + .9)));
+  });
+  cities[3].style.opacity = easeOut(prog(u2, 1.5, 1.7));
+  routes[3]._m.setAttribute('stroke-dashoffset', 1 - easeInOut(prog(u2, 1.5, 2.0)));
+  cities[4].style.opacity = easeOut(prog(u2, 1.9, 2.1));
+  routes[4]._m.setAttribute('stroke-dashoffset', 1 - easeInOut(prog(u2, 2.0, 2.4)));
+  cities[5].style.opacity = easeOut(prog(u2, 2.3, 2.5));
+  // keep flight dots marching
+  $$('.route-fly', mapSvg).forEach((r) => r.style.strokeDashoffset = -30 * (u2 / 1.4));
+
+  // S3 – track
+  const u3 = t - 6;
+  trackLine.setAttribute('stroke-dashoffset', 1 - easeInOut(prog(u3, 0, .7)));
+  const lap = 2.4;
+  const pt = trackLine.getPointAtLength(((Math.max(0, u3 - .3) % lap) / lap) * trackLen);
+  car.setAttribute('cx', pt.x); car.setAttribute('cy', pt.y);
+  car.style.opacity = prog(u3, .25, .4);
+  $('#s3 .copy').style.opacity = easeOut(prog(u3, 0, .3));
+  $$('#s3 .stat').forEach((s, i) => { pop(s, u3, 0.5 + i * 0.5, .22, 1.15); s.style.transformOrigin = 'left center'; });
+
+  // S4 – title
+  const u4 = t - 8.5;
+  $$('#s4 h1 span').forEach((s, i) => {
+    const p = easeOut(prog(u4, i * .5, i * .5 + .22));
+    s.style.opacity = p;
+    s.style.transform = `skewX(-8deg) translateX(${-120 * (1 - p)}px)`;
+  });
+  const d = easeOut(prog(u4, 1.5, 1.8));
+  $('#s4 .date').style.opacity = d;
+  $('#s4 .date').style.transform = `translateY(${20 * (1 - d)}px)`;
+  $('#s4 .brandbox').style.opacity = easeOut(prog(u4, 1.5, 1.9));
+  $$('#s4 .lightsrow i').forEach((l, i) => {
+    l.style.background = u4 >= 2.0 + i * .25 ? '#00d26a' : '#2a0a0a';
+    l.style.boxShadow = u4 >= 2.0 + i * .25 ? 'inset 0 0 0 5px #111, 0 0 24px #00d26a' : 'inset 0 0 0 5px #111';
+  });
+  $('#s4').style.transform = `scale(${1 + .03 * prog(u4, 0, 3.5)})`;
+
+  // Wipes at 6.0 and 8.5
+  const wipe = $('#wipe');
+  let shown = false;
+  for (const cut of [6.0, 8.5]) {
+    const p = prog(t, cut - .35, cut + .35);
+    if (p > 0 && p < 1) {
+      const x0 = -5000, x1 = W;
+      const xx = x0 + (x1 - x0) * easeInOut(p);
+      wipe.style.display = 'block';
+      wipe.style.transform = `translateX(${xx}px) skewX(-18deg)`;
+      shown = true;
+    }
+  }
+  if (!shown) wipe.style.display = 'none';
+};
+window.ready = document.fonts.ready.then(() => true);
+</script>
+</body>
+</html>
