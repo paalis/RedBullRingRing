@@ -261,6 +261,11 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .stats dd { margin: 2px 0 0; font-weight: 900; font-size: clamp(28px, 3.6vw, 40px); line-height: 1.05; font-variant-numeric: tabular-nums; }
 .stats small { display: block; font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
 
+.ticket { margin-top: 28px; padding: 18px 20px; border: 1px dashed var(--yellow); border-radius: var(--radius); background: rgba(255,210,0,.05); }
+.ticket p { margin: 0; color: #cfcfd8; }
+.ticket .ticket-kicker { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.ticket .ticket-title { font-weight: 900; font-size: 28px; text-transform: uppercase; color: var(--text); margin: 2px 0 6px; }
+
 /* ---------- TOWER ---------- */
 .tower { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; counter-reset: pos; }
 .driver {

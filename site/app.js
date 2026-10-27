@@ -16,8 +16,8 @@ const FLIGHTS = [
     who: ["Filip", "Pål André"],
     out: { date: "Tor 8. juli", from: "TRD", dep: "17:10", to: "VIE", arr: "22:20", airline: "KLM Cityhopper + 1", stops: "1 bytte (AMS)", dur: "5 t 10 min" },
     ret: [
-      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min", note: "Samme fly som Hans-Kristian" },
-      { date: "Man 12. juli", from: "AMS", dep: "", to: "TRD", arr: "22:50", airline: "KLM", stops: "Direkte", dur: "", layover: "Bonusrunde i Amsterdam", note: "avgangstid kommer" },
+      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM · KL1902", stops: "Direkte", dur: "1 t 50 min", note: "Samme fly som Hans-Kristian" },
+      { date: "Man 12. juli", from: "AMS", dep: "20:40", to: "TRD", arr: "22:50", airline: "KLM · KL1155", stops: "Direkte", dur: "2 t 10 min", layover: "Bonusrunde: 9 t 25 min i Amsterdam" },
     ],
   },
   {
@@ -31,7 +31,7 @@ const FLIGHTS = [
     who: ["Hans-Kristian"],
     out: { date: "Tor 8. juli", from: "OSL", dep: "", to: "VIE", arr: "15:55", stops: "Direkte", dur: "", note: "Samme fly som Håvard fra Gardermoen · avgangstid kommer" },
     ret: [
-      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min", note: "Samme fly som Filip og Pål André" },
+      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM · KL1902", stops: "Direkte", dur: "1 t 50 min", note: "Samme fly som Filip og Pål André" },
       { date: "Man 12. juli", from: "AMS", dep: "21:45", to: "OSL", arr: "23:30", airline: "Norwegian", stops: "Direkte", dur: "1 t 45 min", layover: "Bonusrunde: 10 t 30 min i Amsterdam" },
     ],
   },
@@ -40,7 +40,8 @@ const FLIGHTS = [
 const PACKING = [
   "Pass / ID",
   "Flybillett",
-  "Løpsbillett (helg)",
+  "GA-billett (helg)",
+  "Sitteunderlag",
   "Førerkort",
   "Leiebil bekreftet",
   "Hotell Wien bekreftet",
