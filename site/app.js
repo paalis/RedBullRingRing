@@ -24,9 +24,9 @@ const FLIGHTS = [
     ret: { date: "Man 12. juli", from: "VIE", dep: "16:35", to: "OSL", arr: "18:50", stops: "Direkte", dur: "2 t 15 min" },
   },
   {
-    base: "Kristiansand",
+    base: "Oslo",
     who: ["Hans-Kristian"],
-    out: { date: "Tor 8. juli", from: "KRS", dep: "10:10", to: "VIE", arr: "15:55", stops: "1 bytte (OSL)", dur: "5 t 45 min", note: "Samme fly som Håvard" },
+    out: { date: "Tor 8. juli", from: "OSL", dep: "", to: "VIE", arr: "15:55", stops: "Direkte", dur: "", note: "Samme fly som Håvard fra Gardermoen · avgangstid kommer" },
     ret: [
       { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min" },
       { date: "Man 12. juli", from: "AMS", dep: "21:45", to: "OSL", arr: "23:30", airline: "Norwegian", stops: "Direkte", dur: "1 t 45 min", layover: "10 t 30 min i Amsterdam" },
@@ -112,8 +112,8 @@ function leg(label, f) {
     <div class="pass-leg">
       <p class="pass-label">${label} · ${f.date}</p>
       <div class="pass-route">
-        <div><b>${f.from}</b><span>${f.dep}</span></div>
-        <div class="pass-line"><span>${f.stops}</span><i></i><span>${f.dur}</span></div>
+        <div><b>${f.from}</b><span>${f.dep || "–"}</span></div>
+        <div class="pass-line"><span>${f.stops}</span><i></i><span>${f.dur || "&nbsp;"}</span></div>
         <div class="pass-to"><b>${f.to}</b><span>${f.arr}</span></div>
       </div>
       ${f.airline || f.note ? `<p class="pass-airline">${[f.airline, f.note].filter(Boolean).join(" · ")}</p>` : ""}
