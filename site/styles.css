@@ -263,7 +263,10 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 
 .ticket { margin-top: 28px; padding: 18px 20px; border: 1px dashed var(--yellow); border-radius: var(--radius); background: rgba(255,210,0,.05); }
 .ticket p { margin: 0; color: #cfcfd8; }
-.ticket .ticket-kicker { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
+.ticket-mark { width: 26px; height: 17px; flex: none; }
+.chips .chip-icon { display: inline-flex; align-items: center; gap: 6px; }
+.chips .ticket-mark { width: 21px; height: 14px; }
+.ticket .ticket-kicker { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--yellow); }
 .ticket .ticket-title { font-weight: 900; font-size: 28px; text-transform: uppercase; color: var(--text); margin: 2px 0 6px; }
 
 /* ---------- TOWER ---------- */
