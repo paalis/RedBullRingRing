@@ -297,6 +297,8 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .pass-line i { display: block; width: 100%; height: 0; border-top: 2px dotted var(--muted); position: relative; }
 .pass-line i::after { content: "✈"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--bg-2); padding: 0 6px; font-style: normal; font-size: 13px; line-height: 1; }
 .pass-airline { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.pass-layover { margin: 0; padding: 8px 20px; font-size: 13px; font-weight: 700; color: var(--yellow); background: rgba(255,210,0,.06); border-top: 2px dashed var(--line); }
+.pass-layover + .pass-leg { border-top: 0; }
 .pass-tbc { margin: 0; font-weight: 700; color: var(--muted); }
 .session-home .session-tag { color: var(--green); border-color: var(--green); }
 

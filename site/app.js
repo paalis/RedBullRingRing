@@ -4,11 +4,12 @@ const RACE_START = new Date("2027-07-11T15:00:00+02:00"); // Forventet løpsstar
 const CREW = [
   { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600" },
   { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000" },
-  { name: "Fører 3",    fullName: "Navn kommer",              code: "OSL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2" },
+  { name: "Hans-Kristian", fullName: "Hans-Kristian Holthe",  code: "HOL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2" },
   { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff" },
 ];
 
-// Flyreiser per hjemby. `out`/`ret` = null betyr ikke booket ennå.
+// Flyreiser per gruppe. `out`/`ret` er ett fly eller en liste med etapper (`layover` = ventetid før etappen).
+// null betyr ikke booket ennå.
 const FLIGHTS = [
   {
     base: "Trondheim",
@@ -16,12 +17,20 @@ const FLIGHTS = [
     out: { date: "Tor 8. juli", from: "TRD", dep: "17:10", to: "VIE", arr: "22:20", airline: "KLM Cityhopper + 1", stops: "1 bytte", dur: "5 t 10 min" },
     ret: { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "TRD", arr: "22:50", airline: "KLM + 1", stops: "1 bytte", dur: "13 t 25 min" },
   },
-  { base: "Oslo", who: ["Fører 3"], out: null, ret: null },
   {
     base: "Kristiansand",
     who: ["Håvard"],
     out: { date: "Tor 8. juli", from: "KRS", dep: "10:10", to: "VIE", arr: "15:55", stops: "1 bytte (OSL)", dur: "5 t 45 min" },
     ret: { date: "Man 12. juli", from: "VIE", dep: "16:35", to: "OSL", arr: "18:50", stops: "Direkte", dur: "2 t 15 min" },
+  },
+  {
+    base: "Kristiansand",
+    who: ["Hans-Kristian"],
+    out: { date: "Tor 8. juli", from: "KRS", dep: "10:10", to: "VIE", arr: "15:55", stops: "1 bytte (OSL)", dur: "5 t 45 min", note: "Samme fly som Håvard" },
+    ret: [
+      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min" },
+      { date: "Man 12. juli", from: "AMS", dep: "21:45", to: "OSL", arr: "23:30", airline: "Norwegian", stops: "Direkte", dur: "1 t 45 min", layover: "10 t 30 min i Amsterdam" },
+    ],
   },
 ];
 
@@ -93,6 +102,9 @@ CREW.forEach((d, i) => {
 // ---------- Flyreiser ----------
 const passes = document.querySelector(".passes");
 function leg(label, f) {
+  if (Array.isArray(f)) {
+    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">⏸ ${seg.layover}</p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
+  }
   if (!f) {
     return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Ikke booket ennå</p></div>`;
   }
@@ -104,7 +116,7 @@ function leg(label, f) {
         <div class="pass-line"><span>${f.stops}</span><i></i><span>${f.dur}</span></div>
         <div class="pass-to"><b>${f.to}</b><span>${f.arr}</span></div>
       </div>
-      ${f.airline ? `<p class="pass-airline">${f.airline}</p>` : ""}
+      ${f.airline || f.note ? `<p class="pass-airline">${[f.airline, f.note].filter(Boolean).join(" · ")}</p>` : ""}
     </div>`;
 }
 FLIGHTS.forEach((g) => {
