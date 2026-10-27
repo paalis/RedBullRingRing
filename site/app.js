@@ -2,10 +2,22 @@
 const RACE_START = new Date("2027-07-11T15:00:00+02:00"); // Forventet løpsstart (CEST)
 
 const CREW = [
-  { name: "Fører 1", code: "TRD", number: 7,  home: "Trondheim",    role: "Teamsjef",          team: "#e10600" },
-  { name: "Fører 2", code: "OSL", number: 16, home: "Oslo",         role: "Strateg",           team: "#ff8000" },
-  { name: "Fører 3", code: "KRS", number: 44, home: "Kristiansand", role: "Navigatør",         team: "#27f4d2" },
-  { name: "Fører 4", code: "TBC", number: 81, home: "Hjemby TBC",   role: "Schnitzel-sjef",    team: "#b64dff" },
+  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600" },
+  { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000" },
+  { name: "Fører 3",    fullName: "Navn kommer",              code: "OSL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2" },
+  { name: "Fører 4",    fullName: "Navn kommer",              code: "KRS", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff" },
+];
+
+// Flyreiser per hjemby. `out`/`ret` = null betyr ikke booket ennå.
+const FLIGHTS = [
+  {
+    base: "Trondheim",
+    who: ["Filip", "Pål André"],
+    out: { date: "Tor 8. juli", from: "TRD", dep: "17:10", to: "VIE", arr: "22:20", airline: "KLM Cityhopper + 1", stops: "1 bytte", dur: "5 t 10 min" },
+    ret: { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "TRD", arr: "22:50", airline: "KLM + 1", stops: "1 bytte", dur: "13 t 25 min" },
+  },
+  { base: "Oslo", who: ["Fører 3"], out: null, ret: null },
+  { base: "Kristiansand", who: ["Fører 4"], out: null, ret: null },
 ];
 
 const PACKING = [
@@ -67,9 +79,40 @@ CREW.forEach((d, i) => {
   li.innerHTML = `
     <span class="driver-pos">P${i + 1}</span>
     <h3 class="driver-name">${d.name}</h3>
+    <p class="driver-full">${d.fullName}</p>
     <span class="driver-code">${d.code}</span>
     <p class="driver-meta"><span>${d.home}</span><span>${d.role}</span></p>`;
   tower.append(li);
+});
+
+// ---------- Flyreiser ----------
+const passes = document.querySelector(".passes");
+function leg(label, f) {
+  if (!f) {
+    return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Ikke booket ennå</p></div>`;
+  }
+  return `
+    <div class="pass-leg">
+      <p class="pass-label">${label} · ${f.date}</p>
+      <div class="pass-route">
+        <div><b>${f.from}</b><span>${f.dep}</span></div>
+        <div class="pass-line"><span>${f.stops}</span><i></i><span>${f.dur}</span></div>
+        <div class="pass-to"><b>${f.to}</b><span>${f.arr}</span></div>
+      </div>
+      <p class="pass-airline">${f.airline}</p>
+    </div>`;
+}
+FLIGHTS.forEach((g) => {
+  const li = document.createElement("li");
+  li.className = "pass reveal" + (g.out ? "" : " is-pending");
+  li.innerHTML = `
+    <header class="pass-head">
+      <span class="pass-base">Fra ${g.base}</span>
+      <span class="pass-who">${g.who.join(" · ")}</span>
+    </header>
+    ${leg("Utreise", g.out)}
+    ${leg("Hjemreise", g.ret)}`;
+  passes.append(li);
 });
 
 // ---------- Pakkeliste ----------
@@ -139,7 +182,7 @@ if (trackPath && car) {
 }
 
 // ---------- Reveal + aktiv meny ----------
-document.querySelectorAll(".section-head, .session, .map, .track, .stats, .checklist, .radio").forEach((el) => el.classList.add("reveal"));
+document.querySelectorAll(".section-head, .session, .map, .track, .stats, .checklist, .radio, .passes").forEach((el) => el.classList.add("reveal"));
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); }
 }, { threshold: 0.15 });

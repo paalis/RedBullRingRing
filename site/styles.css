@@ -266,14 +266,39 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 }
 .driver::before {
   content: attr(data-number); position: absolute; right: -6px; top: -24px;
-  font-weight: 900; font-size: 160px; line-height: 1; color: var(--team, var(--red)); opacity: .18;
+  font-weight: 900; font-size: 160px; line-height: 1; color: var(--team, var(--red)); opacity: .12;
   transform: skewX(-10deg);
 }
 .driver::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--team, var(--red)); }
 .driver-pos { font-weight: 900; font-size: 14px; letter-spacing: .14em; color: var(--muted); }
 .driver-name { font-size: 30px; font-weight: 900; text-transform: uppercase; margin: 2px 0 0; }
+.driver-full { margin: 0 0 6px; color: var(--muted); font-size: 14px; font-weight: 600; }
 .driver-code { font-weight: 900; color: var(--team, var(--red)); letter-spacing: .1em; }
 .driver-meta { margin: 10px 0 0; display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 14px; font-weight: 600; border-top: 1px solid var(--line); padding-top: 10px; }
+
+/* ---------- PASSES ---------- */
+.section-fly { padding-top: 0; }
+.passes { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.pass { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.pass.is-pending { opacity: .6; }
+.pass-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 20px; background: var(--red); }
+.pass.is-pending .pass-head { background: var(--bg-3); }
+.pass-base { font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+.pass-who { font-weight: 600; font-size: 14px; text-align: right; }
+.pass-leg { padding: 16px 20px 18px; }
+.pass-leg + .pass-leg { border-top: 2px dashed var(--line); }
+.pass-label { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.pass-route { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; }
+.pass-route b { display: block; font-weight: 900; font-size: 34px; line-height: 1; }
+.pass-route span { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pass-to { text-align: right; }
+.pass-line { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.pass-line span { font-size: 12px; line-height: 1; color: var(--muted); font-weight: 600; }
+.pass-line i { display: block; width: 100%; height: 0; border-top: 2px dotted var(--muted); position: relative; }
+.pass-line i::after { content: "✈"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--bg-2); padding: 0 6px; font-style: normal; font-size: 13px; line-height: 1; }
+.pass-airline { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.pass-tbc { margin: 0; font-weight: 700; color: var(--muted); }
+.session-home .session-tag { color: var(--green); border-color: var(--green); }
 
 /* ---------- CHECKLIST ---------- */
 .pack-progress { font-size: 22px; font-weight: 700; margin: 24px 0 8px; }
