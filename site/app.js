@@ -15,7 +15,10 @@ const FLIGHTS = [
     base: "Trondheim",
     who: ["Filip", "Pål André"],
     out: { date: "Tor 8. juli", from: "TRD", dep: "17:10", to: "VIE", arr: "22:20", airline: "KLM Cityhopper + 1", stops: "1 bytte (AMS)", dur: "5 t 10 min" },
-    ret: { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "TRD", arr: "22:50", airline: "KLM + 1", stops: "1 bytte (AMS)", dur: "13 t 25 min" },
+    ret: [
+      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min", note: "Samme fly som Hans-Kristian" },
+      { date: "Man 12. juli", from: "AMS", dep: "", to: "TRD", arr: "22:50", airline: "KLM", stops: "Direkte", dur: "", layover: "Bonusrunde i Amsterdam", note: "avgangstid kommer" },
+    ],
   },
   {
     base: "Kristiansand",
@@ -28,8 +31,8 @@ const FLIGHTS = [
     who: ["Hans-Kristian"],
     out: { date: "Tor 8. juli", from: "OSL", dep: "", to: "VIE", arr: "15:55", stops: "Direkte", dur: "", note: "Samme fly som Håvard fra Gardermoen · avgangstid kommer" },
     ret: [
-      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min" },
-      { date: "Man 12. juli", from: "AMS", dep: "21:45", to: "OSL", arr: "23:30", airline: "Norwegian", stops: "Direkte", dur: "1 t 45 min", layover: "10 t 30 min i Amsterdam" },
+      { date: "Man 12. juli", from: "VIE", dep: "09:25", to: "AMS", arr: "11:15", airline: "KLM", stops: "Direkte", dur: "1 t 50 min", note: "Samme fly som Filip og Pål André" },
+      { date: "Man 12. juli", from: "AMS", dep: "21:45", to: "OSL", arr: "23:30", airline: "Norwegian", stops: "Direkte", dur: "1 t 45 min", layover: "Bonusrunde: 10 t 30 min i Amsterdam" },
     ],
   },
 ];
@@ -103,7 +106,7 @@ CREW.forEach((d, i) => {
 const passes = document.querySelector(".passes");
 function leg(label, f) {
   if (Array.isArray(f)) {
-    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">⏸ ${seg.layover}</p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
+    return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">🚲 ${seg.layover}</p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
   }
   if (!f) {
     return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Ikke booket ennå</p></div>`;
