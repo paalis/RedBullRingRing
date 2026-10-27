@@ -41,7 +41,8 @@ const PACKING = [
   "Pass / ID",
   "Flybillett",
   "Løpsbillett (helg)",
-  "Togbillett Wien → Graz",
+  "Førerkort",
+  "Leiebil bekreftet",
   "Hotell Wien bekreftet",
   "Hotell Graz bekreftet",
   "Euro i kontanter",
@@ -56,7 +57,7 @@ const PACKING = [
 
 const RADIO = [
   "«Box, box. Schnitzel er klar.»",
-  "«We are checking… toget til Graz går tidlig. Veldig tidlig.»",
+  "«We are checking… leiebilen går tidlig. Veldig tidlig.»",
   "«Plan B. Vi kjører plan B. Det er ingen plan B.»",
   "«Leave me alone, I know what I'm doing.»",
   "«Copy. Én øl til, så gir vi oss.»",
