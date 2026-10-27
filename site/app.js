@@ -37,6 +37,14 @@ const FLIGHTS = [
   },
 ];
 
+// Overnatting. `options` er tom til noe er funnet; status "kandidat" eller "booket".
+// Eksempel: { status: "booket", type: "Hotell", name: "Hotel X", area: "Neubau", price: "", url: "https://…", distance: "10 min til sentrum" }
+const STAYS = [
+  { id: "wien-1", city: "Wien",  dates: "Tor 8. – lør 10. juli", nights: 2, note: "Base før løpshelgen. Vi drar tidlig med leiebil lørdag.", options: [] },
+  { id: "graz",   city: "Graz",  dates: "Lør 10. – søn 11. juli", nights: 1, note: "Natten mellom kvalifisering og løp. Ca. 1 time til banen.", options: [] },
+  { id: "wien-2", city: "Wien",  dates: "Søn 11. – man 12. juli", nights: 1, note: "Siste natt. Nær flyplassen er et pluss – første fly går 09:25.", options: [] },
+];
+
 const PACKING = [
   "Pass / ID",
   "Flybillett",
@@ -137,6 +145,43 @@ FLIGHTS.forEach((g) => {
   passes.append(li);
 });
 
+// ---------- Base camp ----------
+const staysEl = document.querySelector(".stays");
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function option(o) {
+  const meta = [o.type, o.area, o.distance, o.price].filter(Boolean).map(esc).join(" · ");
+  return `
+    <li class="stay-option is-${o.status === "booket" ? "booked" : "candidate"}">
+      <span class="stay-status">${o.status === "booket" ? "Booket" : "Kandidat"}</span>
+      <p class="stay-name">${esc(o.name)}</p>
+      ${meta ? `<p class="stay-meta">${meta}</p>` : ""}
+      ${o.url ? `<a class="stay-link" href="${esc(o.url)}" target="_blank" rel="noopener">Se stedet →</a>` : ""}
+    </li>`;
+}
+STAYS.forEach((s) => {
+  const booked = s.options.find((o) => o.status === "booket");
+  const shown = booked ? [booked] : s.options;
+  const li = document.createElement("li");
+  li.className = "stay reveal" + (booked ? " is-booked" : shown.length ? "" : " is-empty");
+  li.id = `stay-${s.id}`;
+  li.innerHTML = `
+    <header class="stay-head">
+      <span class="stay-city">${esc(s.city)}</span>
+      <span class="stay-nights">${s.nights} ${s.nights === 1 ? "natt" : "netter"}</span>
+    </header>
+    <div class="stay-body">
+      <p class="stay-dates">${esc(s.dates)}</p>
+      <p class="stay-note">${esc(s.note)}</p>
+      ${shown.length
+        ? `<ul class="stay-options">${shown.map(option).join("")}</ul>`
+        : `<div class="stay-empty"><b>Ikke booket ennå</b><span>Hotell eller Airbnb – send lenke eller skjermdump.</span></div>`}
+    </div>`;
+  staysEl.append(li);
+  if (booked) {
+    document.querySelectorAll(`.stay-chip a[data-stay="${s.id}"]`).forEach((a) => (a.textContent = `🏨 ${booked.name}`));
+  }
+});
+
 // ---------- Pakkeliste ----------
 const STORE_KEY = "rbr27-pack";
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; } };
@@ -204,7 +249,7 @@ if (trackPath && car) {
 }
 
 // ---------- Reveal + aktiv meny ----------
-document.querySelectorAll(".section-head, .session, .map, .track, .stats, .checklist, .radio, .passes").forEach((el) => el.classList.add("reveal"));
+document.querySelectorAll(".section-head, .session, .map, .track, .stats, .checklist, .radio, .passes, .stays").forEach((el) => el.classList.add("reveal"));
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); }
 }, { threshold: 0.15 });
