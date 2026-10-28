@@ -572,7 +572,10 @@ function startIntro({ sound = false } = {}) {
   el.setAttribute("aria-label", "Intro: line-up RBR '27");
   el.innerHTML = teamIntroMarkup(`<div class="si-car" aria-hidden="true"><div class="si-trail"></div>${CAR_IMG}</div>`);
   const show = sceneSwitcher(el);
-  const audio = sound ? new Audio("assets/intro-theme.mp3") : null;
+  // Kommer vi rett fra innloggingen, er lydelementet allerede låst opp av klikket der.
+  const audio = sound ? window.__rbrTheme || new Audio("assets/intro-theme.mp3") : null;
+  window.__rbrTheme = null;
+  if (audio) { audio.currentTime = 0; audio.volume = 1; }
   const run = { el, audio, raf: 0, next: 0, t0: 0, shown: false };
   siteIntro = run;
 
@@ -637,7 +640,7 @@ if (video) {
   });
   // Rett etter innlogging (et klikk på samme side) tillater nettleseren som regel lyd.
   let fresh = false;
-  try { fresh = sessionStorage.getItem("rbr-fresh") === "1"; sessionStorage.removeItem("rbr-fresh"); } catch (_) {}
+  try { fresh = !!window.__rbrTheme || sessionStorage.getItem("rbr-fresh") === "1"; sessionStorage.removeItem("rbr-fresh"); } catch (_) {}
   if (reduceMotion) stopIntro();
   else startIntro({ sound: fresh }).catch(() => stopIntro()); // autoplay blokkert → rett til siden
 }
