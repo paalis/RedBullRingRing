@@ -741,4 +741,94 @@ const navIo = new IntersectionObserver((entries) => {
 }, { rootMargin: "-45% 0px -50% 0px" });
 document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 
-// The rendered site intro and its accessible playback controls live in intro.js.
+// ---------- Nettsideintro: introvideo → teamintro → bil over skjermen, synket til lydsporet ----------
+// Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s, førerne følger TEAM_SCHEDULE,
+// bilen kommer inn rett før motorlyden topper (52,3 s), og siden åpnes på sluttslaget (53 s). Lydsporet toner ut til 57 s.
+const SITE_INTRO = [...TEAM_SCHEDULE.map(([t, name]) => [12 + t, name]), [12 + LINEUP_AT + 3.6, "car"], [12 + LINEUP_AT + 5, "end"]];
+// Bilen som suser over line-upen (utklippet bilde, kjører mot høyre).
+const CAR_IMG = `<img class="si-car-img" src="assets/car.webp" alt="" decoding="async">`;
+
+const hero = document.querySelector(".hero");
+const video = document.querySelector(".hero-video");
+let siteIntro = null;
+
+function startIntro({ sound = false } = {}) {
+  stopIntro(true);
+  const el = document.createElement("div");
+  el.className = "tintro is-site";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-label", "Intro: line-up RBR '27");
+  el.innerHTML = teamIntroMarkup(`<div class="si-car" aria-hidden="true"><div class="si-trail"></div>${CAR_IMG}</div>`);
+  const show = sceneSwitcher(el);
+  // Kommer vi rett fra innloggingen, er lydelementet allerede låst opp av klikket der.
+  const audio = sound ? window.__rbrTheme || new Audio("assets/intro-theme.mp3") : null;
+  window.__rbrTheme = null;
+  if (audio) { audio.currentTime = 0; audio.volume = 1; }
+  const run = { el, audio, raf: 0, next: 0, t0: 0, shown: false };
+  siteIntro = run;
+
+  hero.classList.add("intro");
+  video.muted = true;
+  video.currentTime = 0;
+  // Klokka er lydsporet når det spiller, ellers sanntid fra start.
+  const clock = () => (audio && !audio.paused && audio.currentTime > 0 ? audio.currentTime : (performance.now() - run.t0) / 1000);
+  const tick = () => {
+    if (siteIntro !== run) return;
+    const t = clock();
+    while (run.next < SITE_INTRO.length && t >= SITE_INTRO[run.next][0]) {
+      const [, name] = SITE_INTRO[run.next++];
+      if (name === "end") return stopIntro();
+      if (name === "car") { el.classList.add("car-go"); continue; }
+      if (!run.shown) {
+        run.shown = true;
+        document.body.append(el);
+        document.body.classList.add("has-modal");
+        hero.classList.remove("intro");
+        video.pause();
+      }
+      show(name);
+    }
+    run.raf = requestAnimationFrame(tick);
+  };
+  el.addEventListener("click", () => stopIntro());
+  const begin = () => {
+    run.t0 = performance.now();
+    run.raf = requestAnimationFrame(tick);
+  };
+  const plays = [video.play()];
+  if (audio) plays.push(audio.play().catch(() => {})); // lyd blokkert → kjører videre uten lyd
+  return Promise.all(plays).then(begin, (err) => { stopIntro(); throw err; });
+}
+
+// Avslutter introen (hopp over, Esc, ferdig): lyden tones ut og siden kommer fram.
+function stopIntro(instant = false) {
+  const run = siteIntro;
+  hero.classList.remove("intro");
+  setTimeout(() => { if (!hero.classList.contains("intro")) { video.pause(); video.muted = true; } }, 800);
+  if (!run) return;
+  siteIntro = null;
+  cancelAnimationFrame(run.raf);
+  if (run.audio) {
+    const a = run.audio;
+    const fade = setInterval(() => { a.volume = Math.max(0, a.volume - 0.1); if (a.volume <= 0) { a.pause(); clearInterval(fade); } }, 40);
+  }
+  if (!run.el.isConnected) return;
+  document.body.classList.remove("has-modal");
+  if (instant) return run.el.remove();
+  run.el.classList.add("si-leave");
+  setTimeout(() => run.el.remove(), 600);
+}
+
+if (video) {
+  video.addEventListener("error", () => stopIntro());
+  document.querySelector(".intro-skip").addEventListener("click", () => stopIntro());
+  document.addEventListener("keydown", (e) => e.key === "Escape" && siteIntro && stopIntro());
+  document.querySelector(".intro-replay").addEventListener("click", () => {
+    startIntro({ sound: true }).catch(() => stopIntro());
+  });
+  // Rett etter innlogging (et klikk på samme side) tillater nettleseren som regel lyd.
+  let fresh = false;
+  try { fresh = !!window.__rbrTheme || sessionStorage.getItem("rbr-fresh") === "1"; sessionStorage.removeItem("rbr-fresh"); } catch (_) {}
+  if (reduceMotion) stopIntro();
+  else startIntro({ sound: fresh }).catch(() => stopIntro()); // autoplay blokkert → rett til siden
+}

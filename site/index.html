@@ -36,12 +36,14 @@
 
   <main>
     <!-- HERO -->
-    <section class="hero">
+    <section class="hero intro">
       <svg class="hero-track" viewBox="0 0 600 420" aria-hidden="true"><path d="M387.9 341.0 L351.5 350.6 L261.4 374.9 L255.2 375.4 L251.1 371.7 L244.1 358.3 L222.1 328.6 L198.1 294.8 L179.3 265.0 L162.1 235.6 L134.0 174.8 L126.3 158.5 L114.4 139.5 L96.1 117.2 L65.8 87.0 L37.7 59.1 L36.0 55.4 L36.2 51.4 L39.4 49.4 L46.8 48.1 L69.8 45.5 L92.8 44.6 L116.5 44.8 L139.1 47.0 L165.3 51.2 L245.4 66.6 L282.0 71.4 L361.0 74.7 L367.4 76.9 L371.4 81.2 L372.9 86.1 L372.5 91.2 L370.4 96.0 L362.5 107.2 L356.3 114.6 L344.8 124.7 L332.2 131.5 L316.9 136.6 L300.3 139.2 L282.9 138.1 L215.7 127.3 L206.6 128.5 L199.3 131.1 L192.8 135.5 L187.2 141.4 L183.6 148.4 L181.7 156.1 L181.4 163.2 L182.5 170.8 L184.5 176.5 L217.1 233.1 L222.6 239.1 L231.3 244.6 L241.3 246.8 L250.9 245.9 L261.1 241.7 L267.3 236.7 L273.7 228.8 L279.7 221.1 L286.2 214.5 L293.9 209.3 L302.9 203.9 L315.6 199.3 L328.7 196.5 L433.2 194.3 L513.5 192.4 L522.0 192.5 L530.2 195.4 L537.1 200.5 L542.5 207.3 L546.6 216.2 L563.0 271.1 L564.0 276.2 L563.0 279.9 L561.2 282.8 L554.8 287.8 L546.3 292.8 L535.3 298.3 L522.9 303.6 L508.2 308.4 Z"/></svg>
+      <video class="hero-video" src="assets/intro.mp4" poster="assets/poster.jpg" muted playsinline preload="auto" aria-label="Introvideo: 4 kamerater, 3 byer, 1 løp"></video>
+      <button class="intro-skip" type="button">Hopp over intro →</button>
       <div class="hero-shade"></div>
       <div class="hero-inner">
         <p class="eyebrow"><span class="flag-at" aria-hidden="true"></span> Østerrikes Grand Prix · Spielberg</p>
-        <h1 class="hero-title" id="intro-return-target" tabindex="-1">
+        <h1 class="hero-title">
           <span>4 kamerater.</span>
           <span>3 byer.</span>
           <span class="red">1 løp.</span>
@@ -62,7 +64,7 @@
           </div>
         </div>
 
-        <button class="intro-replay" type="button" data-intro-replay aria-haspopup="dialog">
+        <button class="intro-replay" type="button">
           <svg class="play-mark" viewBox="0 0 34 22" aria-hidden="true"><path class="play-badge" d="M8 0h26l-8 22H0z"/><path class="play-tri" d="M14 6l9 5-9 5z"/></svg>
           Se introen med lyd
         </button>
@@ -341,39 +343,7 @@
     <p class="fineprint">Uoffisiell fanside. Ikke tilknyttet Formula 1, FIA eller Red Bull. · <a class="logout" href="/api/logout">Logg ut</a></p>
   </footer>
 
-  <!-- No video source is assigned until the visitor chooses to play. -->
-  <dialog class="intro-player" id="site-intro" aria-labelledby="intro-heading" aria-describedby="intro-description">
-    <div class="intro-screen">
-      <h2 class="intro-sr-only" id="intro-heading">Red Bull Ring 2027 · Intro</h2>
-      <picture class="intro-cover" aria-hidden="true">
-        <source media="(max-aspect-ratio: 4/5)" srcset="assets/intro-poster-mobile.jpg">
-        <img src="assets/intro-poster-desktop.jpg" alt="" width="1920" height="1080" loading="lazy" decoding="async">
-      </picture>
-      <video class="intro-film" playsinline preload="none" tabindex="-1" aria-label="Filmintro til Red Bull Ring 2027"></video>
-      <div class="intro-topbar">
-        <button class="intro-exit" type="button" data-intro-skip>Hopp over <span aria-hidden="true">→</span></button>
-      </div>
-      <div class="intro-launch-panel">
-        <p class="intro-launch-copy" id="intro-description">52 sekunder til Spielberg.</p>
-        <p class="intro-motion-note" hidden>Redusert bevegelse er på. Gå rett til turplanleggingen, eller velg selv å spille introen.</p>
-        <div class="intro-launch-actions">
-          <button class="intro-start" type="button" data-intro-start>Start intro med lyd <span aria-hidden="true">▶</span></button>
-          <button class="intro-direct" type="button" data-intro-skip>Gå til turplanleggingen <span aria-hidden="true">→</span></button>
-        </div>
-      </div>
-      <p class="intro-status" role="status" aria-live="polite" aria-atomic="true"></p>
-      <div class="intro-playback" hidden>
-        <button class="intro-control" type="button" data-intro-pause aria-label="Sett introen på pause">Pause</button>
-        <button class="intro-control" type="button" data-intro-mute aria-label="Slå av lyd" aria-pressed="false">Lyd på</button>
-        <progress class="intro-progress" max="52.1" value="0" aria-label="Avspilt av introen"></progress>
-        <span class="intro-time" aria-hidden="true">0:00 / 0:52</span>
-        <button class="intro-control intro-playback-skip" type="button" data-intro-skip>Hopp over <span aria-hidden="true">→</span></button>
-      </div>
-    </div>
-  </dialog>
-
   <script src="app.js" defer></script>
-  <script src="intro.js" defer></script>
   <script src="plan.js" type="module"></script>
 </body>
 </html>
