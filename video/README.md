@@ -7,10 +7,12 @@ Introfilmen til nettsiden, synket til F1-temaet (`site/assets/f1-theme.m4a`, 52 
 | 0–5,2 s | Startlys tennes på anslagene i musikken, «lights out» på det store slaget |
 | 5,2–10 s | Ruten: Trondheim, Oslo og Kristiansand → Wien → Graz → Spielberg |
 | 10–11,6 s | Red Bull Ring, 71 runder, 4,318 km |
-| 11,6–14 s | «4 kamerater. 3 byer. 1 løp.», datoen og lys som går grønt |
-| 14,15–15,4 s | Red Bull-bilen suser over skjermen og blinker over i teamintroen |
-| 15,36 s | Musikken tar av: «Line-up» |
-| 17,8–46,6 s | Fire førere, tre takter hver: bilklipp, nærbilde, hovedscene, profil og vid vinkel |
+| 11,6–13,6 s | «4 kamerater. 3 byer. 1 løp.», datoen og lys som går grønt |
+| 13,6–14,2 s | Bilen på startgrid: mørk asfalt, rødt motlys, regnlyset blinker |
+| 14,2–14,78 s | Tre raske nærbilder: bakhjulet som spinner, nesen, cockpiten |
+| 14,8–15,1 s | Bilen suser over skjermen på vroom-lyden (topp 14,88 s): uskarphet, fartsstriper, gnister, risting |
+| 15,1–15,36 s | Stillheten: lysstriper og gnister dør ut, hvitt blink inn i teamintroen |
+| 15,36–46,6 s | Musikken tar av, og førerne kommer rett inn: Filip fire takter, de andre tre, med bilklipp, nærbilde, hovedscene, profil og vid vinkel |
 | 46,6–52 s | Line-up-plakaten, så tones filmen ut |
 
 Hovedpartiet går i ~100 BPM (ett slag = 0,6 s), og alle tider ligger i `src/timeline.ts`.

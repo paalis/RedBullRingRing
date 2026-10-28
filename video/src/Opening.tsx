@@ -20,12 +20,7 @@ const markup = () => `
     <p class="kick"><span class="flag-at"></span>Østerrikes Grand Prix · Spielberg</p>
   </section>
   <section class="scene" id="s2">
-    <div class="copy">
-      <p class="kick" style="color:var(--red);margin:0 0 18px">Strategi</p>
-      <h2 class="big"><span class="skew">Tre byer.</span><br><span class="skew">Ett mål.</span></h2>
-      <p class="sub">Trondheim · Oslo · Kristiansand → Wien → Graz → Red Bull Ring</p>
-    </div>
-    <div class="mapwrap">${MAP_SVG}</div>
+    <div class="mapwrap">${MAP_SVG.replace('viewBox="0 0 640 600"', 'viewBox="70 15 590 590"')}</div>
   </section>
   <section class="scene" id="s3">
     <div class="trackwrap">${TRACK_SVG}</div>
@@ -92,8 +87,6 @@ export const Opening: React.FC = () => {
     const cities = $$<SVGGElement>("#s2 .city");
     const masks = $$<SVGPathElement>("#s2 mask path");
     const [trd, osl, krs, vie, graz, rbr] = O.cities;
-    $("#s2 .copy").style.opacity = String(prog(t, O.lightsOut, O.lightsOut + 0.3, easeOut));
-    $("#s2 .copy").style.transform = `translateX(${-60 * (1 - prog(t, O.lightsOut, O.lightsOut + 0.4, easeOut))}px)`;
     $("#s2 .mapwrap").style.transform = `scale(${1.04 - 0.04 * prog(t, O.lightsOut, O.track, easeOut)})`;
     [trd, osl, krs].forEach((at, i) => {
       cities[i].style.opacity = String(prog(t, at, at + 0.2, easeOut));
@@ -135,11 +128,11 @@ export const Opening: React.FC = () => {
     $("#s4 .date").style.transform = `translateY(${20 * (1 - d)}px)`;
     $("#s4 .brandbox").style.opacity = String(prog(t, O.date, O.date + 0.4, easeOut));
     $$("#s4 .lightsrow i").forEach((l, i) => {
-      const green = t >= O.date + 0.5 + i * 0.15;
+      const green = t >= O.date + 0.1 + i * 0.1;
       l.style.background = green ? "#00d26a" : "#2a0a0a";
       l.style.boxShadow = green ? "inset 0 0 0 5px #111, 0 0 24px #00d26a" : "inset 0 0 0 5px #111";
     });
-    $("#s4").style.transform = `scale(${1 + 0.04 * prog(t, O.punch[0], CAR.peak)})`;
+    $("#s4").style.transform = `scale(${1 + 0.04 * prog(t, O.punch[0], CAR.from)})`;
 
     // Kantstein-visker over kuttene
     const wipe = $(".wipe");

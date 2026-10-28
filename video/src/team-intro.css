@@ -23,24 +23,6 @@
 .ti-scene.is-off { visibility: visible; opacity: 1; animation: ti-out .35s cubic-bezier(.7,0,.9,.4) both; z-index: 2; }
 @keyframes ti-out { 99% { visibility: visible; } to { transform: translateX(-150%) skewX(-12deg); visibility: hidden; } }
 
-/* Tittel */
-.ti-title { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-.ti-title h2 { font-weight: 900; font-size: clamp(56px, 13vw, 180px); text-transform: uppercase; line-height: .9; transform: skewX(-8deg); margin: 8px 0; }
-.ti-kicker { margin: 0; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-size: clamp(12px, 1.6vw, 18px); }
-.ti-sub { margin: 6px 0 0; }
-.ti-sub .brand-mark, .ti-sub .brand-year { font-size: clamp(26px, 4vw, 44px); }
-.ti-stripes { position: absolute; inset: 0; pointer-events: none; }
-.ti-stripes i { position: absolute; top: -20%; bottom: -20%; width: 30vw; background: var(--red); transform: skewX(-18deg) translateX(-150vw); }
-.ti-stripes i:nth-child(2) { width: 10vw; background: #fff; }
-.ti-stripes i:nth-child(3) { width: 18vw; background: #7a0300; }
-.ti-title.is-on .ti-stripes i { animation: di-stripe .8s cubic-bezier(.6,0,.3,1) both; }
-.ti-title.is-on .ti-stripes i:nth-child(2) { animation-delay: .07s; }
-.ti-title.is-on .ti-stripes i:nth-child(3) { animation-delay: .14s; }
-.ti-title.is-on .ti-kicker { animation: di-fade .4s ease .35s both; }
-.ti-title.is-on h2 { animation: ti-slam .5s cubic-bezier(.2,1.4,.4,1) .45s both; }
-.ti-title.is-on .ti-sub { animation: di-fade .4s ease .8s both; }
-@keyframes di-stripe { 0% { transform: skewX(-18deg) translateX(-60vw); } 100% { transform: skewX(-18deg) translateX(160vw); } }
-@keyframes ti-slam { from { opacity: 0; transform: skewX(-8deg) scale(1.6); } to { opacity: 1; transform: skewX(-8deg); } }
 
 /* Én fører: samme scene som førerintroen, i høyere tempo */
 .ti-driver .rv { --s: .6; }
@@ -221,7 +203,7 @@
 @keyframes tp-line { from { clip-path: inset(0 100% 0 0); transform: translateX(-20px); } to { clip-path: inset(0 -10% 0 0); } }
 
 /* Scenene som står lenge, får en sakte kamerabevegelse */
-.ti-title.is-on, .tx.is-on { animation: ti-drift 3.4s linear both; }
+.tx.is-on { animation: ti-drift 3.4s linear both; }
 @keyframes ti-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
 
 @media (max-aspect-ratio: 4/5) {

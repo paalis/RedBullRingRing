@@ -171,13 +171,7 @@ function driverScene(d: Driver, i: number) {
 export function teamIntroMarkup() {
   return `
     <div class="ti-stage">
-      <section class="ti-scene ti-title" data-scene="title">
-        <div class="ti-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
-        <p class="ti-kicker">Østerrikes Grand Prix · Spielberg 2027</p>
-        <h2>Line-up</h2>
-        <p class="ti-sub"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></p>
-      </section>
-      ${CREW.map((d, i) => transitionScene(i) + closeupScene(d, i) + driverScene(d, i) + profileScene(d, i) + wideScene(d, i)).join("")}
+      ${CREW.map((d, i) => (i > 0 ? transitionScene(i) : "") + closeupScene(d, i) + driverScene(d, i) + profileScene(d, i) + wideScene(d, i)).join("")}
       ${transitionScene(CREW.length)}
       <section class="ti-scene ti-grid" data-scene="grid">
         <div class="tg-bar" aria-hidden="true"><i></i><span><span class="brand-mark">RBR</span><span class="brand-year">'27</span></span><i></i></div>
