@@ -2,7 +2,7 @@
 const RACE_START = new Date("2027-07-11T15:00:00+02:00"); // Forventet løpsstart (CEST)
 
 const CREW = [
-  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600" },
+  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600", photo: "assets/crew/filip.jpg", photoPos: "60% 45%" },
   { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000", photo: "assets/crew/pal-andre.jpg" },
   { name: "Hans-Kristian", fullName: "Hans-Kristian Holthe",  code: "HOL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2" },
   { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff" },
@@ -129,7 +129,7 @@ CREW.forEach((d, i) => {
   li.setAttribute("role", "button");
   li.setAttribute("aria-label", `Se førerintro for ${d.fullName}`);
   li.innerHTML = `
-    ${d.photo ? `<img class="driver-photo" src="${d.photo}" alt="" loading="lazy">` : ""}
+    ${d.photo ? `<img class="driver-photo" src="${d.photo}" alt="" loading="lazy" style="object-position:${d.photoPos || "center 15%"}">` : ""}
     <span class="driver-pos">P${i + 1}</span>
     <h3 class="driver-name">${d.name}</h3>
     <p class="driver-full">${d.fullName}</p>
@@ -154,8 +154,12 @@ function flightLine(f) {
 
 function openDriverIntro(d, i) {
   const group = FLIGHTS.find((g) => g.who.includes(d.name));
-  const last = d.fullName.startsWith(d.name) ? d.fullName.slice(d.name.length).trim() : d.fullName;
-  const letters = (s) => [...s].map((c, k) => `<span style="--k:${k}">${c === " " ? "&nbsp;" : c}</span>`).join("");
+  // Stor linje = etternavn, liten linje = alle fornavn («Filip Johannes» / «Grydeland»).
+  const words = d.fullName.split(" ");
+  const last = words.length > 1 ? words.pop() : d.fullName;
+  const first = words.length ? words.join(" ") : d.name;
+  let k = 0;
+  const letters = (s) => s.split(" ").map((w) => `<span class="w">${[...w].map((c) => `<span class="l" style="--k:${k++}">${c}</span>`).join("")}</span>`).join(" ");
   const el = document.createElement("div");
   el.className = "dintro";
   el.style.setProperty("--team", d.team);
@@ -167,12 +171,12 @@ function openDriverIntro(d, i) {
       <div class="dintro-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="dintro-number" aria-hidden="true">${d.number}</div>
       ${d.photo
-        ? `<div class="dintro-photo"><img src="${d.photo}" alt="${d.fullName}"></div>`
+        ? `<div class="dintro-photo"><img src="${d.photo}" alt="${d.fullName}" style="object-position:${d.photoPos || "center 20%"}"></div>`
         : `<div class="dintro-photo is-empty" aria-hidden="true"><span>${d.code}</span></div>`}
       <div class="dintro-name">
         <p class="dintro-pos">P${i + 1} · ${d.code}</p>
-        <p class="dintro-first">${letters(d.name)}</p>
-        <p class="dintro-last">${letters(last)}</p>
+        <p class="dintro-first">${letters(first)}</p>
+        <p class="dintro-last">${(k = 0, letters(last))}</p>
       </div>
       <section class="dintro-card" aria-label="Førerinfo">
         <dl>
