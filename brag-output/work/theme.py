@@ -1,10 +1,10 @@
-"""Soundtrack for the site intro: the 12-s RBR '27 intro, then a brass section for the team intro and an engine pass-by.
+"""Soundtrack for the site intro (57 s, like the F1 theme): the 12-s RBR '27 intro, then a brass section for the team intro and an engine pass-by.
 120 BPM, D minor, one beat grid from t=0. Original composition (no samples)."""
 import math, sys, wave
 import numpy as np
 
 SR = 44100
-DUR = 26.5
+DUR = 57.0
 BEAT = 0.5
 N = int(SR * DUR)
 rng = np.random.default_rng(7)
@@ -174,7 +174,7 @@ n = int(2.5 * SR); tt = np.arange(n) / SR
 place(drums, hp(rng.standard_normal(n), 4500) * np.exp(-tt * 2) * .18, 8.5)
 place(drums, kick(1.2), 8.5)
 
-# ---------- Part 2: team intro (12–23.5 s), brass over a driving groove ----------
+# ---------- Part 2: team intro (12–31.5 s), brass over a driving groove ----------
 def brass(midi, dur, bright=1.0):
     """Horn section: detuned saws through an opening filter, slow vibrato on held notes."""
     n = int(dur * SR); tt = np.arange(n) / SR
@@ -214,11 +214,16 @@ place(bass, timpani(38, 1.0), 12.0, .9)
 for m in (50, 53, 57, 62):
     place(pad, brass(m, 1.0, 1.2), 12.0, .45)
 
-# Bars of 2 s: Dm, Bb, C, Dm, Bb, then A (dominant) holding the line-up
-bars = [(12.0, [50, 53, 57], 38), (14.0, [46, 50, 53], 34), (16.0, [48, 52, 55], 36),
-        (18.0, [50, 53, 57], 38), (20.0, [46, 50, 53], 34), (22.0, [45, 49, 52], 33)]
+# Timing shared with site/app.js (SITE_INTRO): title 12–16 s, four drivers of 8 s from 16 s, line-up 48–51.5 s,
+# the car at ~52 s, final hit at 53 s and a brass outro fading out by 57 s.
+DRIVERS, D0, DLEN = 4, 16.0, 8.0
+LU = D0 + DRIVERS * DLEN  # 48.0
+LU_END = LU + 3.5
+DM, BB, C_, A_ = ([50, 53, 57], 38), ([46, 50, 53], 34), ([48, 52, 55], 36), ([45, 49, 52], 33)
+prog = ([DM, BB, C_, DM] * 6)[: int((LU - 12.0) / 2)]
+bars = [(12.0 + 2 * k, notes, root) for k, (notes, root) in enumerate(prog)] + [(LU, *A_), (LU + 2, *A_)]
 for at, notes, root in bars:
-    dur = 2.0 if at < 22 else 1.5
+    dur = 2.0 if at < LU + 2 else LU_END - at
     for m in notes:  # sustained horn pad (lower, softer than the lead)
         place(pad, brass(m, dur, .6), at + (.0 if at > 12 else 1.0), .32 if at > 12 else 0)
     for e in range(int(dur / (BEAT / 2))):  # bass 8ths
@@ -228,21 +233,26 @@ for at, notes, root in bars:
         place(bass, b, at + e * BEAT / 2, .6)
 place(pad, brass(50, 1.0, .6) + brass(53, 1.0, .6) + brass(57, 1.0, .6), 13.0, .32)
 
-# Fanfare (lead horns, doubled an octave down): (offset, length, midi)
-fanfare = {
-    12.0: [(0, .375, 62), (.375, .125, 62), (.5, .5, 69), (1.0, 1.0, 74)],
-    14.0: [(0, .375, 74), (.375, .125, 72), (.5, .5, 70), (1.0, 1.0, 65)],
-    16.0: [(0, .375, 67), (.375, .125, 67), (.5, .5, 72), (1.0, 1.0, 76)],
-    18.0: [(0, .375, 77), (.375, .125, 76), (.5, .5, 74), (1.0, 1.0, 69)],
-    20.0: [(0, .375, 70), (.375, .125, 70), (.5, .5, 74), (1.0, .5, 77), (1.5, .5, 79)],
-    22.0: [(0, 1.5, 76)],
+# Fanfare (lead horns, doubled an octave down): one phrase per bar, (offset, length, midi)
+P = {
+    "dm1": [(0, .375, 62), (.375, .125, 62), (.5, .5, 69), (1.0, 1.0, 74)],
+    "bb1": [(0, .375, 74), (.375, .125, 72), (.5, .5, 70), (1.0, 1.0, 65)],
+    "c1": [(0, .375, 67), (.375, .125, 67), (.5, .5, 72), (1.0, 1.0, 76)],
+    "dm2": [(0, .375, 77), (.375, .125, 76), (.5, .5, 74), (1.0, 1.0, 69)],
+    "bb2": [(0, .375, 70), (.375, .125, 70), (.5, .5, 74), (1.0, .5, 77), (1.5, .5, 79)],
+    "c2": [(0, .375, 79), (.375, .125, 79), (.5, .5, 76), (1.0, .5, 72), (1.5, .5, 76)],
 }
+# Two «verses» of eight bars per pair of drivers, plus the title bars.
+phrases = (["dm1", "bb1", "c1", "dm2", "dm1", "bb2", "c2", "dm2"] * 3)[: len(prog)]
+fanfare = {12.0 + 2 * k: P[name] for k, name in enumerate(phrases)}
+fanfare[LU] = [(0, 2.0, 76)]
+fanfare[LU + 2] = [(0, .5, 73), (.5, 1.0, 76)]
 for at, notes in fanfare.items():
     for off, ln, m in notes:
         place(lead, brass(m, ln * .97, 1.3) + .6 * brass(m - 12, ln * .97, 1.0), at + off, .5)
 
-# Groove 12–22: kick on beats, snare 2 & 4, 8th hats, tom fill on the last beat of each bar
-for bt in np.arange(12.0, 22.0 - 1e-9, BEAT):
+# Groove 12–48: kick on beats, snare 2 & 4, 8th hats, tom fill on the last beat of each bar
+for bt in np.arange(12.0, LU - 1e-9, BEAT):
     bi = int(round((bt - 12.0) / BEAT))
     if bt > 12.0:
         place(drums, kick(1.0), bt)
@@ -252,25 +262,35 @@ for bt in np.arange(12.0, 22.0 - 1e-9, BEAT):
     if bi % 4 == 3:
         for k, m in enumerate((50, 47, 43, 40)):
             place(drums, tom(m, .7), bt + k * BEAT / 4)
-for at in (14.0, 16.0, 18.0, 20.0):
-    place(bass, timpani(38 if at != 14 and at != 20 else 34, .7), at, .8)
+for k in range(DRIVERS):  # timpani on each driver's first downbeat
+    place(bass, timpani(38 if k % 2 == 0 else 34, .8), D0 + k * DLEN, .85)
 
-# Line-up 22–23.5: drums drop out, timpani roll and a riser build into the car
+# Crash on every driver's first downbeat
+for k in range(DRIVERS):
+    n = int(1.8 * SR); tt = np.arange(n) / SR
+    place(drums, hp(rng.standard_normal(n), 4000) * np.exp(-tt * 2.6) * .2, D0 + k * DLEN)
+
+# Line-up 48–51.5: drums drop out, timpani roll and a riser build into the car
 for k in range(24):
-    at = 22.0 + k * 1.5 / 24
+    at = LU + 2 + k * 1.5 / 24
     place(bass, timpani(45, .15 + .5 * k / 23), at, .5)
 n = int(1.5 * SR); tt = np.arange(n) / SR
-place(fx, biquad_lp(rng.standard_normal(n), 400 + 6000 * (tt / 1.5) ** 2, q=2) * (tt / 1.5) ** 2, 22.0, .45)
+place(fx, biquad_lp(rng.standard_normal(n), 400 + 6000 * (tt / 1.5) ** 2, q=2) * (tt / 1.5) ** 2, LU + 2, .45)
 
-# Whooshes on the car-detail cuts between drivers (13.4, 15.4, … 21.4 s)
-for cut in (13.4, 15.4, 17.4, 19.4, 21.4):
-    n = int(0.6 * SR); tt = np.arange(n) / SR
-    w = biquad_lp(rng.standard_normal(n), 300 + 7000 * np.sin(np.pi * tt / .6) ** 2, q=1.6) * np.sin(np.pi * tt / .6) ** 1.5
-    place(fx, w, cut - .05, .3)
+# Whooshes: big ones on the car-detail cuts before each driver and the line-up, small ones on angle changes
+def whoosh(at, length, gain):
+    n = int(length * SR); tt = np.arange(n) / SR
+    w = biquad_lp(rng.standard_normal(n), 300 + 7000 * np.sin(np.pi * tt / length) ** 2, q=1.6) * np.sin(np.pi * tt / length) ** 1.5
+    place(fx, w, at, gain)
+for k in range(DRIVERS + 1):
+    whoosh(D0 + k * DLEN - .65, .6, .3)
+for k in range(DRIVERS):
+    for off in (1.5, 4.0, 5.5):  # angle changes, see TEAM_SCHEDULE in site/app.js
+        whoosh(D0 + k * DLEN + off - .15, .3, .14)
 
-# ---------- Part 3: engine pass-by (stereo, left → right), peak at 24.3 s ----------
+# ---------- Part 3: engine pass-by (stereo, left → right), peak at LU + 2.3 s ----------
 eng_l = np.zeros(N); eng_r = np.zeros(N)
-T0, TC, TL = 23.3, 24.3, 2.0
+T0, TC, TL = LU_END - .2, LU_END + .8, 2.0
 n = int(TL * SR); tt = np.arange(n) / SR + T0
 rel = (tt - TC) / 0.22
 rpm = 95 + 70 * np.clip((tt - T0) / (TC - T0), 0, 1) ** 1.5           # revving up as it approaches
@@ -286,12 +306,17 @@ i0 = int(T0 * SR)
 eng_l[i0:i0 + n] = x * amp * np.cos(pan * math.pi / 2)
 eng_r[i0:i0 + n] = x * amp * np.sin(pan * math.pi / 2)
 
-# Final hit at 25.0: the site appears
-place(drums, kick(1.4), 25.0)
-place(drums, hp(rng.standard_normal(int(1.5 * SR)), 4000) * np.exp(-np.arange(int(1.5 * SR)) / SR * 2.5) * .25, 25.0)
-place(bass, timpani(38, 1.0), 25.0, .9)
+# Final hit at LU + 3: the site appears
+END = LU_END + 1.5
+place(drums, kick(1.4), END)
+place(drums, hp(rng.standard_normal(int(1.5 * SR)), 4000) * np.exp(-np.arange(int(1.5 * SR)) / SR * 2.5) * .25, END)
+place(bass, timpani(38, 1.0), END, .9)
 for m in (50, 57, 62, 65, 69):
-    place(pad, brass(m, 1.5, 1.1), 25.0, .4)
+    place(pad, brass(m, 1.5, 1.1), END, .4)
+# Outro: held D minor in the horns, fading out over the last seconds
+for m in (50, 57, 62, 65):
+    n = int((DUR - END - 1.4) * SR)
+    place(pad, brass(m, DUR - END - 1.4, .7) * np.linspace(1, 0, n) ** 1.5, END + 1.4, .3)
 
 
 # ---------- mix ----------

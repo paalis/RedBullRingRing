@@ -788,6 +788,87 @@ body.has-modal { overflow: hidden; }
   .tx-big-bottom { bottom: -7vh; }
 }
 
+/* Teamintro: nærbilde (før hovedscenen) – mørkt, rødt kantlys, store bokstaver bak ansiktet */
+.tz { overflow: hidden; background: linear-gradient(180deg, #121016 0%, #24090f 50%, #8c0c14 100%); }
+.tz-word { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; }
+.tz-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 44vh; line-height: 1; color: #fff; letter-spacing: .02em; white-space: nowrap; }
+.tz-face { position: absolute; z-index: 2; left: 50%; top: -6vh; height: 230vh; width: auto; max-width: none; translate: -50% 0;
+  filter: brightness(.55) contrast(1.25) saturate(.85) drop-shadow(-6px -4px 0 rgba(255, 40, 30, .85)) drop-shadow(0 0 40px rgba(255, 30, 20, .45)); }
+.tz-face.is-tight { top: 12vh; height: 90vh; }
+.tz .tx-tag { color: #fff; }
+.tz.is-on .tz-face { animation: tz-push 1s cubic-bezier(.2, .8, .2, 1) both; }
+.tz.is-on .tz-word span { animation: tz-word 1s cubic-bezier(.2, .8, .2, 1) both; }
+.tz.is-on .tx-tag { animation: di-fade .3s ease .3s both; }
+@keyframes tz-push { from { opacity: 0; transform: scale(1.12); filter: brightness(0) blur(8px); } 35% { opacity: 1; } to { transform: scale(1.02); } }
+@keyframes tz-word { from { opacity: 0; transform: translateX(-12%); filter: blur(10px); } to { opacity: 1; transform: translateX(3%); } }
+
+/* Teamintro: profil – speilvendt nærbilde i svart-hvitt med lagfarge, stort nummer i omriss, skannelinjer */
+.tp { overflow: hidden; background: linear-gradient(120deg, #07070a 0%, color-mix(in srgb, var(--team) 30%, #07070a) 100%); }
+.tp-num { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; padding-left: 4vw; }
+.tp-num span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 80vh; line-height: .8; color: transparent; -webkit-text-stroke: 2px color-mix(in srgb, var(--team) 70%, #fff); opacity: .45; }
+.tp-face { position: absolute; z-index: 2; left: 66%; top: -4vh; height: 190vh; width: auto; max-width: none; translate: -50% 0; transform: scaleX(-1);
+  filter: grayscale(1) contrast(1.35) brightness(.95); }
+.tp-tint { position: absolute; inset: 0; z-index: 3; background: linear-gradient(90deg, transparent 30%, var(--team) 120%); mix-blend-mode: color; opacity: .75; pointer-events: none; }
+.tp-scan { position: absolute; inset: 0; z-index: 3; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .25) 0 2px, transparent 2px 5px); pointer-events: none; }
+.tp-name { position: absolute; z-index: 4; left: 7%; bottom: 14vh; display: flex; flex-direction: column; align-items: flex-start; }
+.tp-name .tx-first { color: var(--team); margin-bottom: -.15em; }
+.tp-name .tx-last { color: #fff; font-family: "Unbounded", sans-serif; font-weight: 800; font-size: clamp(30px, 6vw, 100px); line-height: 1; }
+.tp-meta { margin-top: 12px; color: #d8d8de; font-weight: 700; letter-spacing: .4em; font-size: clamp(10px, 1vw, 14px); }
+.tp.is-on .tp-face { animation: tp-pan 1.5s linear both; }
+.tp.is-on .tp-num span { animation: tp-num 1.5s ease-out both; }
+.tp.is-on .tp-name > * { animation: tp-line .45s cubic-bezier(.2, .9, .3, 1) both; }
+.tp.is-on .tp-name > :nth-child(2) { animation-delay: .1s; }
+.tp.is-on .tp-name > :nth-child(3) { animation-delay: .2s; }
+@keyframes tp-pan { from { transform: scaleX(-1) translateX(-3vw) scale(1.06); filter: grayscale(1) contrast(1.35) brightness(.95) blur(6px); }
+  20% { filter: grayscale(1) contrast(1.35) brightness(.95) blur(0); } to { transform: scaleX(-1) translateX(2vw) scale(1); } }
+@keyframes tp-num { from { transform: translateX(-6%); opacity: 0; } to { transform: translateX(2%); opacity: 1; } }
+@keyframes tp-line { from { clip-path: inset(0 100% 0 0); transform: translateX(-20px); } to { clip-path: inset(0 -10% 0 0); } }
+
+/* Scenene som står lenge, får en sakte kamerabevegelse */
+.ti-title.is-on, .tx.is-on { animation: ti-drift 3.4s linear both; }
+@keyframes ti-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tp-face { height: 120vh; left: 50%; top: 2vh; }
+  .tp-num span { font-size: 50vh; }
+  .tp-name { left: 50%; translate: -50% 0; bottom: 8vh; align-items: center; text-align: center; }
+  .tp-name .tx-last { font-size: 9vw; }
+}
+
+/* Teamintro: vid vinkel (etter hovedscenen) – hele føreren på en plattform, navn i omriss, nøkkeltall */
+.tw { overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 30%, #2a2a31, #0a0a0d 75%); }
+.tw-cone { position: absolute; left: 50%; top: -10%; width: 70vw; height: 100%; translate: -50% 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 85%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(6px); }
+.tw-word { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.tw-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 26vh; line-height: 1; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .35); }
+.tw-stage { position: absolute; z-index: 2; left: 50%; bottom: 10vh; width: 46vw; height: 5vh; translate: -50% 0; background: #08080b;
+  border-top: 2px solid var(--red); box-shadow: 0 -4px 30px rgba(255, 30, 20, .6), 0 0 80px rgba(255, 30, 20, .35); }
+.tw-driver { position: absolute; z-index: 3; left: 50%; bottom: 14.6vh; height: 64vh; width: auto; max-width: none; translate: -50% 0;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .7)); }
+.tw-stats { position: absolute; z-index: 4; right: 6%; bottom: 18vh; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; color: #fff;
+  font-weight: 700; font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .4em; }
+.tw-stats b { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 96px); letter-spacing: 0; line-height: 1; color: var(--team); }
+.tw .tx-tag { color: #fff; letter-spacing: .3em; }
+.tw.is-on .tw-driver { animation: tw-dolly .9s cubic-bezier(.2, .8, .2, 1) both; }
+.tw.is-on .tw-word span { animation: tw-parallax .9s cubic-bezier(.2, .8, .2, 1) both; }
+.tw.is-on .tw-stats > * { animation: tx-last .4s cubic-bezier(.2, .9, .3, 1) both; }
+.tw.is-on .tw-stats > :nth-child(2) { animation-delay: .08s; }
+.tw.is-on .tw-stats > :nth-child(3) { animation-delay: .16s; }
+.tw.is-on .tw-cone { animation: tx-flicker .5s steps(1) both; }
+@keyframes tw-dolly { from { opacity: 0; transform: translateX(-8vw); filter: blur(8px); } to { opacity: 1; transform: none; } }
+@keyframes tw-parallax { from { transform: translateX(10%); opacity: 0; } to { transform: translateX(-2%); opacity: 1; } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tz-face { height: 150vh; top: 4vh; }
+  .tz-face.is-tight { height: 56vh; top: 16vh; }
+  .tz-word span { font-size: 26vh; }
+  .tw-driver { height: 52vh; bottom: 21.6vh; }
+  .tw-stage { width: 90vw; bottom: 17vh; }
+  .tw-stats { right: 50%; translate: 50% 0; bottom: 4vh; align-items: center; flex-direction: row; gap: 14px; letter-spacing: .25em; }
+  .tw-stats b { font-size: 9vw; }
+  .tw-word span { font-size: 16vh; }
+}
+
 /* Teamintro: bilklipp mellom førerne (~0,6 s hver, harde kutt) */
 .tr { overflow: hidden; background: #050507; z-index: 3; }
 .tr.is-off { animation: none; visibility: hidden; }
