@@ -229,7 +229,7 @@ function shot(kind, name) {
 }
 
 // ---------- Teamintro: én scene per fører, hver i sin egen stil (som F1-sesongens førerpresentasjoner) ----------
-const SCENE_STYLES = ["studio", "portrait", "diagonal", "spotlight"];
+const SCENE_STYLES = ["studio", "echo", "diagonal", "spotlight"];
 
 function driverScene(d, i) {
   const { first, last } = splitName(d);
@@ -254,11 +254,12 @@ function driverScene(d, i) {
       ${img("tx-driver")}
       ${name(outlined)}
       ${home}`,
-    portrait: `
-      <div class="tx-ring tx-ring-l"></div><div class="tx-ring tx-ring-r"></div>
-      <div class="tx-bars"><i></i><i></i></div>
-      ${home}${tag("left:38%;top:11%")}${tag("right:7%;top:11%")}
+    echo: `
+      <div class="tx-outline"><span>${L.slice(0, 3)}</span></div>
+      ${img("tx-ghost tx-ghost-l")}${img("tx-ghost tx-ghost-r")}
       ${img("tx-driver")}
+      ${tag("left:6%;top:9%")}${tag("right:6%;top:9%")}${tag("right:6%;top:30%")}${tag("left:6%;bottom:12%")}
+      <span class="tx-home" style="left:6%;top:50%">${d.home.toUpperCase()}</span>
       ${name()}`,
     diagonal: `
       <div class="tx-flash"><span>${L}</span></div>
