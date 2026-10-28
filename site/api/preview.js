@@ -78,6 +78,16 @@ module.exports = async (req, res) => {
     });
     if (!allowed(new URL(r.url))) return res.status(400).end(JSON.stringify({ error: "Siden støttes ikke" }));
     const html = (await r.text()).slice(0, 600000);
+    if (req.query.debug === "1") {
+      const grab = (re, n = 12) => [...html.matchAll(re)].slice(0, n).map((m) => m[0].slice(0, 160));
+      return res.status(200).end(JSON.stringify({
+        len: html.length,
+        lat: grab(/"lat(?:itude)?"\s*:\s*-?\d+\.\d+/g),
+        lng: grab(/"(?:lng|lon|longitude)"\s*:\s*-?\d+\.\d+/g),
+        loc: grab(/"(?:localizedCityName|city|neighborhood|neighbourhood|locationTitle|subtitle|location)"\s*:\s*"[^"]{2,80}"/g, 20),
+        hi: grab(/"(?:title|headline)"\s*:\s*"I [^"]{2,80}"/g),
+      }));
+    }
     const raw = meta(html, ["og:image:secure_url", "og:image", "twitter:image"]);
     const img = raw ? new URL(raw, r.url) : null;
     const image = img && img.protocol === "https:" ? img.href : "";
