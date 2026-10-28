@@ -229,7 +229,7 @@ function shot(kind, name) {
 }
 
 // ---------- Teamintro: én scene per fører, hver i sin egen stil (som F1-sesongens førerpresentasjoner) ----------
-const SCENE_STYLES = ["studio", "echo", "diagonal", "spotlight"];
+const SCENE_STYLES = ["studio", "echo", "diagonal", "corridor"];
 
 function driverScene(d, i) {
   const { first, last } = splitName(d);
@@ -241,7 +241,9 @@ function driverScene(d, i) {
   // Etternavnet med to bokstaver i omriss på midten (der føreren står foran teksten).
   const mid = Math.max(1, Math.floor(L.length / 2) - 1);
   const outlined = `${L.slice(0, mid)}<em>${L.slice(mid, mid + 2)}</em>${L.slice(mid + 2)}`;
-  const name = (lastHtml = L, extra = "") => `
+  // De to siste bokstavene lyser rødt først (som i F1-presentasjonene), så blir de hvite.
+  const tail = `${L.slice(0, -2)}<i class="tx-tail">${L.slice(-2)}</i>`;
+  const name = (lastHtml = tail, extra = "") => `
     <div class="tx-name">
       <span class="tx-first">${first}</span>
       <span class="tx-last" data-t="${L}">${lastHtml}</span>${extra}
@@ -267,14 +269,28 @@ function driverScene(d, i) {
         <div class="tx-floor"></div>
         <div class="tx-band"></div>
         ${img("tx-reflect")}${img("tx-driver")}
-        ${name(L, `<span class="tx-meta"><b>${d.number}</b>${d.home.toUpperCase()}</span>`)}
+        ${name(tail, `<span class="tx-meta"><b>${d.number}</b>${d.home.toUpperCase()}</span>`)}
       </div>`,
-    spotlight: `
-      <div class="tx-wall"></div><div class="tx-beam"></div><div class="tx-line"></div>
+    corridor: `
+      <svg class="tx-hall" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <pattern id="tx-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="7" cy="7" r="3.2" fill="#ff2a1f" opacity=".55"/></pattern>
+          <linearGradient id="tx-wall-l" x1="0" x2="1"><stop offset="0" stop-color="#5a0004"/><stop offset="1" stop-color="#170003"/></linearGradient>
+          <linearGradient id="tx-wall-r" x1="1" x2="0"><stop offset="0" stop-color="#7a0006"/><stop offset="1" stop-color="#170003"/></linearGradient>
+        </defs>
+        <rect width="1600" height="900" fill="#100002"/>
+        <path d="M0 0 L560 260 L560 640 L0 900Z" fill="url(#tx-wall-l)"/><path d="M0 0 L560 260 L560 640 L0 900Z" fill="url(#tx-dots)" opacity=".7"/>
+        <path d="M1600 0 L1040 260 L1040 640 L1600 900Z" fill="url(#tx-wall-r)"/><path d="M1600 0 L1040 260 L1040 640 L1600 900Z" fill="url(#tx-dots)"/>
+        <path d="M0 0 L1600 0 L1040 260 L560 260Z" fill="#2a0004"/>
+        <path d="M0 900 L1600 900 L1040 640 L560 640Z" fill="#1e0003"/>
+        <rect x="560" y="260" width="480" height="380" fill="#a00008"/>
+        <path class="tx-laser" d="M380 0 L640 330"/><path class="tx-laser" d="M1480 0 L1080 380"/>
+      </svg>
+      <div class="tx-ghostword"><span>${L.slice(0, 2)}</span></div>
       ${img("tx-driver")}
       ${name()}
-      ${home}
-      ${tag("left:8%;bottom:7%")}${tag("left:44%;bottom:6%")}${tag("right:8%;bottom:5%")}`,
+      <span class="tx-home" style="left:7%;top:51%">${d.home.toUpperCase()}</span>
+      ${tag("left:7%;top:26%")}${tag("left:7%;bottom:18%")}`,
   }[style];
   return `<section class="ti-scene ti-driver tx tx-${style}" data-scene="d${i}" style="--team:${d.team}">${body}</section>`;
 }
