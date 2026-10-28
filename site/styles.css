@@ -788,6 +788,52 @@ body.has-modal { overflow: hidden; }
   .tx-big-bottom { bottom: -7vh; }
 }
 
+/* Teamintro: nærbilde (før hovedscenen) – mørkt, rødt kantlys, store bokstaver bak ansiktet */
+.tz { overflow: hidden; background: linear-gradient(180deg, #121016 0%, #24090f 50%, #8c0c14 100%); }
+.tz-word { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; }
+.tz-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 44vh; line-height: 1; color: #fff; letter-spacing: .02em; white-space: nowrap; }
+.tz-face { position: absolute; z-index: 2; left: 50%; top: -6vh; height: 230vh; width: auto; max-width: none; translate: -50% 0;
+  filter: brightness(.55) contrast(1.25) saturate(.85) drop-shadow(-6px -4px 0 rgba(255, 40, 30, .85)) drop-shadow(0 0 40px rgba(255, 30, 20, .45)); }
+.tz .tx-tag { color: #fff; }
+.tz.is-on .tz-face { animation: tz-push 1s cubic-bezier(.2, .8, .2, 1) both; }
+.tz.is-on .tz-word span { animation: tz-word 1s cubic-bezier(.2, .8, .2, 1) both; }
+.tz.is-on .tx-tag { animation: di-fade .3s ease .3s both; }
+@keyframes tz-push { from { opacity: 0; transform: scale(1.12); filter: brightness(0) blur(8px); } 35% { opacity: 1; } to { transform: scale(1.02); } }
+@keyframes tz-word { from { opacity: 0; transform: translateX(-12%); filter: blur(10px); } to { opacity: 1; transform: translateX(3%); } }
+
+/* Teamintro: vid vinkel (etter hovedscenen) – hele føreren på en plattform, navn i omriss, nøkkeltall */
+.tw { overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 30%, #2a2a31, #0a0a0d 75%); }
+.tw-cone { position: absolute; left: 50%; top: -10%; width: 70vw; height: 100%; translate: -50% 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 85%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(6px); }
+.tw-word { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.tw-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 26vh; line-height: 1; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .35); }
+.tw-stage { position: absolute; z-index: 2; left: 50%; bottom: 10vh; width: 46vw; height: 5vh; translate: -50% 0; background: #08080b;
+  border-top: 2px solid var(--red); box-shadow: 0 -4px 30px rgba(255, 30, 20, .6), 0 0 80px rgba(255, 30, 20, .35); }
+.tw-driver { position: absolute; z-index: 3; left: 50%; bottom: 14.6vh; height: 64vh; width: auto; max-width: none; translate: -50% 0;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .7)); }
+.tw-stats { position: absolute; z-index: 4; right: 6%; bottom: 18vh; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; color: #fff;
+  font-weight: 700; font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .4em; }
+.tw-stats b { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 96px); letter-spacing: 0; line-height: 1; color: var(--team); }
+.tw .tx-tag { color: #fff; letter-spacing: .3em; }
+.tw.is-on .tw-driver { animation: tw-dolly .9s cubic-bezier(.2, .8, .2, 1) both; }
+.tw.is-on .tw-word span { animation: tw-parallax .9s cubic-bezier(.2, .8, .2, 1) both; }
+.tw.is-on .tw-stats > * { animation: tx-last .4s cubic-bezier(.2, .9, .3, 1) both; }
+.tw.is-on .tw-stats > :nth-child(2) { animation-delay: .08s; }
+.tw.is-on .tw-stats > :nth-child(3) { animation-delay: .16s; }
+.tw.is-on .tw-cone { animation: tx-flicker .5s steps(1) both; }
+@keyframes tw-dolly { from { opacity: 0; transform: translateX(-8vw); filter: blur(8px); } to { opacity: 1; transform: none; } }
+@keyframes tw-parallax { from { transform: translateX(10%); opacity: 0; } to { transform: translateX(-2%); opacity: 1; } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tz-face { height: 150vh; top: 4vh; }
+  .tz-word span { font-size: 26vh; }
+  .tw-driver { height: 52vh; bottom: 21.6vh; }
+  .tw-stage { width: 90vw; bottom: 17vh; }
+  .tw-stats { right: 50%; translate: 50% 0; bottom: 4vh; align-items: center; flex-direction: row; gap: 14px; letter-spacing: .25em; }
+  .tw-stats b { font-size: 9vw; }
+  .tw-word span { font-size: 16vh; }
+}
+
 /* Teamintro: bilklipp mellom førerne (~0,6 s hver, harde kutt) */
 .tr { overflow: hidden; background: #050507; z-index: 3; }
 .tr.is-off { animation: none; visibility: hidden; }

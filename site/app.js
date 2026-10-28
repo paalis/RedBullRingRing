@@ -228,6 +228,31 @@ function shot(kind, name) {
   return `<section class="ti-scene tr tr-${kind}" data-scene="${name}" aria-hidden="true">${body}</section>`;
 }
 
+// Nærbilde før hovedscenen: mørkt, rødt kantlys, store bokstaver bak ansiktet (som Verstappen-introen).
+function closeupScene(d, i) {
+  const L = splitName(d).last.toUpperCase();
+  return `
+    <section class="ti-scene tz" data-scene="d${i}a" style="--team:${d.team}">
+      <div class="tz-word"><span>${L.slice(0, 3)}</span></div>
+      ${d.photo ? `<img class="tz-face" src="${d.photo}" alt="">` : ""}
+      <i class="tx-tag" style="right:6%;top:9%">${d.number}</i>
+    </section>`;
+}
+
+// Vid vinkel etter hovedscenen: hele føreren på en opplyst plattform, navnet i omriss og nøkkeltall.
+function wideScene(d, i) {
+  const L = splitName(d).last.toUpperCase();
+  return `
+    <section class="ti-scene tw" data-scene="d${i}c" style="--team:${d.team}">
+      <div class="tw-cone"></div>
+      <div class="tw-word"><span>${L}</span></div>
+      <div class="tw-stage"></div>
+      ${d.photo ? `<img class="tw-driver" src="${d.photo}" alt="">` : ""}
+      <div class="tw-stats"><b>${d.number}</b><span>${d.role.toUpperCase()}</span><span>${d.home.toUpperCase()}</span></div>
+      <i class="tx-tag" style="left:6%;top:9%">${d.code}</i>
+    </section>`;
+}
+
 // ---------- Teamintro: én scene per fører, hver i sin egen stil (som F1-sesongens førerpresentasjoner) ----------
 const SCENE_STYLES = ["studio", "echo", "diagonal", "corridor"];
 
@@ -297,9 +322,19 @@ function driverScene(d, i) {
 
 // ---------- Teamintro (F1 «line-up»-stil) ----------
 // Mellom hver fører (og før line-upen) kommer et kort bilklipp, «t0»–«t4».
-// Hvert bilklipp er to raske kutt på 0,3 s («t0a», «t0b» …).
-const cut = (i) => [[`t${i}a`, 300], [`t${i}b`, 300]];
-const TEAM_TIMELINE = [["title", 1300], ...CREW.flatMap((_, i) => [...cut(i), [`d${i}`, 1500]]), ...cut(CREW.length), ["grid", 0]];
+// Rytmen i teamintroen, i sekunder fra tittelen (samme takt som lydsporet, 2 s per takt): hver fører får to takter
+// med bilklipp (to kutt på 0,3 s), nærbilde, hovedscene og en vid vinkel. Line-upen kommer etter siste fører.
+const DRIVER_START = 2, DRIVER_LEN = 4;
+const LINEUP_AT = DRIVER_START + CREW.length * DRIVER_LEN;
+const TEAM_SCHEDULE = [
+  [0, "title"],
+  ...CREW.flatMap((_, i) => {
+    const t = DRIVER_START + i * DRIVER_LEN;
+    return [[t - 0.6, `t${i}a`], [t - 0.3, `t${i}b`], [t, `d${i}a`], [t + 1, `d${i}`], [t + 2.5, `d${i}c`]];
+  }),
+  [LINEUP_AT - 0.6, `t${CREW.length}a`], [LINEUP_AT - 0.3, `t${CREW.length}b`], [LINEUP_AT, "grid"],
+];
+const TEAM_TIMELINE = TEAM_SCHEDULE.map(([t, name], k) => [name, k + 1 < TEAM_SCHEDULE.length ? Math.round((TEAM_SCHEDULE[k + 1][0] - t) * 1000) : 0]);
 // Rekkefølge i line-upen fra venstre: ytterst bak, innerst foran (som F1-plakaten).
 const LINEUP = [2, 0, 1, 3];
 
@@ -312,7 +347,7 @@ function teamIntroMarkup(extra = "") {
         <h2>Line-up</h2>
         <p class="ti-sub"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></p>
       </section>
-      ${CREW.map((d, i) => transitionScene(i) + driverScene(d, i)).join("")}
+      ${CREW.map((d, i) => transitionScene(i) + closeupScene(d, i) + driverScene(d, i) + wideScene(d, i)).join("")}
       ${transitionScene(CREW.length)}
       <section class="ti-scene ti-grid" data-scene="grid">
         <div class="tg-bar" aria-hidden="true"><i></i><span><span class="brand-mark">RBR</span><span class="brand-year">'27</span></span><i></i></div>
@@ -680,10 +715,9 @@ const navIo = new IntersectionObserver((entries) => {
 document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 
 // ---------- Nettsideintro: introvideo → teamintro → bil over skjermen, synket til lydsporet ----------
-// Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s,
-// bilen kommer inn rett før motorlyden topper (24,3 s), og siden åpnes på sluttslaget (25 s).
-const SITE_INTRO = [[12, "title"], [13.4, "t0a"], [13.7, "t0b"], [14, "d0"], [15.4, "t1a"], [15.7, "t1b"], [16, "d1"], [17.4, "t2a"], [17.7, "t2b"], [18, "d2"],
-  [19.4, "t3a"], [19.7, "t3b"], [20, "d3"], [21.4, "t4a"], [21.7, "t4b"], [22, "grid"], [23.6, "car"], [25, "end"]];
+// Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s, førerne følger TEAM_SCHEDULE,
+// bilen kommer inn rett før motorlyden topper (32,3 s), og siden åpnes på sluttslaget (33 s).
+const SITE_INTRO = [...TEAM_SCHEDULE.map(([t, name]) => [12 + t, name]), [12 + LINEUP_AT + 1.6, "car"], [12 + LINEUP_AT + 3, "end"]];
 // Bilen som suser over line-upen (utklippet bilde, kjører mot høyre).
 const CAR_IMG = `<img class="si-car-img" src="assets/car.webp" alt="" decoding="async">`;
 
