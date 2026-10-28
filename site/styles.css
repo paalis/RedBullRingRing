@@ -801,6 +801,39 @@ body.has-modal { overflow: hidden; }
 @keyframes tz-push { from { opacity: 0; transform: scale(1.12); filter: brightness(0) blur(8px); } 35% { opacity: 1; } to { transform: scale(1.02); } }
 @keyframes tz-word { from { opacity: 0; transform: translateX(-12%); filter: blur(10px); } to { opacity: 1; transform: translateX(3%); } }
 
+/* Teamintro: profil – speilvendt nærbilde i svart-hvitt med lagfarge, stort nummer i omriss, skannelinjer */
+.tp { overflow: hidden; background: linear-gradient(120deg, #07070a 0%, color-mix(in srgb, var(--team) 30%, #07070a) 100%); }
+.tp-num { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; padding-left: 4vw; }
+.tp-num span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 80vh; line-height: .8; color: transparent; -webkit-text-stroke: 2px color-mix(in srgb, var(--team) 70%, #fff); opacity: .45; }
+.tp-face { position: absolute; z-index: 2; left: 66%; top: -4vh; height: 190vh; width: auto; max-width: none; translate: -50% 0; transform: scaleX(-1);
+  filter: grayscale(1) contrast(1.35) brightness(.95); }
+.tp-tint { position: absolute; inset: 0; z-index: 3; background: linear-gradient(90deg, transparent 30%, var(--team) 120%); mix-blend-mode: color; opacity: .75; pointer-events: none; }
+.tp-scan { position: absolute; inset: 0; z-index: 3; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .25) 0 2px, transparent 2px 5px); pointer-events: none; }
+.tp-name { position: absolute; z-index: 4; left: 7%; bottom: 14vh; display: flex; flex-direction: column; align-items: flex-start; }
+.tp-name .tx-first { color: var(--team); margin-bottom: -.15em; }
+.tp-name .tx-last { color: #fff; font-family: "Unbounded", sans-serif; font-weight: 800; font-size: clamp(30px, 6vw, 100px); line-height: 1; }
+.tp-meta { margin-top: 12px; color: #d8d8de; font-weight: 700; letter-spacing: .4em; font-size: clamp(10px, 1vw, 14px); }
+.tp.is-on .tp-face { animation: tp-pan 1.5s linear both; }
+.tp.is-on .tp-num span { animation: tp-num 1.5s ease-out both; }
+.tp.is-on .tp-name > * { animation: tp-line .45s cubic-bezier(.2, .9, .3, 1) both; }
+.tp.is-on .tp-name > :nth-child(2) { animation-delay: .1s; }
+.tp.is-on .tp-name > :nth-child(3) { animation-delay: .2s; }
+@keyframes tp-pan { from { transform: scaleX(-1) translateX(-3vw) scale(1.06); filter: grayscale(1) contrast(1.35) brightness(.95) blur(6px); }
+  20% { filter: grayscale(1) contrast(1.35) brightness(.95) blur(0); } to { transform: scaleX(-1) translateX(2vw) scale(1); } }
+@keyframes tp-num { from { transform: translateX(-6%); opacity: 0; } to { transform: translateX(2%); opacity: 1; } }
+@keyframes tp-line { from { clip-path: inset(0 100% 0 0); transform: translateX(-20px); } to { clip-path: inset(0 -10% 0 0); } }
+
+/* Scenene som står lenge, får en sakte kamerabevegelse */
+.ti-title.is-on, .tx.is-on { animation: ti-drift 3.4s linear both; }
+@keyframes ti-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tp-face { height: 120vh; left: 50%; top: 2vh; }
+  .tp-num span { font-size: 50vh; }
+  .tp-name { left: 50%; translate: -50% 0; bottom: 8vh; align-items: center; text-align: center; }
+  .tp-name .tx-last { font-size: 9vw; }
+}
+
 /* Teamintro: vid vinkel (etter hovedscenen) – hele føreren på en plattform, navn i omriss, nøkkeltall */
 .tw { overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 30%, #2a2a31, #0a0a0d 75%); }
 .tw-cone { position: absolute; left: 50%; top: -10%; width: 70vw; height: 100%; translate: -50% 0; z-index: 1;
