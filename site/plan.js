@@ -143,29 +143,40 @@ function renderBudget() {
   document.querySelectorAll(".plan-budget").forEach((el) => (el.innerHTML = html));
 }
 
-// ---------- Forsidebilde fra annonsen ----------
+// ---------- Navn, bilde og fakta fra annonsen ----------
 const triedPreview = new Set();
+const str = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 async function fetchPreview(url) {
-  if (!url) return "";
+  if (!url) return {};
   try {
     const r = await fetch(`/api/preview?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(10000) });
-    if (!r.ok) return "";
-    const { image } = await r.json();
-    return typeof image === "string" && /^https:\/\//.test(image) && image.length <= 1000 ? image : "";
+    if (!r.ok) return {};
+    const d = await r.json();
+    const image = str(d.image, 1000);
+    return {
+      image: /^https:\/\//.test(image) ? image : "",
+      name: str(d.name, 80),
+      area: str(d.area, 60),
+      details: str(d.details, 200),
+      type: ["Hotell", "Airbnb"].includes(d.type) ? d.type : "",
+    };
   } catch (_) {
-    return "";
+    return {};
   }
 }
 
-// Forslag lagt inn før bildestøtten kom: første medlem som ser dem henter bildet.
+// Forslag lagt inn før dette fantes: første medlem som ser dem henter bilde og fakta.
 function backfillPreviews() {
   if (!me) return;
   candidates
-    .filter((c) => c.url && !("image" in c) && !triedPreview.has(c.id))
+    .filter((c) => c.url && (!("image" in c) || !("details" in c)) && !triedPreview.has(c.id))
     .forEach(async (c) => {
       triedPreview.add(c.id);
-      const image = await fetchPreview(c.url);
-      if (image) await updateDoc(doc(db, "candidates", c.id), { image }).catch(() => {});
+      const pv = await fetchPreview(c.url);
+      const patch = {};
+      if (!("image" in c) && pv.image) patch.image = pv.image;
+      if (!("details" in c) && pv.name) patch.details = pv.details || "";
+      if (Object.keys(patch).length) await updateDoc(doc(db, "candidates", c.id), patch).catch(() => {});
     });
 }
 
@@ -180,6 +191,7 @@ function candidateItem(c) {
       ${c.image ? `<a class="plan-photo" href="${esc(c.url || c.image)}" target="_blank" rel="noopener"><img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.remove()"></a>` : ""}
       <span class="stay-status">${booked ? "Booket" : "Kandidat"}</span>
       <p class="stay-name">${esc(c.name)}</p>
+      ${c.details ? `<p class="plan-details">${esc(c.details)}</p>` : ""}
       ${meta ? `<p class="stay-meta">${meta}</p>` : ""}
       ${priceBlock(c)}
       ${c.note ? `<p class="plan-note">${esc(c.note)}</p>` : ""}
@@ -205,13 +217,14 @@ function addForm(slot) {
     <details class="plan-add">
       <summary>+ Legg til ${car ? "tilbud" : "forslag"}</summary>
       <form class="plan-form" data-slot="${slot}">
+        <label class="plan-wide">Lenke<input name="url" type="url" maxlength="500" placeholder="Lim inn lenken – navn og bilde hentes automatisk"></label>
+        <div class="plan-fetch plan-wide" aria-live="polite"></div>
         <label>${car ? "Utleier" : "Navn på stedet"}<input name="name" required maxlength="80" placeholder="${car ? "F.eks. Sixt" : "F.eks. Hotel Daniel"}"></label>
         ${car
           ? `<label>Bil<input name="area" maxlength="60" placeholder="F.eks. VW Passat stasjonsvogn"></label>`
           : `<label>Type<select name="type"><option>Hotell</option><option>Airbnb</option></select></label>
              <label>Nabolag<input name="area" maxlength="60" placeholder="F.eks. Neubau"></label>`}
         <label>Totalpris for alle (kr)<input name="total" type="number" inputmode="numeric" min="0" max="1000000" step="1" placeholder="${car ? "F.eks. 3600" : "F.eks. 4800"}"></label>
-        <label>Lenke<input name="url" type="url" maxlength="500" placeholder="https://…"></label>
         <label class="plan-wide">Notat<input name="note" maxlength="200" placeholder="Hvorfor dette?"></label>
         <button class="plan-btn" type="submit">Legg til</button>
       </form>
@@ -308,9 +321,10 @@ document.addEventListener("submit", async (e) => {
   submit.disabled = true;
   submit.textContent = url ? "Henter bilde …" : "Legger til …";
   try {
-    const image = await fetchPreview(url);
+    const pv = form._preview && form._preview.url === url ? form._preview : await fetchPreview(url);
     await addDoc(collection(db, "candidates"), {
-      ...(image ? { image } : {}),
+      ...(pv.image ? { image: pv.image } : {}),
+      ...(pv.details ? { details: pv.details } : {}),
       slot: form.dataset.slot,
       type: f.type ? f.type.value : "Leiebil",
       name: f.name.value.trim(),
@@ -329,6 +343,50 @@ document.addEventListener("submit", async (e) => {
     submit.disabled = false;
     submit.textContent = "Legg til";
   }
+});
+
+// Lim inn lenke → fyll inn navn, sted og type automatisk.
+let fetchTimer;
+document.addEventListener("input", (e) => {
+  const input = e.target.closest(".plan-form input[name=url]");
+  if (!input) return;
+  clearTimeout(fetchTimer);
+  fetchTimer = setTimeout(() => autofill(input.form), 500);
+});
+
+async function autofill(form) {
+  const url = form.elements.url.value.trim();
+  const status = form.querySelector(".plan-fetch");
+  if (!/^https:\/\/.+\..+/.test(url)) {
+    status.innerHTML = "";
+    return;
+  }
+  status.innerHTML = `<span class="plan-fetch-wait">Henter navn og bilde …</span>`;
+  const pv = await fetchPreview(url);
+  if (form.elements.url.value.trim() !== url) return; // lenken ble endret i mellomtiden
+  form._preview = { ...pv, url };
+  const fill = (field, value) => {
+    const el = form.elements[field];
+    if (!el || !value) return;
+    if (!el.value || el.dataset.auto === "1") {
+      el.value = value;
+      el.dataset.auto = "1";
+    }
+  };
+  fill("name", pv.name);
+  if (form.dataset.slot !== "car") {
+    fill("area", pv.area);
+    if (pv.type) form.elements.type.value = pv.type;
+  }
+  status.innerHTML = pv.name || pv.image
+    ? `<div class="plan-fetch-found">${pv.image ? `<img src="${esc(pv.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
+         <div><b>${esc(pv.name || "Fant bilde")}</b>${pv.details ? `<span>${esc(pv.details)}</span>` : ""}</div></div>`
+    : `<span class="plan-fetch-wait">Fant ikke navn automatisk – skriv det inn selv.</span>`;
+}
+
+document.addEventListener("input", (e) => {
+  const el = e.target.closest(".plan-form input[name=name], .plan-form input[name=area]");
+  if (el && e.isTrusted) el.dataset.auto = "";
 });
 
 // ---------- Leiebil: avkrysning ----------

@@ -38,6 +38,24 @@ function decodeEntities(s) {
     .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 }
 
+// Airbnb: og:description er annonsens navn, og:title er «Type · Sted · ★4,9 · 2 soverom · …».
+// Andre sider: navnet står i tittelen, gjerne fulgt av « – oppdaterte priser …» eller « | Booking.com».
+function describe(host, title, description) {
+  const clip = (s, n) => s.replace(/\s+/g, " ").trim().slice(0, n);
+  if (/(^|\.)(airbnb\.[a-z.]+|abnb\.me)$/.test(host)) {
+    const parts = title.split(" · ").map((s) => s.trim()).filter(Boolean);
+    return {
+      name: clip(description || parts[0] || "", 80),
+      area: clip(parts[1] || "", 60),
+      details: clip(title, 200),
+      type: "Airbnb",
+    };
+  }
+  const name = title.split(/\s+[|–—-]\s+/)[0].replace(/[★⭐]+/g, "").replace(/,\s*[^,]+$/, (m) => (m.length < 25 ? "" : m));
+  const hotel = /(^|\.)(booking\.com|hotels\.com|expedia\.[a-z.]+|agoda\.com|hostelworld\.com)$/.test(host);
+  return { name: clip(name, 80), area: "", details: "", type: hotel ? "Hotell" : "" };
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   let target;
@@ -67,7 +85,7 @@ module.exports = async (req, res) => {
     const description = meta(html, ["og:description", "twitter:description", "description"]) || "";
     if (!image && !title) return res.status(404).end(JSON.stringify({ error: "Fant ingenting" }));
     res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
-    return res.status(200).end(JSON.stringify({ image, title: decodeEntities(title).slice(0, 300), description: description.slice(0, 500) }));
+    return res.status(200).end(JSON.stringify({ image, ...describe(new URL(r.url).hostname, decodeEntities(title), description) }));
   } catch {
     return res.status(502).end(JSON.stringify({ error: "Kunne ikke hente siden" }));
   }
