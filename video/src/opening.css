@@ -76,11 +76,11 @@
 .op #s5 { flex-direction: column; justify-content: center; }
 .op .bignum { position: absolute; inset: 0; display: none; place-items: center; align-content: center; overflow: hidden; }
 .op .bignum .bar { position: absolute; left: 20%; top: -10%; width: 60%; height: 120%; background: var(--team); opacity: .18; }
-.op .bignum b { position: relative; font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 560px; line-height: .85; color: var(--team);
+.op .bignum b { position: relative; font-family: "Orbitron", sans-serif; font-weight: 800; font-size: 560px; line-height: .85; color: var(--team);
   text-shadow: 0 0 80px color-mix(in srgb, var(--team) 50%, transparent); }
 .op .bignum span { position: relative; margin-top: 30px; font-weight: 700; font-size: 54px; letter-spacing: .5em; color: #fff; text-align: center; }
 .op .numrow { position: absolute; top: 140px; left: 0; right: 0; display: flex; justify-content: center; gap: 90px; }
-.op .numrow i { font-family: "Unbounded", sans-serif; font-weight: 800; font-style: normal; font-size: 110px; color: var(--team); opacity: 0; }
+.op .numrow i { font-family: "Orbitron", sans-serif; font-weight: 800; font-style: normal; font-size: 110px; color: var(--team); opacity: 0; }
 .op .dw { position: absolute; left: 150px; top: 360px; display: flex; flex-direction: column; }
 .op .dw span { font-weight: 900; font-size: 210px; line-height: .95; text-transform: uppercase; opacity: 0; }
 .op .dw .red { color: var(--red); }
