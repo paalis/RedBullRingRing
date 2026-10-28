@@ -15,6 +15,18 @@ Nettsiden for turen vår til Østerrikes Grand Prix på Red Bull Ring, juli 2027
 cd site && python3 -m http.server 8000
 ```
 
+## Video med Remotion
+
+`video/` er et eget React/TypeScript-prosjekt for å lage og rendre videoer:
+
+```sh
+cd video
+npm ci
+npm run dev
+```
+
+Se [video/README.md](video/README.md) for MP4-eksport, stillbilder og kommandoer for Codex-skymiljøet. Startkomposisjonen `RedBullRingIntro` er seks sekunder lang. Nettsidens eksisterende videofiler oppdateres ikke automatisk.
+
 ## Publisering
 
 Vercel-prosjektet har `site/` som rotmappe. Push til `main` publiserer automatisk.
