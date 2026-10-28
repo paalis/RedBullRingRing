@@ -129,7 +129,6 @@ CREW.forEach((d, i) => {
   li.setAttribute("role", "button");
   li.setAttribute("aria-label", `Se førerintro for ${d.fullName}`);
   li.innerHTML = `
-    ${d.photo ? `<img class="driver-photo" src="${d.photo}" alt="" loading="lazy" style="object-position:${d.photoPos || "center 15%"}">` : ""}
     <span class="driver-pos">P${i + 1}</span>
     <h3 class="driver-name">${d.name}</h3>
     <p class="driver-full">${d.fullName}</p>

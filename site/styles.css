@@ -510,9 +510,6 @@ body.has-modal { overflow: hidden; }
 /* ---------- FØRERINTRO ---------- */
 .driver { cursor: pointer; transition: transform .2s ease, border-color .2s ease; }
 .driver:hover, .driver:focus-visible { transform: translateY(-3px); border-color: var(--team); outline: none; }
-.driver-photo { position: absolute; right: 0; top: 0; height: 100%; width: 55%; object-fit: cover; object-position: center 15%; opacity: .3; filter: grayscale(1) contrast(1.1);
-  -webkit-mask-image: linear-gradient(to left, #000 30%, transparent); mask-image: linear-gradient(to left, #000 30%, transparent); pointer-events: none; }
-.driver > *:not(.driver-photo) { position: relative; }
 .driver-intro-hint { margin-top: 10px; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--team); }
 
 .dintro { position: fixed; inset: 0; z-index: 2000; background: var(--bg); overflow: hidden; }
