@@ -169,8 +169,58 @@ function revealMarkup(d) {
 // Vent kort på bilder og håndskriftfonten, så ingen scene starter tom.
 function whenReady(el, maxMs) {
   const imgs = [...el.querySelectorAll("img")].map((im) => (im.complete ? 1 : new Promise((r) => { im.onload = im.onerror = r; })));
-  const font = document.fonts ? document.fonts.load('1em "Mr Dafoe"').catch(() => {}) : 1;
+  const font = document.fonts ? Promise.all([document.fonts.load('1em "Mr Dafoe"'), document.fonts.load('800 1em "Unbounded"')]).catch(() => {}) : 1;
   return Promise.race([Promise.all([...imgs, font]), new Promise((r) => setTimeout(r, maxMs))]);
+}
+
+// ---------- Teamintro: én scene per fører, hver i sin egen stil (som F1-sesongens førerpresentasjoner) ----------
+const SCENE_STYLES = ["studio", "portrait", "diagonal", "spotlight"];
+
+function driverScene(d, i) {
+  const { first, last } = splitName(d);
+  const L = last.toUpperCase();
+  const style = SCENE_STYLES[i % SCENE_STYLES.length];
+  const img = (cls) => (d.photo ? `<img class="${cls}" src="${d.photo}" alt="">` : "");
+  const tag = (pos) => `<i class="tx-tag" style="${pos}">${d.number}</i>`;
+  const home = `<span class="tx-home">${d.home.toUpperCase()}</span>`;
+  // Etternavnet med to bokstaver i omriss på midten (der føreren står foran teksten).
+  const mid = Math.max(1, Math.floor(L.length / 2) - 1);
+  const outlined = `${L.slice(0, mid)}<em>${L.slice(mid, mid + 2)}</em>${L.slice(mid + 2)}`;
+  const name = (lastHtml = L, extra = "") => `
+    <div class="tx-name">
+      <span class="tx-first">${first}</span>
+      <span class="tx-last" data-t="${L}">${lastHtml}</span>${extra}
+    </div>`;
+  const body = {
+    studio: `
+      <div class="tx-big tx-big-top"><span>${L} ${L} ${L}</span></div>
+      <div class="tx-big tx-big-bottom"><span>${L} ${L} ${L}</span></div>
+      ${tag("left:12%;top:7%")}${tag("right:8%;top:7%")}${tag("right:8%;top:28%")}${tag("left:12%;bottom:12%")}
+      ${img("tx-driver")}
+      ${name(outlined)}
+      ${home}`,
+    portrait: `
+      <div class="tx-ring tx-ring-l"></div><div class="tx-ring tx-ring-r"></div>
+      <div class="tx-bars"><i></i><i></i></div>
+      ${home}${tag("left:38%;top:11%")}${tag("right:7%;top:11%")}
+      ${img("tx-driver")}
+      ${name()}`,
+    diagonal: `
+      <div class="tx-flash"><span>${L}</span></div>
+      <div class="tx-tilt">
+        <div class="tx-floor"></div>
+        <div class="tx-band"></div>
+        ${img("tx-reflect")}${img("tx-driver")}
+        ${name(L, `<span class="tx-meta"><b>${d.number}</b>${d.home.toUpperCase()}</span>`)}
+      </div>`,
+    spotlight: `
+      <div class="tx-wall"></div><div class="tx-beam"></div><div class="tx-line"></div>
+      ${img("tx-driver")}
+      ${name()}
+      ${home}
+      ${tag("left:8%;bottom:7%")}${tag("left:44%;bottom:6%")}${tag("right:8%;bottom:5%")}`,
+  }[style];
+  return `<section class="ti-scene ti-driver tx tx-${style}" data-scene="d${i}" style="--team:${d.team}">${body}</section>`;
 }
 
 // ---------- Teamintro (F1 «line-up»-stil) ----------
@@ -187,7 +237,7 @@ function teamIntroMarkup(extra = "") {
         <h2>Line-up</h2>
         <p class="ti-sub"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></p>
       </section>
-      ${CREW.map((d, i) => `<section class="ti-scene ti-driver" data-scene="d${i}">${revealMarkup(d)}</section>`).join("")}
+      ${CREW.map((d, i) => driverScene(d, i)).join("")}
       <section class="ti-scene ti-grid" data-scene="grid">
         <div class="tg-bar" aria-hidden="true"><i></i><span><span class="brand-mark">RBR</span><span class="brand-year">'27</span></span><i></i></div>
         <div class="tg-row">
