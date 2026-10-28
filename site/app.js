@@ -2,10 +2,10 @@
 const RACE_START = new Date("2027-07-11T15:00:00+02:00"); // Forventet løpsstart (CEST)
 
 const CREW = [
-  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600", photo: "assets/crew/filip.jpg", photoPos: "60% 45%" },
-  { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000", photo: "assets/crew/pal-andre.jpg" },
-  { name: "Hans-Kristian", fullName: "Hans-Kristian Holthe",  code: "HOL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2", photo: "assets/crew/hans-kristian.jpg", photoPos: "45% 20%" },
-  { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff", photo: "assets/crew/havard.jpg", photoPos: "35% 15%" },
+  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600", photo: "assets/crew/filip.webp" },
+  { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000", photo: "assets/crew/pal-andre.webp" },
+  { name: "Hans-Kristian", fullName: "Hans-Kristian Holthe",  code: "HOL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2", photo: "assets/crew/hans-kristian.webp" },
+  { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff", photo: "assets/crew/havard.webp" },
 ];
 
 // Flyreiser per gruppe. `out`/`ret` er ett fly eller en liste med etapper (`layover` = ventetid før etappen).
@@ -140,51 +140,70 @@ CREW.forEach((d, i) => {
   tower.append(li);
 });
 
-// ---------- Teamintro (F1 «starting grid»-stil) ----------
-const TEAM_TIMELINE = [["title", 1300], ...CREW.map((_, i) => [`d${i}`, 1500]), ["grid", 0]];
-
+// ---------- Førerpresentasjon (F1-stil: mørk scene, røde lysstriper, utklippet fører) ----------
 function splitName(d) {
+  // Stor linje = etternavn, håndskrift = alle fornavn («Filip Johannes» / «Grydeland»).
   const words = d.fullName.split(" ");
   const last = words.length > 1 ? words.pop() : d.fullName;
   return { first: words.length ? words.join(" ") : d.name, last };
 }
+
+function revealMarkup(d) {
+  const n = splitName(d);
+  return `
+    <div class="rv" style="--team:${d.team}">
+      <div class="rv-glow" aria-hidden="true"></div>
+      <div class="rv-beams" aria-hidden="true"><i></i><i></i></div>
+      <div class="rv-streaks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="rv-hero">
+        ${d.photo ? `<img class="rv-driver" src="${d.photo}" alt="${d.fullName}">` : `<div class="rv-driver is-empty" aria-hidden="true">${d.code}</div>`}
+        <div class="rv-floor" aria-hidden="true"></div>
+        <div class="rv-name">
+          <p class="rv-first">${n.first}</p>
+          <p class="rv-last"><span class="w">${n.last}</span><span class="rv-num">/ ${d.number}</span></p>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Vent kort på bilder og håndskriftfonten, så ingen scene starter tom.
+function whenReady(el, maxMs) {
+  const imgs = [...el.querySelectorAll("img")].map((im) => (im.complete ? 1 : new Promise((r) => { im.onload = im.onerror = r; })));
+  const font = document.fonts ? document.fonts.load('1em "Mr Dafoe"').catch(() => {}) : 1;
+  return Promise.race([Promise.all([...imgs, font]), new Promise((r) => setTimeout(r, maxMs))]);
+}
+
+// ---------- Teamintro (F1 «line-up»-stil) ----------
+const TEAM_TIMELINE = [["title", 1300], ...CREW.map((_, i) => [`d${i}`, 1900]), ["grid", 0]];
+// Rekkefølge i line-upen fra venstre: ytterst bak, innerst foran (som F1-plakaten).
+const LINEUP = [2, 0, 1, 3];
 
 function openTeamIntro() {
   const el = document.createElement("div");
   el.className = "tintro";
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
-  el.setAttribute("aria-label", "Teamintro: startgrid RBR '27");
+  el.setAttribute("aria-label", "Teamintro: line-up RBR '27");
   el.innerHTML = `
     <div class="ti-stage">
       <section class="ti-scene ti-title" data-scene="title">
         <div class="ti-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
         <p class="ti-kicker">Østerrikes Grand Prix · Spielberg 2027</p>
-        <h2>Startgrid</h2>
+        <h2>Line-up</h2>
         <p class="ti-sub"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></p>
       </section>
-      ${CREW.map((d, i) => {
-        const n = splitName(d);
-        return `
-        <section class="ti-scene ti-driver" data-scene="d${i}" style="--team:${d.team}">
-          <div class="ti-sweep" aria-hidden="true"></div>
-          <div class="ti-num" aria-hidden="true">${d.number}</div>
-          <div class="ti-photo">${d.photo ? `<img src="${d.photo}" alt="${d.fullName}" style="object-position:${d.photoPos || "center 20%"}">` : `<span>${d.code}</span>`}</div>
-          <div class="ti-name">
-            <p class="ti-pos">P${i + 1} · ${d.code}</p>
-            <p class="ti-first">${n.first}</p>
-            <p class="ti-last">${n.last}</p>
-            <p class="ti-meta">${d.home} · ${d.role}</p>
-          </div>
-        </section>`;
-      }).join("")}
+      ${CREW.map((d, i) => `<section class="ti-scene ti-driver" data-scene="d${i}">${revealMarkup(d)}</section>`).join("")}
       <section class="ti-scene ti-grid" data-scene="grid">
-        <div class="ti-cols">
-          ${CREW.map((d, i) => `
-            <figure class="ti-col" style="--team:${d.team};--i:${i}">
-              ${d.photo ? `<img src="${d.photo}" alt="${d.fullName}" style="object-position:${d.photoPos || "center 20%"}">` : `<span class="ti-col-code">${d.code}</span>`}
-              <figcaption><span class="ti-col-num">${d.number}</span><b>${d.code}</b><small>${d.name}</small></figcaption>
-            </figure>`).join("")}
+        <div class="tg-bar" aria-hidden="true"><i></i><span><span class="brand-mark">RBR</span><span class="brand-year">'27</span></span><i></i></div>
+        <div class="tg-row">
+          ${LINEUP.map((idx, pos) => {
+            const d = CREW[idx];
+            const inner = pos === 1 || pos === 2;
+            return `
+            <figure class="tg-driver${inner ? " is-front" : ""}" style="--i:${pos}">
+              ${d.photo ? `<img src="${d.photo}" alt="${d.fullName}">` : `<span class="tg-code">${d.code}</span>`}
+            </figure>`;
+          }).join("")}
         </div>
         <div class="ti-grid-title"><p>Østerrikes Grand Prix · 9.–11. juli 2027</p><h2>Team <span class="brand-mark">RBR</span> '27</h2></div>
         <div class="ti-actions">
@@ -243,10 +262,7 @@ function openTeamIntro() {
     if (!stage.classList.contains("is-done")) toEnd();
   });
 
-  // Vent kort på bildene så ingen scene starter tom.
-  const imgs = [...el.querySelectorAll("img")];
-  const ready = Promise.all(imgs.map((im) => (im.complete ? 1 : new Promise((r) => { im.onload = im.onerror = r; }))));
-  Promise.race([ready, new Promise((r) => setTimeout(r, 1500))]).then(() => (reduceMotion ? toEnd() : play()));
+  whenReady(el, 1500).then(() => (reduceMotion ? toEnd() : play()));
   el.querySelector(".dintro-close").focus();
 }
 
@@ -265,31 +281,16 @@ function flightLine(f) {
 
 function openDriverIntro(d, i) {
   const group = FLIGHTS.find((g) => g.who.includes(d.name));
-  // Stor linje = etternavn, liten linje = alle fornavn («Filip Johannes» / «Grydeland»).
-  const words = d.fullName.split(" ");
-  const last = words.length > 1 ? words.pop() : d.fullName;
-  const first = words.length ? words.join(" ") : d.name;
-  let k = 0;
-  const letters = (s) => s.split(" ").map((w) => `<span class="w">${[...w].map((c) => `<span class="l" style="--k:${k++}">${c}</span>`).join("")}</span>`).join(" ");
   const el = document.createElement("div");
   el.className = "dintro";
-  el.style.setProperty("--team", d.team);
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-modal", "true");
   el.setAttribute("aria-label", `Førerintro: ${d.fullName}`);
   el.innerHTML = `
     <div class="dintro-stage">
-      <div class="dintro-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="dintro-number" aria-hidden="true">${d.number}</div>
-      ${d.photo
-        ? `<div class="dintro-photo"><img src="${d.photo}" alt="${d.fullName}" style="object-position:${d.photoPos || "center 20%"}"></div>`
-        : `<div class="dintro-photo is-empty" aria-hidden="true"><span>${d.code}</span></div>`}
-      <div class="dintro-name">
+      ${revealMarkup(d)}
+      <section class="dintro-card" aria-label="Førerinfo" style="--team:${d.team}">
         <p class="dintro-pos">P${i + 1} · ${d.code}</p>
-        <p class="dintro-first">${letters(first)}</p>
-        <p class="dintro-last">${(k = 0, letters(last))}</p>
-      </div>
-      <section class="dintro-card" aria-label="Førerinfo">
         <dl>
           <div><dt>Nummer</dt><dd>${d.number}</dd></div>
           <div><dt>Hjemby</dt><dd>${d.home}</dd></div>
@@ -329,8 +330,7 @@ function openDriverIntro(d, i) {
     if (act && act.dataset.act === "replay") return play();
     if (!stage.classList.contains("is-done")) finish();
   });
-  if (reduceMotion) finish();
-  else play();
+  whenReady(el, 1000).then(() => (reduceMotion ? finish() : play()));
   el.querySelector(".dintro-close").focus();
 }
 
