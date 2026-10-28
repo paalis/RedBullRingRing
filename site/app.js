@@ -3,7 +3,7 @@ const RACE_START = new Date("2027-07-11T15:00:00+02:00"); // Forventet løpsstar
 
 const CREW = [
   { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600" },
-  { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000" },
+  { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000", photo: "assets/crew/pal-andre.jpg" },
   { name: "Hans-Kristian", fullName: "Hans-Kristian Holthe",  code: "HOL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2" },
   { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff" },
 ];
@@ -125,14 +125,99 @@ CREW.forEach((d, i) => {
   li.className = "driver reveal";
   li.dataset.number = d.number;
   li.style.setProperty("--team", d.team);
+  li.tabIndex = 0;
+  li.setAttribute("role", "button");
+  li.setAttribute("aria-label", `Se førerintro for ${d.fullName}`);
   li.innerHTML = `
+    ${d.photo ? `<img class="driver-photo" src="${d.photo}" alt="" loading="lazy">` : ""}
     <span class="driver-pos">P${i + 1}</span>
     <h3 class="driver-name">${d.name}</h3>
     <p class="driver-full">${d.fullName}</p>
     <span class="driver-code">${d.code}</span>
-    <p class="driver-meta"><span>${d.home}</span><span>${d.role}</span></p>`;
+    <p class="driver-meta"><span>${d.home}</span><span>${d.role}</span></p>
+    <span class="driver-intro-hint">Se intro →</span>`;
+  li.addEventListener("click", () => openDriverIntro(d, i));
+  li.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), openDriverIntro(d, i)));
   tower.append(li);
 });
+
+// ---------- Førerintro (F1-stil) ----------
+function flightLine(f) {
+  if (!f) return "Ikke booket ennå";
+  const legs = Array.isArray(f) ? f : [f];
+  const first = legs[0];
+  const last = legs[legs.length - 1];
+  const via = legs.length > 1 ? ` via ${legs.slice(0, -1).map((l) => l.to).join(", ")}` : "";
+  const dep = first.dep ? ` ${first.dep}` : "";
+  return `${first.date} · ${first.from}${dep} → ${last.to} ${last.arr}${via}`;
+}
+
+function openDriverIntro(d, i) {
+  const group = FLIGHTS.find((g) => g.who.includes(d.name));
+  const last = d.fullName.startsWith(d.name) ? d.fullName.slice(d.name.length).trim() : d.fullName;
+  const letters = (s) => [...s].map((c, k) => `<span style="--k:${k}">${c === " " ? "&nbsp;" : c}</span>`).join("");
+  const el = document.createElement("div");
+  el.className = "dintro";
+  el.style.setProperty("--team", d.team);
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", `Førerintro: ${d.fullName}`);
+  el.innerHTML = `
+    <div class="dintro-stage">
+      <div class="dintro-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="dintro-number" aria-hidden="true">${d.number}</div>
+      ${d.photo
+        ? `<div class="dintro-photo"><img src="${d.photo}" alt="${d.fullName}"></div>`
+        : `<div class="dintro-photo is-empty" aria-hidden="true"><span>${d.code}</span></div>`}
+      <div class="dintro-name">
+        <p class="dintro-pos">P${i + 1} · ${d.code}</p>
+        <p class="dintro-first">${letters(d.name)}</p>
+        <p class="dintro-last">${letters(last)}</p>
+      </div>
+      <section class="dintro-card" aria-label="Førerinfo">
+        <dl>
+          <div><dt>Nummer</dt><dd>${d.number}</dd></div>
+          <div><dt>Hjemby</dt><dd>${d.home}</dd></div>
+          <div><dt>Rolle</dt><dd>${d.role}</dd></div>
+          <div><dt>Lagkode</dt><dd>${d.code}</dd></div>
+          <div class="wide"><dt>Utreise</dt><dd>${flightLine(group && group.out)}</dd></div>
+          <div class="wide"><dt>Hjemreise</dt><dd>${flightLine(group && group.ret)}</dd></div>
+        </dl>
+        <div class="dintro-actions">
+          <button type="button" class="plan-btn" data-act="replay">Spill igjen</button>
+          <button type="button" class="btn-ghost" data-act="close">Lukk</button>
+        </div>
+      </section>
+      <button type="button" class="dintro-close" data-act="close" aria-label="Lukk">✕</button>
+      <p class="dintro-skip" aria-hidden="true">Trykk for å hoppe over</p>
+    </div>`;
+  document.body.append(el);
+  document.body.classList.add("has-modal");
+  const stage = el.querySelector(".dintro-stage");
+  const play = () => {
+    stage.classList.remove("is-done", "is-playing");
+    void stage.offsetWidth; // start animasjonen på nytt
+    stage.classList.add("is-playing");
+  };
+  const finish = () => stage.classList.add("is-done");
+  const close = () => {
+    el.remove();
+    document.body.classList.remove("has-modal");
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => e.key === "Escape" && close();
+  document.addEventListener("keydown", onKey);
+  stage.addEventListener("animationend", (e) => e.target.classList.contains("dintro-card") && finish());
+  el.addEventListener("click", (e) => {
+    const act = e.target.closest("[data-act]");
+    if (act && act.dataset.act === "close") return close();
+    if (act && act.dataset.act === "replay") return play();
+    if (!stage.classList.contains("is-done")) finish();
+  });
+  if (reduceMotion) finish();
+  else play();
+  el.querySelector(".dintro-close").focus();
+}
 
 // ---------- Flyreiser ----------
 const BIKE_ICON = '<svg class="sport-mark" viewBox="0 0 30 18" aria-hidden="true"><path class="sm-speed" d="M1 6h4.5M0 9h5.5M1.5 12h4"/><g transform="translate(1.6 0) skewX(-10)"><circle class="sm-thin" cx="12.4" cy="12.4" r="3.6"/><circle class="sm-thin" cx="24.6" cy="12.4" r="3.6"/><path class="sm-thin" d="M12.4 12.4l4-6h6.2l2 5.8M16.4 6.4l2.2 6 4-6M15 4.6h3M21.4 4.2h2.6"/></g></svg>';
