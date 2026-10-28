@@ -110,12 +110,8 @@ function driverScene(d: Driver, i: number) {
   const img = (cls: string) => `<img class="${cls}" src="${d.photo}" alt="">`;
   const tag = (pos: string) => `<i class="tx-tag" style="${pos}">${d.number}</i>`;
   const home = `<span class="tx-home">${d.home.toUpperCase()}</span>`;
-  // Etternavnet med to bokstaver i omriss på midten (der føreren står foran teksten).
-  const mid = Math.max(1, Math.floor(L.length / 2) - 1);
-  const outlined = `${L.slice(0, mid)}<em>${L.slice(mid, mid + 2)}</em>${L.slice(mid + 2)}`;
-  // De to siste bokstavene lyser rødt først (som i F1-presentasjonene), så blir de hvite.
-  const tail = `${L.slice(0, -2)}<i class="tx-tail">${L.slice(-2)}</i>`;
-  const name = (lastHtml = tail, extra = "") => `
+  // Etternavnet avsløres av et lysbånd i lagfargen (se .tx-last i CSS-en), som i F1-presentasjonene.
+  const name = (lastHtml = L, extra = "") => `
     <div class="tx-name">
       <span class="tx-first">${first}</span>
       <span class="tx-last" data-t="${L}">${lastHtml}</span>${extra}
@@ -126,7 +122,7 @@ function driverScene(d: Driver, i: number) {
       <div class="tx-big tx-big-bottom"><span>${L} ${L} ${L}</span></div>
       ${tag("left:12%;top:7%")}${tag("right:8%;top:7%")}${tag("right:8%;top:28%")}${tag("left:12%;bottom:12%")}
       ${img("tx-driver")}
-      ${name(outlined)}
+      ${name()}
       ${home}`,
     echo: `
       <div class="tx-outline"><span>${L.slice(0, 3)}</span></div>
@@ -141,7 +137,7 @@ function driverScene(d: Driver, i: number) {
         <div class="tx-floor"></div>
         <div class="tx-band"></div>
         ${img("tx-reflect")}${img("tx-driver")}
-        ${name(tail, `<span class="tx-meta"><b>${d.number}</b>${d.home.toUpperCase()}</span>`)}
+        ${name(L, `<span class="tx-meta"><b>${d.number}</b>${d.home.toUpperCase()}</span>`)}
       </div>`,
     corridor: `
       <svg class="tx-hall" viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true">
