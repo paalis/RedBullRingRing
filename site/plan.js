@@ -113,7 +113,7 @@ function chosen(slot) {
   const booked = list.find((c) => c.status === "booket");
   if (booked) return { c: booked, how: "Booket" };
   const lead = list.filter(hasTotal).sort((a, b) => (b.votes || []).length - (a.votes || []).length)[0];
-  return lead ? { c: lead, how: "Flest stemmer" } : null;
+  return lead ? { c: lead, how: (lead.votes || []).length ? "Flest stemmer" : "Foreløpig, ingen stemmer ennå" } : null;
 }
 
 function renderBudget() {
