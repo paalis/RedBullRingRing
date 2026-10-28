@@ -36,7 +36,7 @@ service cloud.firestore {
     }
 
     function validCandidate(d) {
-      return d.keys().hasOnly(['slot', 'type', 'name', 'url', 'area', 'price', 'total', 'image', 'details', 'note', 'status', 'votes', 'by', 'createdAt'])
+      return d.keys().hasOnly(['slot', 'type', 'name', 'url', 'area', 'price', 'total', 'image', 'details', 'lat', 'lng', 'note', 'status', 'votes', 'by', 'createdAt'])
         && d.slot in ['wien-1', 'graz', 'wien-2', 'car']
         && d.status in ['kandidat', 'booket']
         && shortString(d.name, 80) && d.name.size() > 0
@@ -46,6 +46,8 @@ service cloud.firestore {
         && (!('total' in d) || (d.total is int && d.total >= 0 && d.total <= 1000000))
         && (!('image' in d) || (shortString(d.image, 1000) && d.image.matches('^https://.+')))
         && (!('details' in d) || shortString(d.details, 200))
+        && (!('lat' in d) || (d.lat is number && d.lat >= -90 && d.lat <= 90))
+        && (!('lng' in d) || (d.lng is number && d.lng >= -180 && d.lng <= 180))
         && shortString(d.note, 200)
         && shortString(d.url, 500) && (d.url == '' || d.url.matches('^https://.+'))
         && d.votes is list && d.votes.size() <= 10

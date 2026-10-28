@@ -470,6 +470,43 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .car-check:disabled { cursor: default; }
 .car-todo li.is-done .car-check { background: var(--green); }
 
+/* ---------- KART ---------- */
+.plan-map { position: relative; margin: 0 0 14px; height: 180px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); cursor: pointer; background: #111; }
+.plan-map[hidden] { display: none; }
+.plan-map-canvas { position: absolute; inset: 0; }
+.plan-map .leaflet-control-attribution { font-size: 9px; background: rgba(11,11,16,.7); color: var(--muted); }
+.plan-map .leaflet-control-attribution a { color: var(--muted); }
+.plan-map-open {
+  position: absolute; right: 10px; bottom: 22px; z-index: 500; pointer-events: none;
+  font: 700 11px/1 "Titillium", sans-serif; letter-spacing: .12em; text-transform: uppercase;
+  color: #fff; background: var(--red); border: 0; border-radius: 999px; padding: 8px 12px;
+}
+.map-pin span {
+  display: inline-block; transform: translate(-50%, -100%); white-space: nowrap;
+  font: 900 12px/1 "Titillium", sans-serif; color: var(--bg); background: var(--yellow);
+  padding: 5px 8px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.5); position: relative;
+}
+.map-pin span::after { content: ""; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); border: 5px solid transparent; border-bottom: 0; border-top-color: var(--yellow); }
+.map-pin.is-booked span { background: var(--red); color: #fff; }
+.map-pin.is-booked span::after { border-top-color: var(--red); }
+.map-ref i { display: block; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,.25); }
+.map-ref span { position: absolute; left: 8px; top: -7px; white-space: nowrap; font: 700 11px/1 "Titillium", sans-serif; color: #fff; text-shadow: 0 1px 3px #000; }
+.map-modal { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.75); display: grid; place-items: center; padding: 16px; }
+.map-modal-box { width: min(960px, 100%); height: min(720px, 100%); display: flex; flex-direction: column; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.map-modal-box header { display: flex; align-items: baseline; gap: 12px; padding: 12px 16px; background: var(--bg-3); }
+.map-modal-box header b { font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+.map-modal-box header span { color: var(--muted); font-size: 14px; margin-right: auto; }
+.map-close { background: none; border: 1px solid var(--line); color: var(--text); border-radius: 999px; width: 34px; height: 34px; font-size: 16px; cursor: pointer; }
+.map-close:hover { border-color: var(--red); }
+.map-modal-canvas { flex: 1; background: #111; }
+body.has-modal { overflow: hidden; }
+.map-pop { display: flex; flex-direction: column; gap: 3px; font-family: "Titillium", sans-serif; }
+.map-pop img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; margin-bottom: 4px; }
+.map-pop b { font-size: 14px; }
+.map-pop span { font-size: 12px; color: #555; }
+.map-pop em { font-style: normal; font-weight: 700; font-size: 13px; }
+.leaflet-container .map-pop a { font-weight: 700; color: var(--red); }
+
 /* ---------- CHECKLIST ---------- */
 .pack-progress { font-size: 22px; font-weight: 700; margin: 24px 0 8px; }
 .pack-progress b { font-weight: 900; font-size: 40px; color: var(--green); }
