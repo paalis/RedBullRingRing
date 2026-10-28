@@ -235,6 +235,14 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 
 .map { margin: 0; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; color: var(--text); }
 .map svg { width: 100%; height: auto; }
+.land { fill: #1a1a22; stroke: #2c2c36; stroke-width: 1; stroke-linejoin: round; }
+.land-nor, .land-aut { fill: #24242e; }
+.inset .land-aut { fill: #2a1416; stroke: rgba(225, 6, 0, .45); }
+.inset-bg { fill: var(--bg); }
+.inset-frame { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.inset-mark { fill: none; stroke: var(--red); stroke-width: 1.5; }
+.inset-link { stroke: var(--red); stroke-opacity: .4; stroke-width: 1; stroke-dasharray: 3 4; }
+.inset-label { fill: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .2em; }
 .route { fill: none; stroke-linecap: round; }
 .route-fly { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 2 9; }
 .route-ground { stroke: var(--red); stroke-width: 5; }
@@ -242,7 +250,8 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .map.is-visible .route-fly { animation: dash 1.4s linear infinite; }
 @keyframes dash { to { stroke-dashoffset: -22; } }
 .city circle { fill: var(--bg); stroke: var(--text); stroke-width: 3; }
-.city text { fill: var(--text); font-weight: 700; font-size: 18px; }
+.city text { fill: var(--text); font-weight: 700; font-size: 18px; paint-order: stroke; stroke: var(--bg-2); stroke-width: 5px; stroke-linejoin: round; }
+.city .end { text-anchor: end; }
 .city .code { fill: var(--muted); font-size: 12px; letter-spacing: .12em; }
 .city-hub circle { fill: var(--red); stroke: #fff; }
 .city-track circle { fill: var(--yellow); stroke: var(--bg); }
