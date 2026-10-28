@@ -194,8 +194,8 @@ const REF_POINTS = {
     { name: "Flyplassen (VIE)", lat: 48.1103, lng: 16.5697 },
   ],
 };
-const TILES = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
-const TILES_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const TILES_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bidragsytere';
 const smallMaps = {};
 let leafletReady;
 
@@ -264,7 +264,7 @@ async function renderMaps() {
         zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
         boxZoom: false, keyboard: false, touchZoom: false, tap: false,
       });
-      L.tileLayer(TILES, { attribution: TILES_ATTR, subdomains: "abcd", maxZoom: 19 }).addTo(map);
+      L.tileLayer(TILES, { attribution: TILES_ATTR, maxZoom: 19 }).addTo(map);
       sm = smallMaps[slot] = { map, layer: L.layerGroup().addTo(map) };
       el.addEventListener("click", () => openBigMap(slot));
     }
@@ -288,7 +288,7 @@ async function openBigMap(slot) {
   document.body.append(modal);
   document.body.classList.add("has-modal");
   const map = L.map(modal.querySelector(".map-modal-canvas"));
-  L.tileLayer(TILES, { attribution: TILES_ATTR, subdomains: "abcd", maxZoom: 19 }).addTo(map);
+  L.tileLayer(TILES, { attribution: TILES_ATTR, maxZoom: 19 }).addTo(map);
   const pts = addMarkers(L, L.layerGroup().addTo(map), slot, true);
   map.fitBounds(pts, { padding: [40, 40], maxZoom: 15 });
   const close = () => {
