@@ -65,6 +65,7 @@ function renderBars() {
         me = { uid: cred.user.uid, name: form.name.value };
         renderAll();
       } catch (ex) {
+        console.error("Kunne ikke bli med:", ex);
         me = null;
         joinError = /permission/i.test(ex.message) ? "Feil lagkode." : "Noe gikk galt – prøv igjen.";
         renderBars();
@@ -84,17 +85,76 @@ onAuthStateChanged(auth, async (user) => {
   renderAll();
 });
 
+// ---------- Pris ----------
+const PEOPLE = CREW.length;
+const kr = (n) => `${Math.round(n).toLocaleString("nb-NO")} kr`;
+const hasTotal = (c) => Number.isInteger(c.total);
+const nightsFor = (slot) => (STAYS.find((s) => s.id === slot) || {}).nights || 0;
+
+function priceBlock(c) {
+  if (!hasTotal(c)) {
+    return c.price
+      ? `<p class="plan-price is-missing">Oppgitt pris: <b class="plan-legacy">${esc(c.price)}</b> – trykk «Endre pris» og legg inn totalpris for alle, så kommer den med i budsjettet.</p>`
+      : `<p class="plan-price is-missing">Pris mangler</p>`;
+  }
+  const nights = nightsFor(c.slot);
+  const per = [`${kr(c.total / PEOPLE)} per person`];
+  if (nights > 1) per.push(`${kr(c.total / nights)} per natt`);
+  return `
+    <div class="plan-price">
+      <b>${kr(c.total)}</b><span>totalt</span>
+      <small>${per.join(" · ")}</small>
+    </div>`;
+}
+
+// Det som teller i budsjettet: booket forslag, ellers det med flest stemmer som har pris.
+function chosen(slot) {
+  const list = candidates.filter((c) => c.slot === slot);
+  const booked = list.find((c) => c.status === "booket");
+  if (booked) return { c: booked, how: "Booket" };
+  const lead = list.filter(hasTotal).sort((a, b) => (b.votes || []).length - (a.votes || []).length)[0];
+  return lead ? { c: lead, how: "Flest stemmer" } : null;
+}
+
+function renderBudget() {
+  const rows = [...STAYS.map((s) => ({ slot: s.id, label: `${s.city} · ${s.nights} ${s.nights === 1 ? "natt" : "netter"}` })), { slot: "car", label: "Leiebil" }];
+  let sum = 0;
+  let missing = 0;
+  const lines = rows.map(({ slot, label }) => {
+    const pick = chosen(slot);
+    const ok = pick && hasTotal(pick.c);
+    if (ok) sum += pick.c.total; else missing++;
+    return `
+      <li class="${ok ? "" : "is-missing"}">
+        <span class="budget-label">${esc(label)}<small>${ok ? `${esc(pick.how)}: ${esc(pick.c.name)}` : "Ingen pris ennå"}</small></span>
+        <span class="budget-val">${ok ? kr(pick.c.total) : "–"}</span>
+      </li>`;
+  }).join("");
+  const html = `
+    <div class="budget">
+      <div class="budget-total">
+        <p class="budget-kicker">Totalpris overnatting + leiebil</p>
+        <p class="budget-big">${kr(sum)}</p>
+        <p class="budget-pp"><b>${kr(sum / PEOPLE)}</b> per person</p>
+        ${missing ? `<p class="budget-note">${missing} av ${rows.length} mangler pris ennå</p>` : ""}
+      </div>
+      <ul class="budget-lines">${lines}</ul>
+    </div>`;
+  document.querySelectorAll(".plan-budget").forEach((el) => (el.innerHTML = html));
+}
+
 // ---------- Forslag ----------
 function candidateItem(c) {
   const votes = c.votes || [];
   const mine = me && votes.includes(me.name);
-  const meta = [c.type, c.area, c.price].filter(Boolean).map(esc).join(" · ");
+  const meta = [c.type, c.area].filter(Boolean).map(esc).join(" · ");
   const booked = c.status === "booket";
   return `
     <li class="stay-option plan-item is-${booked ? "booked" : "candidate"}" data-id="${c.id}">
       <span class="stay-status">${booked ? "Booket" : "Kandidat"}</span>
       <p class="stay-name">${esc(c.name)}</p>
       ${meta ? `<p class="stay-meta">${meta}</p>` : ""}
+      ${priceBlock(c)}
       ${c.note ? `<p class="plan-note">${esc(c.note)}</p>` : ""}
       ${c.url ? `<a class="stay-link" href="${esc(c.url)}" target="_blank" rel="noopener">Se tilbudet →</a>` : ""}
       <div class="plan-votes">
@@ -105,6 +165,7 @@ function candidateItem(c) {
       ${me ? `
         <div class="plan-actions">
           <button type="button" class="plan-btn plan-vote${mine ? " is-on" : ""}" data-act="vote">${mine ? "Stemt" : "Stem"}</button>
+          <button type="button" class="btn-ghost" data-act="price">Endre pris</button>
           <button type="button" class="btn-ghost" data-act="book">${booked ? "Angre booket" : "Merk som booket"}</button>
           <button type="button" class="btn-ghost plan-del" data-act="del">Slett</button>
         </div>` : ""}
@@ -122,7 +183,7 @@ function addForm(slot) {
           ? `<label>Bil<input name="area" maxlength="60" placeholder="F.eks. VW Passat stasjonsvogn"></label>`
           : `<label>Type<select name="type"><option>Hotell</option><option>Airbnb</option></select></label>
              <label>Nabolag<input name="area" maxlength="60" placeholder="F.eks. Neubau"></label>`}
-        <label>Pris<input name="price" maxlength="40" placeholder="F.eks. 1 200 kr per person"></label>
+        <label>Totalpris for alle (kr)<input name="total" type="number" inputmode="numeric" min="0" max="1000000" step="1" placeholder="${car ? "F.eks. 3600" : "F.eks. 4800"}"></label>
         <label>Lenke<input name="url" type="url" maxlength="500" placeholder="https://…"></label>
         <label class="plan-wide">Notat<input name="note" maxlength="200" placeholder="Hvorfor dette?"></label>
         <button class="plan-btn" type="submit">Legg til</button>
@@ -160,7 +221,7 @@ function renderCarBooking(b) {
   if (b) {
     set("company", esc(b.name));
     set("model", b.area ? esc(b.area) : '<span class="car-tbc">–</span>');
-    set("price", b.price ? esc(b.price) : '<span class="car-tbc">–</span>');
+    set("price", hasTotal(b) ? `${kr(b.total)} <small class="car-pp">${kr(b.total / PEOPLE)} per person</small>` : '<span class="car-tbc">–</span>');
     set("link", b.url ? `<a class="stay-link" href="${esc(b.url)}" target="_blank" rel="noopener">Se bestillingen →</a>` : "");
   }
 }
@@ -168,12 +229,14 @@ function renderCarBooking(b) {
 function renderAll() {
   renderBars();
   document.querySelectorAll(".plan-live").forEach(renderSlot);
+  renderBudget();
   document.querySelectorAll(".car-todo li").forEach((li) => (li.querySelector(".car-check").disabled = !me));
 }
 
 onSnapshot(collection(db, "candidates"), (snap) => {
   candidates = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   document.querySelectorAll(".plan-live").forEach(renderSlot);
+  renderBudget();
 });
 
 // ---------- Handlinger ----------
@@ -188,6 +251,12 @@ document.addEventListener("click", async (e) => {
     if (btn.dataset.act === "vote") {
       const on = (c.votes || []).includes(me.name);
       await updateDoc(ref, { votes: on ? arrayRemove(me.name) : arrayUnion(me.name) });
+    } else if (btn.dataset.act === "price") {
+      const v = prompt(`Totalpris for alle (kr) – ${c.name}`, hasTotal(c) ? c.total : (c.price || "").replace(/[^0-9]/g, ""));
+      if (v !== null) {
+        const n = parseInt(String(v).replace(/[^0-9]/g, ""), 10);
+        if (Number.isInteger(n)) await updateDoc(ref, { total: n });
+      }
     } else if (btn.dataset.act === "book") {
       await updateDoc(ref, { status: c.status === "booket" ? "kandidat" : "booket" });
     } else if (btn.dataset.act === "del" && confirm(`Slette «${c.name}»?`)) {
@@ -214,7 +283,8 @@ document.addEventListener("submit", async (e) => {
       name: f.name.value.trim(),
       url,
       area: f.area.value.trim(),
-      price: f.price.value.trim(),
+      price: "",
+      ...(f.total.value !== "" ? { total: parseInt(f.total.value, 10) } : {}),
       note: f.note.value.trim(),
       status: "kandidat",
       votes: [me.name],
