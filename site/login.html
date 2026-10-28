@@ -187,9 +187,35 @@
       await setDoc(doc(db, "members", cred.user.uid), { name, code, joinedAt: serverTimestamp() });
     }
 
+    // Nettlesere spiller bare lyd som startes av et klikk i samme dokument. Derfor «låses» lydelementet opp
+    // her i klikket (med et stille lydklipp), og siden byttes inn i dette dokumentet i stedet for å lastes på nytt.
+    const SILENT = "data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+    let theme = null;
+
+    async function enterSite() {
+      const res = await fetch("/", { cache: "no-store" });
+      if (!res.ok || /login\.html$/.test(new URL(res.url).pathname)) throw new Error("ikke sluppet inn");
+      const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+      history.replaceState(null, "", "/");
+      document.replaceChild(document.adoptNode(doc.documentElement), document.documentElement);
+      // Skript fra DOMParser kjøres ikke; lag dem på nytt, ett om gangen i samme rekkefølge som på siden.
+      for (const old of [...document.querySelectorAll("script")]) {
+        const s = document.createElement("script");
+        for (const a of old.attributes) s.setAttribute(a.name, a.value);
+        s.textContent = old.textContent;
+        const done = s.src ? new Promise((r) => { s.onload = s.onerror = r; }) : null;
+        old.replaceWith(s);
+        if (done) await done;
+      }
+    }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       err.textContent = "";
+      if (!theme) {
+        theme = new Audio(SILENT);
+        theme.play().catch(() => {});
+      }
       const name = form.name.value;
       const code = form.code.value.trim();
       if (!name) return fail("Velg hvem du er.");
@@ -210,8 +236,20 @@
       await new Promise((r) => setTimeout(r, 450));
       document.querySelector(".gantry").classList.add("out");
       document.body.classList.add("launch");
+      // Nå er cookien satt, så det ekte lydsporet kan lastes inn i det opplåste elementet.
+      theme.pause();
+      theme.src = "/assets/intro-theme.mp3";
+      theme.preload = "auto";
+      theme.load();
+      window.__rbrTheme = theme;
+      fetch("/styles.css").catch(() => {}); // varm opp cachen før byttet
       await Promise.all([joined, new Promise((r) => setTimeout(r, 1400))]);
-      location.replace("/");
+      try {
+        await enterSite();
+      } catch (ex) {
+        console.warn("Laster siden på vanlig måte:", ex);
+        location.replace("/");
+      }
     });
   </script>
 </body>
