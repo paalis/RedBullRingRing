@@ -56,6 +56,33 @@ function describe(host, title, description) {
   return { name: clip(name, 80), area: "", details: "", type: hotel ? "Hotell" : "" };
 }
 
+// Omtrentlig posisjon fra annonsens innebygde data (Airbnb oppgir et punkt nær stedet, ikke nøyaktig adresse).
+function coords(html) {
+  const lat = html.match(/"lat(?:itude)?"\s*:\s*(-?\d{1,2}\.\d+)/);
+  const lng = html.match(/"(?:lng|lon|longitude)"\s*:\s*(-?\d{1,3}\.\d+)/);
+  if (!lat || !lng) return null;
+  const round = (v) => Math.round(parseFloat(v) * 10000) / 10000;
+  const p = { lat: round(lat[1]), lng: round(lng[1]) };
+  return Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180 ? p : null;
+}
+
+// Bydel: Airbnbs høydepunkt («I Leopoldstadt, rett ved T-banen») hvis det finnes, ellers OpenStreetMap.
+async function district(html, pos) {
+  const hi = html.match(/"title"\s*:\s*"I ([A-ZÆØÅÄÖÜ][^",]{2,40})[,"]/);
+  if (hi) return hi[1].trim();
+  if (!pos) return "";
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.lat}&lon=${pos.lng}&zoom=14&accept-language=de`,
+      { headers: { "User-Agent": "RBR27-trip-planner/1.0 (+https://redbullringring.vercel.app)" }, signal: AbortSignal.timeout(4000) },
+    );
+    const a = (await r.json()).address || {};
+    return a.city_district || a.suburb || a.quarter || a.town || a.village || a.city || "";
+  } catch {
+    return "";
+  }
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   let target;
@@ -78,16 +105,6 @@ module.exports = async (req, res) => {
     });
     if (!allowed(new URL(r.url))) return res.status(400).end(JSON.stringify({ error: "Siden støttes ikke" }));
     const html = (await r.text()).slice(0, 600000);
-    if (req.query.debug === "1") {
-      const grab = (re, n = 12) => [...html.matchAll(re)].slice(0, n).map((m) => m[0].slice(0, 160));
-      return res.status(200).end(JSON.stringify({
-        len: html.length,
-        lat: grab(/"lat(?:itude)?"\s*:\s*-?\d+\.\d+/g),
-        lng: grab(/"(?:lng|lon|longitude)"\s*:\s*-?\d+\.\d+/g),
-        loc: grab(/"(?:localizedCityName|city|neighborhood|neighbourhood|locationTitle|subtitle|location)"\s*:\s*"[^"]{2,80}"/g, 20),
-        hi: grab(/"(?:title|headline)"\s*:\s*"I [^"]{2,80}"/g),
-      }));
-    }
     const raw = meta(html, ["og:image:secure_url", "og:image", "twitter:image"]);
     const img = raw ? new URL(raw, r.url) : null;
     const image = img && img.protocol === "https:" ? img.href : "";
@@ -95,7 +112,10 @@ module.exports = async (req, res) => {
     const description = meta(html, ["og:description", "twitter:description", "description"]) || "";
     if (!image && !title) return res.status(404).end(JSON.stringify({ error: "Fant ingenting" }));
     res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
-    return res.status(200).end(JSON.stringify({ image, ...describe(new URL(r.url).hostname, decodeEntities(title), description) }));
+    const info = describe(new URL(r.url).hostname, decodeEntities(title), description);
+    const pos = info.type === "Airbnb" ? coords(html) : null;
+    const area = info.type === "Airbnb" ? (await district(html, pos)) || info.area : info.area;
+    return res.status(200).end(JSON.stringify({ image, ...info, area: area.slice(0, 60), ...(pos || {}) }));
   } catch {
     return res.status(502).end(JSON.stringify({ error: "Kunne ikke hente siden" }));
   }
