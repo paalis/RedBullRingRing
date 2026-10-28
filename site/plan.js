@@ -159,6 +159,7 @@ async function fetchPreview(url) {
       area: str(d.area, 60),
       details: str(d.details, 200),
       type: ["Hotell", "Airbnb"].includes(d.type) ? d.type : "",
+      ...(Number.isFinite(d.lat) && Number.isFinite(d.lng) && Math.abs(d.lat) <= 90 && Math.abs(d.lng) <= 180 ? { lat: d.lat, lng: d.lng } : {}),
     };
   } catch (_) {
     return {};
@@ -169,15 +170,137 @@ async function fetchPreview(url) {
 function backfillPreviews() {
   if (!me) return;
   candidates
-    .filter((c) => c.url && (!("image" in c) || !("details" in c)) && !triedPreview.has(c.id))
+    .filter((c) => c.url && (!("image" in c) || !("details" in c) || (c.type === "Airbnb" && !("lat" in c))) && !triedPreview.has(c.id))
     .forEach(async (c) => {
       triedPreview.add(c.id);
       const pv = await fetchPreview(c.url);
       const patch = {};
       if (!("image" in c) && pv.image) patch.image = pv.image;
       if (!("details" in c) && pv.name) patch.details = pv.details || "";
+      if (!("lat" in c) && "lat" in pv) Object.assign(patch, { lat: pv.lat, lng: pv.lng });
+      // Bytt ut by-navnet («Vienna») med bydelen («Leopoldstadt») når den er hentet automatisk.
+      const city = (c.details || pv.details || "").split(" · ")[1] || "";
+      if (pv.area && (!c.area || c.area === city) && pv.area !== c.area) patch.area = pv.area;
       if (Object.keys(patch).length) await updateDoc(doc(db, "candidates", c.id), patch).catch(() => {});
     });
+}
+
+// ---------- Kart per opphold ----------
+const REF_POINTS = {
+  "wien-1": [{ name: "Stephansplatz (sentrum)", lat: 48.2085, lng: 16.3731 }],
+  graz: [{ name: "Hauptplatz (sentrum)", lat: 47.0707, lng: 15.4386 }],
+  "wien-2": [
+    { name: "Stephansplatz (sentrum)", lat: 48.2085, lng: 16.3731 },
+    { name: "Flyplassen (VIE)", lat: 48.1103, lng: 16.5697 },
+  ],
+};
+const TILES = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILES_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const smallMaps = {};
+let leafletReady;
+
+function loadLeaflet() {
+  leafletReady ||= new Promise((resolve, reject) => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "assets/vendor/leaflet.css";
+    document.head.append(css);
+    const s = document.createElement("script");
+    s.src = "assets/vendor/leaflet.js";
+    s.onload = () => resolve(window.L);
+    s.onerror = reject;
+    document.head.append(s);
+  });
+  return leafletReady;
+}
+
+const located = (slot) => candidates.filter((c) => c.slot === slot && Number.isFinite(c.lat) && Number.isFinite(c.lng));
+
+function addMarkers(L, layer, slot, withPopups) {
+  const points = [];
+  for (const r of REF_POINTS[slot] || []) {
+    L.marker([r.lat, r.lng], {
+      icon: L.divIcon({ className: "map-ref", html: `<i></i><span>${esc(r.name)}</span>`, iconSize: null }),
+      interactive: false,
+      keyboard: false,
+    }).addTo(layer);
+    points.push([r.lat, r.lng]);
+  }
+  for (const c of located(slot)) {
+    const label = hasTotal(c) ? kr(c.total) : c.name.slice(0, 18);
+    const m = L.marker([c.lat, c.lng], {
+      icon: L.divIcon({ className: `map-pin${c.status === "booket" ? " is-booked" : ""}`, html: `<span>${esc(label)}</span>`, iconSize: null }),
+      riseOnHover: true,
+      title: c.name,
+    }).addTo(layer);
+    if (withPopups) {
+      m.bindPopup(`
+        <div class="map-pop">
+          ${c.image ? `<img src="${esc(c.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
+          <b>${esc(c.name)}</b>
+          ${c.details ? `<span>${esc(c.details)}</span>` : ""}
+          ${hasTotal(c) ? `<em>${kr(c.total)} totalt · ${kr(c.total / PEOPLE)} per person</em>` : ""}
+          ${c.url ? `<a href="${esc(c.url)}" target="_blank" rel="noopener">Se annonsen →</a>` : ""}
+        </div>`, { maxWidth: 240 });
+    }
+    points.push([c.lat, c.lng]);
+  }
+  return points;
+}
+
+async function renderMaps() {
+  for (const el of document.querySelectorAll(".plan-map")) {
+    const slot = el.dataset.slot;
+    if (!located(slot).length) {
+      el.hidden = true;
+      continue;
+    }
+    el.hidden = false;
+    const L = await loadLeaflet();
+    let sm = smallMaps[slot];
+    if (!sm) {
+      el.innerHTML = `<div class="plan-map-canvas"></div><button class="plan-map-open" type="button">Åpne kart</button>`;
+      const map = L.map(el.querySelector(".plan-map-canvas"), {
+        zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+        boxZoom: false, keyboard: false, touchZoom: false, tap: false,
+      });
+      L.tileLayer(TILES, { attribution: TILES_ATTR, subdomains: "abcd", maxZoom: 19 }).addTo(map);
+      sm = smallMaps[slot] = { map, layer: L.layerGroup().addTo(map) };
+      el.addEventListener("click", () => openBigMap(slot));
+    }
+    sm.layer.clearLayers();
+    const pts = addMarkers(L, sm.layer, slot, false);
+    sm.map.invalidateSize();
+    sm.map.fitBounds(pts, { padding: [28, 28], maxZoom: 14 });
+  }
+}
+
+async function openBigMap(slot) {
+  const L = await loadLeaflet();
+  const stay = STAYS.find((s) => s.id === slot);
+  const modal = document.createElement("div");
+  modal.className = "map-modal";
+  modal.innerHTML = `
+    <div class="map-modal-box" role="dialog" aria-modal="true" aria-label="Kart over ${esc(stay.city)}">
+      <header><b>${esc(stay.city)}</b><span>${esc(stay.dates)}</span><button type="button" class="map-close" aria-label="Lukk kart">✕</button></header>
+      <div class="map-modal-canvas"></div>
+    </div>`;
+  document.body.append(modal);
+  document.body.classList.add("has-modal");
+  const map = L.map(modal.querySelector(".map-modal-canvas"));
+  L.tileLayer(TILES, { attribution: TILES_ATTR, subdomains: "abcd", maxZoom: 19 }).addTo(map);
+  const pts = addMarkers(L, L.layerGroup().addTo(map), slot, true);
+  map.fitBounds(pts, { padding: [40, 40], maxZoom: 15 });
+  const close = () => {
+    map.remove();
+    modal.remove();
+    document.body.classList.remove("has-modal");
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => e.key === "Escape" && close();
+  document.addEventListener("keydown", onKey);
+  modal.addEventListener("click", (e) => (e.target === modal || e.target.closest(".map-close")) && close());
+  modal.querySelector(".map-close").focus();
 }
 
 // ---------- Forslag ----------
@@ -279,6 +402,7 @@ onSnapshot(collection(db, "candidates"), (snap) => {
   document.querySelectorAll(".plan-live").forEach(renderSlot);
   renderBudget();
   backfillPreviews();
+  renderMaps();
 });
 
 // ---------- Handlinger ----------
@@ -325,6 +449,7 @@ document.addEventListener("submit", async (e) => {
     await addDoc(collection(db, "candidates"), {
       ...(pv.image ? { image: pv.image } : {}),
       ...(pv.details ? { details: pv.details } : {}),
+      ...("lat" in pv ? { lat: pv.lat, lng: pv.lng } : {}),
       slot: form.dataset.slot,
       type: f.type ? f.type.value : "Leiebil",
       name: f.name.value.trim(),

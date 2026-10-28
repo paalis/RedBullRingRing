@@ -195,6 +195,7 @@ STAYS.forEach((s) => {
     <div class="stay-body">
       <p class="stay-dates">${esc(s.dates)}</p>
       <p class="stay-note">${esc(s.note)}</p>
+      <div class="plan-map" data-slot="${s.id}" hidden></div>
       ${shown.length
         ? `<ul class="stay-options">${shown.map(option).join("")}</ul>`
         : `<div class="stay-empty"><b>Ikke booket ennå</b><span>Hotell eller Airbnb – legg til et forslag.</span></div>`}

@@ -77,7 +77,7 @@ async function district(html, pos) {
       { headers: { "User-Agent": "RBR27-trip-planner/1.0 (+https://redbullringring.vercel.app)" }, signal: AbortSignal.timeout(4000) },
     );
     const a = (await r.json()).address || {};
-    return a.city_district || a.suburb || a.quarter || a.town || a.village || a.city || "";
+    return (a.city_district || a.suburb || a.quarter || a.town || a.village || a.city || "").replace(/^Katastralgemeinde\s+/, "");
   } catch {
     return "";
   }
