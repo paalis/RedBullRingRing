@@ -1,0 +1,408 @@
+/* Teamintroen i introfilmen. Flyttet fra site/styles.css; samme scener og keyframes som nettsiden hadde.
+   Alle animasjoner spoles per frame av TeamIntro.tsx, så de rendres likt hver gang. */
+.rbr {
+  --bg: #0b0b10; --bg-2: #15151e; --bg-3: #1f1f2b; --line: #2c2c3a; --text: #f4f4f6; --muted: #a4a4b4;
+  --red: #e10600; --red-hot: #ff2a1f; --green: #00d26a; --purple: #b64dff; --yellow: #ffd200;
+  position: absolute; inset: 0; overflow: hidden; isolation: isolate; background: #060608; color: var(--text);
+  font-family: "Titillium", system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+}
+.rbr *, .rbr *::before, .rbr *::after { box-sizing: border-box; }
+.rbr img { display: block; }
+.brand-mark {
+  font-weight: 900; letter-spacing: .02em; font-size: 22px;
+  background: var(--red); color: #fff; padding: 0 8px; border-radius: 4px;
+  transform: skewX(-12deg); display: inline-block;
+}
+.brand-year { font-weight: 900; font-size: 22px; margin-left: 6px; }
+@keyframes rv-write { from { clip-path: inset(-50% 100% -50% -10%); } to { clip-path: inset(-50% -10% -50% -10%); } }
+@keyframes di-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.ti-stage { position: absolute; inset: 0; }
+.ti-scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
+.ti-scene.is-on { visibility: visible; opacity: 1; }
+.ti-scene.is-off { visibility: visible; opacity: 1; animation: ti-out .35s cubic-bezier(.7,0,.9,.4) both; z-index: 2; }
+@keyframes ti-out { 99% { visibility: visible; } to { transform: translateX(-150%) skewX(-12deg); visibility: hidden; } }
+
+/* Tittel */
+.ti-title { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+.ti-title h2 { font-weight: 900; font-size: clamp(56px, 13vw, 180px); text-transform: uppercase; line-height: .9; transform: skewX(-8deg); margin: 8px 0; }
+.ti-kicker { margin: 0; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-size: clamp(12px, 1.6vw, 18px); }
+.ti-sub { margin: 6px 0 0; }
+.ti-sub .brand-mark, .ti-sub .brand-year { font-size: clamp(26px, 4vw, 44px); }
+.ti-stripes { position: absolute; inset: 0; pointer-events: none; }
+.ti-stripes i { position: absolute; top: -20%; bottom: -20%; width: 30vw; background: var(--red); transform: skewX(-18deg) translateX(-150vw); }
+.ti-stripes i:nth-child(2) { width: 10vw; background: #fff; }
+.ti-stripes i:nth-child(3) { width: 18vw; background: #7a0300; }
+.ti-title.is-on .ti-stripes i { animation: di-stripe .8s cubic-bezier(.6,0,.3,1) both; }
+.ti-title.is-on .ti-stripes i:nth-child(2) { animation-delay: .07s; }
+.ti-title.is-on .ti-stripes i:nth-child(3) { animation-delay: .14s; }
+.ti-title.is-on .ti-kicker { animation: di-fade .4s ease .35s both; }
+.ti-title.is-on h2 { animation: ti-slam .5s cubic-bezier(.2,1.4,.4,1) .45s both; }
+.ti-title.is-on .ti-sub { animation: di-fade .4s ease .8s both; }
+@keyframes di-stripe { 0% { transform: skewX(-18deg) translateX(-60vw); } 100% { transform: skewX(-18deg) translateX(160vw); } }
+@keyframes ti-slam { from { opacity: 0; transform: skewX(-8deg) scale(1.6); } to { opacity: 1; transform: skewX(-8deg); } }
+
+/* Én fører: samme scene som førerintroen, i høyere tempo */
+.ti-driver .rv { --s: .6; }
+
+/* Teamintro: fire førerscener i hver sin stil (studio, portrett, diagonal, spotlys) */
+.tx { overflow: hidden; }
+.tx-driver { position: absolute; bottom: 0; left: 50%; height: 84vh; width: auto; max-width: none; translate: -50% 0; z-index: 2; }
+.tx-name { position: absolute; z-index: 4; display: flex; align-items: baseline; gap: .25em; white-space: nowrap; }
+.tx-first { font-family: "Mr Dafoe", cursive; font-weight: 400; color: var(--team); font-size: clamp(34px, 4.6vw, 72px); line-height: 1; }
+.tx-last { position: relative; font-family: "Unbounded", "Titillium", sans-serif; font-weight: 800; font-size: clamp(28px, 5.4vw, 88px); line-height: 1; letter-spacing: -.01em; }
+.tx-last em { font-style: normal; }
+.tx-tag { position: absolute; z-index: 3; font-family: "Unbounded", sans-serif; font-weight: 800; font-style: normal; font-size: clamp(13px, 1.5vw, 22px); }
+.tx-home { position: absolute; z-index: 3; font-weight: 600; font-size: clamp(10px, 1vw, 14px); letter-spacing: .5em; }
+
+/* 1 · Studio: lyst rom, gigantisk etternavn i bakgrunnen, rød farge som tørkes vekk */
+.tx-studio { background: radial-gradient(ellipse 80% 70% at 50% 62%, #f5f5f7 0%, #dcdde1 70%, #c9cace 100%); }
+.tx-big { position: absolute; left: 0; z-index: 1; white-space: nowrap; font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 34vh; line-height: .8; color: rgba(120, 120, 128, .42); }
+.tx-big-top { top: -14vh; }
+.tx-big-bottom { bottom: -16vh; translate: -18% 0; }
+.tx-studio .tx-tag { color: #16161c; }
+.tx-studio .tx-driver { filter: drop-shadow(0 24px 22px rgba(0, 0, 0, .25)); }
+.tx-studio .tx-name { left: 50%; top: 45%; translate: -50% 0; }
+.tx-studio .tx-last { color: #15152a; }
+.tx-studio .tx-last em { color: transparent; -webkit-text-stroke: 2px #15152a; }
+.tx-studio .tx-last::after { content: attr(data-t); position: absolute; inset: 0; color: var(--red); clip-path: inset(0 0 0 100%); }
+.tx-studio .tx-home { right: 8%; bottom: 10%; color: #55555e; }
+
+/* 2 · Ekko (Hamilton/Leclerc): rødt studio, gigantiske bokstaver i omriss, uskarpe ekko-kopier til hver side */
+.tx-echo { background: radial-gradient(ellipse 70% 90% at 30% 60%, #d0120a 0%, #9a0705 45%, #3a0204 85%, #1c0103 100%); }
+.tx-outline { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; overflow: hidden; }
+.tx-outline span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 62vh; line-height: 1; letter-spacing: .02em; white-space: nowrap;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .32); }
+.tx-ghost { position: absolute; z-index: 1; top: 4vh; height: 150vh; width: auto; max-width: none; opacity: .3; filter: blur(5px) saturate(.6) sepia(.6) hue-rotate(-30deg); }
+.tx-ghost-l { left: 2%; transform: scaleX(-1); }
+.tx-ghost-r { right: 4%; }
+.tx-echo .tx-driver { height: 150vh; bottom: auto; top: 3vh; left: 38%; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, .45)); }
+.tx-echo .tx-name { right: 4%; top: 42%; align-items: center; gap: .2em; }
+.tx-echo .tx-first { color: #fff; font-size: clamp(36px, 5vw, 80px); }
+.tx-echo .tx-last { color: #fff; font-size: clamp(26px, 4.6vw, 80px); text-shadow: 0 6px 30px rgba(60, 0, 0, .5); }
+.tx-echo .tx-tag, .tx-echo .tx-home { color: #fff; }
+
+/* 3 · Diagonal: røde kjempebokstaver, så et skrått bånd med rødt gulv og speilbilde */
+.tx-diagonal { background: radial-gradient(ellipse 70% 60% at 40% 30%, #26262c, #0b0b0e 75%); }
+.tx-flash { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; background: #0b0b0e; opacity: 0; pointer-events: none; }
+.tx-flash span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 40vh; line-height: 1; color: var(--red); text-shadow: 0 0 60px rgba(225, 6, 0, .5); white-space: nowrap; }
+.tx-tilt { position: absolute; left: -25%; right: -25%; top: -10%; bottom: -10%; z-index: 2; transform: rotate(-14deg); }
+.tx-floor { position: absolute; left: 0; right: 0; top: 57%; bottom: -60%; z-index: 0;
+  background: radial-gradient(ellipse 40% 40% at 50% 6%, #e8101a, #8a0008 60%, #2a0003 100%); }
+.tx-band { position: absolute; left: 0; right: 0; top: 43%; height: 14%; z-index: 0;
+  background: linear-gradient(180deg, #1f1f25, #16161b); border-top: 2px solid #f4f4f6; border-bottom: 2px solid #f4f4f6; box-sizing: border-box; }
+.tx-diagonal .tx-driver { left: 47%; bottom: 43%; height: 48vh; filter: drop-shadow(0 0 20px rgba(0, 0, 0, .6)); }
+.tx-reflect { position: absolute; left: 47%; top: 57%; height: 48vh; translate: -50% 0; transform: scaleY(-1); z-index: 1;
+  filter: brightness(0) invert(13%) sepia(90%) saturate(6000%) hue-rotate(350deg) blur(3px); opacity: .55; }
+.tx-diagonal .tx-name { left: 31%; bottom: 43.6%; z-index: 3; }
+.tx-diagonal .tx-last { color: #f4f4f6; font-size: clamp(30px, 6.4vw, 104px); }
+.tx-meta { align-self: flex-start; margin-left: .6em; display: flex; flex-direction: column; gap: 4px; color: #f4f4f6;
+  font-weight: 600; font-size: clamp(10px, 1vw, 14px); letter-spacing: .4em; }
+.tx-meta b { font-family: "Unbounded", sans-serif; font-size: clamp(18px, 2.4vw, 36px); letter-spacing: 0; }
+
+/* 4 · Korridor (Russell/Antonelli): rød gang med prikkvegger og laserstråler, gigantiske bokstaver bak */
+.tx-corridor { background: #100002; }
+.tx-hall { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tx-laser { stroke: #ff3a2a; stroke-width: 10; stroke-linecap: round; filter: drop-shadow(0 0 12px #ff1a0a); }
+.tx-ghostword { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; padding-left: 2vw; overflow: hidden; }
+.tx-ghostword span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 44vh; line-height: 1; color: rgba(255, 255, 255, .22); }
+.tx-corridor .tx-driver { left: 55%; bottom: -4vh; height: 80vh; filter: drop-shadow(0 0 30px rgba(255, 30, 20, .35)); }
+.tx-corridor .tx-name { left: 34%; top: 46%; }
+.tx-corridor .tx-first { color: #fff; }
+.tx-corridor .tx-last { color: #fff; }
+.tx-corridor .tx-tag, .tx-corridor .tx-home { color: #fff; }
+
+/* Animasjoner (~2 s per fører) */
+.tx.is-on .tx-driver { animation: tx-in .7s cubic-bezier(.2, .8, .2, 1) .1s both; }
+.tx.is-on .tx-first { animation: rv-write .6s cubic-bezier(.5, 0, .3, 1) .45s both; }
+.tx.is-on .tx-last { animation: tx-smear .5s cubic-bezier(.2, .9, .3, 1) .25s both; }
+.tx-tail { font-style: normal; }
+.tx.is-on .tx-tail { animation: tx-tail 1.1s steps(1) .25s both; }
+.tx-corridor.is-on .tx-hall { animation: tx-zoomin .7s cubic-bezier(.2, .8, .2, 1) both; }
+@media (max-aspect-ratio: 4/5) { .tx-corridor.is-on .tx-hall { animation: none; } }
+.tx-corridor.is-on .tx-laser { animation: tx-flicker .5s steps(1) .1s both; }
+.tx-corridor.is-on .tx-driver { animation: tx-blurin .7s cubic-bezier(.2, .8, .2, 1) .05s both; }
+.tx-corridor.is-on .tx-ghostword span { animation: tx-outline 1.4s ease-out both; }
+.tx.is-on :is(.tx-tag, .tx-home, .tx-meta) { animation: di-fade .4s ease .6s both; }
+.tx-studio.is-on .tx-big-top { animation: tx-drift-l 2.4s linear both; }
+.tx-studio.is-on .tx-big-bottom { animation: tx-drift-r 2.4s linear both; }
+.tx-studio.is-on .tx-last::after { animation: tx-wipe .9s cubic-bezier(.6, 0, .3, 1) .5s both; }
+.tx-echo.is-on .tx-ghost-l { animation: tx-ghost-l 1.1s cubic-bezier(.2, .8, .2, 1) both; }
+.tx-echo.is-on .tx-ghost-r { animation: tx-ghost-r 1.1s cubic-bezier(.2, .8, .2, 1) both; }
+.tx-echo.is-on .tx-driver { animation: tx-push 1.5s cubic-bezier(.2, .8, .2, 1) both; }
+.tx-echo.is-on .tx-outline span { animation: tx-outline 1.5s ease-out both; }
+.tx-diagonal.is-on .tx-flash { animation: tx-flash .6s ease both; }
+.tx-diagonal.is-on :is(.tx-band, .tx-floor) { animation: di-fade .3s ease .45s both; }
+.tx-diagonal.is-on .tx-driver { animation: tx-in .6s cubic-bezier(.2, .8, .2, 1) .5s both; }
+.tx-diagonal.is-on .tx-reflect { animation: tx-reflect .6s ease .6s both; }
+.tx-diagonal.is-on .tx-last { animation-delay: .6s; }
+.tx-diagonal.is-on .tx-first { animation-delay: .8s; }
+.tx-diagonal.is-on .tx-meta { animation-delay: .9s; }
+@keyframes tx-in { from { opacity: 0; transform: translateY(4%) scale(1.03); filter: brightness(.3); } }
+@keyframes tx-last { from { opacity: 0; transform: translateX(-40px); } }
+@keyframes tx-drift-l { from { transform: translateX(0); } to { transform: translateX(-9%); } }
+@keyframes tx-drift-r { from { transform: translateX(0); } to { transform: translateX(8%); } }
+@keyframes tx-wipe { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 0 100%); } }
+@keyframes tx-ghost-l { from { opacity: .7; transform: scaleX(-1) translateX(-30%); filter: blur(14px); } to { opacity: .3; } }
+@keyframes tx-ghost-r { from { opacity: .7; transform: translateX(-35%); filter: blur(14px); } to { opacity: .3; } }
+@keyframes tx-outline { from { opacity: 0; transform: scale(1.15); } to { opacity: 1; transform: scale(1); } }
+@keyframes tx-smear { from { opacity: 0; transform: translateX(80px) skewX(-12deg); filter: blur(12px); } }
+@keyframes tx-tail { 0% { color: var(--red); } 100% { color: inherit; } }
+@keyframes tx-zoomin { from { transform: scale(1.35); filter: blur(10px); } to { transform: scale(1); filter: blur(0); } }
+@keyframes tx-blurin { from { opacity: 0; transform: scale(1.25); filter: blur(16px); } 50% { opacity: 1; } to { transform: scale(1); filter: blur(0) drop-shadow(0 0 30px rgba(255, 30, 20, .35)); } }
+@keyframes tx-push { from { opacity: 0; transform: scale(1.08); } 25% { opacity: 1; } to { transform: scale(1); } }
+@keyframes tx-flash { 0% { opacity: 1; transform: scale(1.15); } 60% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1); } }
+@keyframes tx-reflect { from { opacity: 0; } to { opacity: .55; } }
+@keyframes tx-flicker { 0% { opacity: 0; } 15% { opacity: 1; } 25% { opacity: .2; } 40% { opacity: 1; } 55% { opacity: .5; } 70%, 100% { opacity: 1; } }
+
+/* Stående mobil: navnet stablet nederst og føreren midt i bildet */
+@media (max-aspect-ratio: 4/5) {
+  .tx .tx-driver { height: 70vh; }
+  .tx .tx-name { flex-direction: column; align-items: center; gap: 0; }
+  .tx .tx-first { margin-bottom: .05em; font-size: 10vw; }
+  .tx .tx-last { font-size: 9vw; }
+  .tx-studio .tx-name { top: auto; bottom: 18vh; }
+  .tx-studio .tx-home { right: 50%; translate: 50% 0; bottom: 13vh; }
+  .tx-echo .tx-driver { height: 110vh; top: 2vh; left: 50%; }
+  .tx-echo .tx-name { left: 50%; right: auto; top: auto; bottom: 10vh; translate: -50% 0; }
+  .tx-echo .tx-last { font-size: 7.6vw; }
+  .tx-echo .tx-ghost { height: 90vh; top: 20vh; }
+  .tx-echo .tx-home { top: 7% !important; }
+  .tx-outline span { font-size: 40vh; }
+  .tx-corridor .tx-name { left: 50%; right: auto; top: auto; bottom: 10vh; translate: -50% 0; }
+  .tx-corridor .tx-driver { left: 50%; bottom: 20vh; height: 58vh; }
+  .tx-corridor .tx-home { left: 50% !important; top: 8vh !important; translate: -50% 0; }
+  .tx-ghostword span { font-size: 30vh; }
+  .tx-tilt { left: -8%; right: -8%; transform: rotate(-10deg); }
+  .tx-diagonal .tx-driver, .tx-reflect { height: 34vh; left: 50%; }
+  .tx-diagonal .tx-name { left: 50%; translate: -50% 0; bottom: auto; top: 58.5%; flex-direction: row; align-items: baseline; }
+  .tx-diagonal .tx-first { font-size: 7vw; margin: 0; }
+  .tx-diagonal .tx-last { font-size: 8.5vw; }
+  .tx-diagonal .tx-meta { display: none; }
+  .tx-big { font-size: 20vh; }
+  .tx-big-top { top: -6vh; }
+  .tx-big-bottom { bottom: -7vh; }
+}
+
+/* Teamintro: nærbilde (før hovedscenen) – mørkt, rødt kantlys, store bokstaver bak ansiktet */
+.tz { overflow: hidden; background: linear-gradient(180deg, #121016 0%, #24090f 50%, #8c0c14 100%); }
+.tz-word { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; }
+.tz-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 44vh; line-height: 1; color: #fff; letter-spacing: .02em; white-space: nowrap; }
+.tz-face { position: absolute; z-index: 2; left: 50%; top: -6vh; height: 230vh; width: auto; max-width: none; translate: -50% 0;
+  filter: brightness(.55) contrast(1.25) saturate(.85) drop-shadow(-6px -4px 0 rgba(255, 40, 30, .85)) drop-shadow(0 0 40px rgba(255, 30, 20, .45)); }
+.tz-face.is-tight { top: 12vh; height: 90vh; }
+.tz .tx-tag { color: #fff; }
+.tz.is-on .tz-face { animation: tz-push 1s cubic-bezier(.2, .8, .2, 1) both; }
+.tz.is-on .tz-word span { animation: tz-word 1s cubic-bezier(.2, .8, .2, 1) both; }
+.tz.is-on .tx-tag { animation: di-fade .3s ease .3s both; }
+@keyframes tz-push { from { opacity: 0; transform: scale(1.12); filter: brightness(0) blur(8px); } 35% { opacity: 1; } to { transform: scale(1.02); } }
+@keyframes tz-word { from { opacity: 0; transform: translateX(-12%); filter: blur(10px); } to { opacity: 1; transform: translateX(3%); } }
+
+/* Teamintro: profil – speilvendt nærbilde i svart-hvitt med lagfarge, stort nummer i omriss, skannelinjer */
+.tp { overflow: hidden; background: linear-gradient(120deg, #07070a 0%, color-mix(in srgb, var(--team) 30%, #07070a) 100%); }
+.tp-num { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; padding-left: 4vw; }
+.tp-num span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 80vh; line-height: .8; color: transparent; -webkit-text-stroke: 2px color-mix(in srgb, var(--team) 70%, #fff); opacity: .45; }
+.tp-face { position: absolute; z-index: 2; left: 66%; top: -4vh; height: 190vh; width: auto; max-width: none; translate: -50% 0; transform: scaleX(-1);
+  filter: grayscale(1) contrast(1.35) brightness(.95); }
+.tp-tint { position: absolute; inset: 0; z-index: 3; background: linear-gradient(90deg, transparent 30%, var(--team) 120%); mix-blend-mode: color; opacity: .75; pointer-events: none; }
+.tp-scan { position: absolute; inset: 0; z-index: 3; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .25) 0 2px, transparent 2px 5px); pointer-events: none; }
+.tp-name { position: absolute; z-index: 4; left: 7%; bottom: 14vh; display: flex; flex-direction: column; align-items: flex-start; }
+.tp-name .tx-first { color: var(--team); margin-bottom: -.15em; }
+.tp-name .tx-last { color: #fff; font-family: "Unbounded", sans-serif; font-weight: 800; font-size: clamp(30px, 6vw, 100px); line-height: 1; }
+.tp-meta { margin-top: 12px; color: #d8d8de; font-weight: 700; letter-spacing: .4em; font-size: clamp(10px, 1vw, 14px); }
+.tp.is-on .tp-face { animation: tp-pan 1.5s linear both; }
+.tp.is-on .tp-num span { animation: tp-num 1.5s ease-out both; }
+.tp.is-on .tp-name > * { animation: tp-line .45s cubic-bezier(.2, .9, .3, 1) both; }
+.tp.is-on .tp-name > :nth-child(2) { animation-delay: .1s; }
+.tp.is-on .tp-name > :nth-child(3) { animation-delay: .2s; }
+@keyframes tp-pan { from { transform: scaleX(-1) translateX(-3vw) scale(1.06); filter: grayscale(1) contrast(1.35) brightness(.95) blur(6px); }
+  20% { filter: grayscale(1) contrast(1.35) brightness(.95) blur(0); } to { transform: scaleX(-1) translateX(2vw) scale(1); } }
+@keyframes tp-num { from { transform: translateX(-6%); opacity: 0; } to { transform: translateX(2%); opacity: 1; } }
+@keyframes tp-line { from { clip-path: inset(0 100% 0 0); transform: translateX(-20px); } to { clip-path: inset(0 -10% 0 0); } }
+
+/* Scenene som står lenge, får en sakte kamerabevegelse */
+.ti-title.is-on, .tx.is-on { animation: ti-drift 3.4s linear both; }
+@keyframes ti-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tp-face { height: 120vh; left: 50%; top: 2vh; }
+  .tp-num span { font-size: 50vh; }
+  .tp-name { left: 50%; translate: -50% 0; bottom: 8vh; align-items: center; text-align: center; }
+  .tp-name .tx-last { font-size: 9vw; }
+}
+
+/* Teamintro: vid vinkel (etter hovedscenen) – hele føreren på en plattform, navn i omriss, nøkkeltall */
+.tw { overflow: hidden; background: radial-gradient(ellipse 70% 60% at 50% 30%, #2a2a31, #0a0a0d 75%); }
+.tw-cone { position: absolute; left: 50%; top: -10%; width: 70vw; height: 100%; translate: -50% 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .22), rgba(255, 255, 255, 0) 85%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%); filter: blur(6px); }
+.tw-word { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; }
+.tw-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 26vh; line-height: 1; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .35); }
+.tw-stage { position: absolute; z-index: 2; left: 50%; bottom: 10vh; width: 46vw; height: 5vh; translate: -50% 0; background: #08080b;
+  border-top: 2px solid var(--red); box-shadow: 0 -4px 30px rgba(255, 30, 20, .6), 0 0 80px rgba(255, 30, 20, .35); }
+.tw-driver { position: absolute; z-index: 3; left: 50%; bottom: 14.6vh; height: 64vh; width: auto; max-width: none; translate: -50% 0;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .7)); }
+.tw-stats { position: absolute; z-index: 4; right: 6%; bottom: 18vh; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; color: #fff;
+  font-weight: 700; font-size: clamp(11px, 1.1vw, 15px); letter-spacing: .4em; }
+.tw-stats b { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: clamp(40px, 6vw, 96px); letter-spacing: 0; line-height: 1; color: var(--team); }
+.tw .tx-tag { color: #fff; letter-spacing: .3em; }
+.tw.is-on .tw-driver { animation: tw-dolly .9s cubic-bezier(.2, .8, .2, 1) both; }
+.tw.is-on .tw-word span { animation: tw-parallax .9s cubic-bezier(.2, .8, .2, 1) both; }
+.tw.is-on .tw-stats > * { animation: tx-last .4s cubic-bezier(.2, .9, .3, 1) both; }
+.tw.is-on .tw-stats > :nth-child(2) { animation-delay: .08s; }
+.tw.is-on .tw-stats > :nth-child(3) { animation-delay: .16s; }
+.tw.is-on .tw-cone { animation: tx-flicker .5s steps(1) both; }
+@keyframes tw-dolly { from { opacity: 0; transform: translateX(-8vw); filter: blur(8px); } to { opacity: 1; transform: none; } }
+@keyframes tw-parallax { from { transform: translateX(10%); opacity: 0; } to { transform: translateX(-2%); opacity: 1; } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tz-face { height: 150vh; top: 4vh; }
+  .tz-face.is-tight { height: 56vh; top: 16vh; }
+  .tz-word span { font-size: 26vh; }
+  .tw-driver { height: 52vh; bottom: 21.6vh; }
+  .tw-stage { width: 90vw; bottom: 17vh; }
+  .tw-stats { right: 50%; translate: 50% 0; bottom: 4vh; align-items: center; flex-direction: row; gap: 14px; letter-spacing: .25em; }
+  .tw-stats b { font-size: 9vw; }
+  .tw-word span { font-size: 16vh; }
+}
+
+/* Teamintro: bilklipp mellom førerne (~0,6 s hver, harde kutt) */
+.tr { overflow: hidden; background: #050507; z-index: 3; }
+.tr.is-off { animation: none; visibility: hidden; }
+.tr-car { position: absolute; max-width: none; height: auto; }
+
+/* Tunnel: lysstriper og gulvlinjer som suser forbi */
+.tr-tunnel { background: radial-gradient(ellipse 60% 50% at 50% 45%, #2b2e35, #050507 70%); perspective: 420px; }
+.tr-floor { position: absolute; left: -60%; right: -60%; top: 50%; height: 140%; transform: rotateX(74deg); transform-origin: 50% 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 70px, rgba(255, 255, 255, .28) 70px 73px),
+    repeating-linear-gradient(90deg, transparent 0 26px, rgba(255, 255, 255, .12) 26px 28px),
+    linear-gradient(180deg, rgba(200, 205, 215, .05), rgba(235, 238, 245, .9)); }
+.tr-strip { position: absolute; height: 3px; background: #fff; box-shadow: 0 0 14px 3px rgba(255, 255, 255, .7); transform-origin: left; }
+.tr-strip-a { left: -5%; top: 45%; width: 42%; transform: rotate(-2deg); }
+.tr-strip-b { right: -5%; top: 4%; width: 34%; transform: rotate(-32deg); transform-origin: right; }
+.tr-glow { position: absolute; left: 50%; top: 44%; width: 30vw; height: 30vw; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(200, 230, 255, .55), transparent 65%); }
+.tr-tunnel.is-on { animation: tr-push .3s cubic-bezier(.5, 0, .7, 1) both; }
+.tr-tunnel.is-on .tr-floor { animation: tr-rush .3s linear both; }
+.tr-tunnel.is-on .tr-strip { animation: tr-strip .2s cubic-bezier(.2, .9, .3, 1) both; }
+.tr-tunnel.is-on .tr-glow { animation: tr-pulse .3s ease both; }
+
+/* Skisse: invertert nærbilde av nesen, røde striper over */
+.tr-sketch { background: #eceef1; }
+.tr-sketch .tr-car, .tr-nose .tr-car { width: 330vw; left: -228vw; top: calc(50vh - 46vw); }
+.tr-sketch .tr-car { filter: grayscale(1) invert(1) contrast(1.7) brightness(1.12); }
+.tr-redbars i { position: absolute; left: 14%; right: 0; height: 5.5vh; clip-path: polygon(3vh 0, 100% 0, 100% 100%, 0 100%); transform-origin: right; }
+.tr-redbars i:first-child { top: 44%; background: linear-gradient(90deg, rgba(225, 6, 0, .25), rgba(225, 6, 0, .8)); }
+.tr-redbars i:last-child { top: 51%; background: var(--red); }
+.tr-sketch.is-on .tr-car { animation: tr-pan-r .3s linear both; }
+.tr-sketch.is-on .tr-redbars i { animation: tr-bars .22s cubic-bezier(.2, .9, .3, 1) both; }
+.tr-sketch.is-on .tr-redbars i:last-child { animation-delay: .06s; }
+
+/* Nærbilde: mørk nese med rødt kantlys og rosa røyk */
+.tr-nose .tr-car { filter: grayscale(.5) brightness(.42) contrast(1.35) drop-shadow(0 -3px 3px rgba(255, 40, 30, .95)); }
+.tr-smoke { position: absolute; left: -10%; top: 46%; width: 85%; height: 12vh; border-radius: 50%; filter: blur(16px);
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255, 160, 170, .8), rgba(255, 120, 130, .3) 55%, transparent 75%); }
+.tr-nose.is-on .tr-car { animation: tr-pan-l .3s linear both; }
+.tr-nose.is-on .tr-smoke { animation: tr-smoke .3s ease-out both; }
+
+/* Vindtunnel: mørk bil i rødt lys, strømningslinjer fra rødt til hvitt */
+.tr-flow { background: radial-gradient(ellipse 80% 70% at 60% 45%, #2a2b30, #08080b 70%); }
+.tr-flow .tr-car { width: 86vw; left: 7vw; bottom: 16vh; filter: brightness(.3) sepia(1) hue-rotate(-30deg) saturate(3.5) drop-shadow(0 -2px 3px rgba(255, 40, 30, .9)); }
+.tr-lines { position: absolute; left: 0; top: 31vh; width: 100%; height: 42vh; z-index: 2; scale: -1 1; }
+.tr-lines path { fill: none; stroke: url(#tr-flow-g); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1600; filter: drop-shadow(0 0 6px rgba(255, 120, 120, .8)); }
+.tr-redfloor { position: absolute; right: -10%; bottom: -10%; width: 50%; height: 40%; background: radial-gradient(ellipse at 70% 60%, rgba(225, 6, 0, .55), transparent 70%); filter: blur(10px); }
+.tr-flow.is-on .tr-lines path { animation: tr-draw .26s cubic-bezier(.3, .6, .4, 1) both; animation-delay: calc(var(--k) * 6ms); }
+.tr-flow.is-on .tr-car { animation: tr-carin .3s ease-out both; }
+
+/* Zoom: bilen suser mot kamera med bevegelsesuskarphet, så hvitt blink */
+.tr-zoom { background: #eceef1; }
+.tr-zoom .tr-car { width: 90vw; left: 5vw; top: 50%; translate: 0 -50%; filter: grayscale(1) invert(1) contrast(1.5); }
+.tr-white { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.tr-zoom.is-on .tr-car { animation: tr-rushcam .3s cubic-bezier(.6, 0, .9, .6) both; }
+.tr-zoom.is-on .tr-white { animation: tr-whiteout .3s ease-in both; }
+
+/* Bakvinge: grå himmel, svarte vingeblader, LED-regnlyset tennes nedover */
+.tr-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tr-wing, .tr-rear { background: linear-gradient(180deg, #7e8187 0%, #b9bcc2 55%, #d9dbdf 100%); }
+.tr-wing-red { background: radial-gradient(ellipse 70% 80% at 30% 50%, #93394a, #4a1420 55%, #1c060b 100%); }
+.tr-wing path, .tr-rear path, .tr-rear rect { fill: #08080a; }
+.tr-led { fill: #ff6a2a; opacity: .12; }
+.is-on .tr-led { animation: tr-led .08s linear both; animation-delay: calc(var(--n) * 14ms); filter: drop-shadow(0 0 6px #ff3a1a); }
+.tr-wing.is-on .tr-svg, .tr-rear.is-on .tr-svg { animation: tr-dolly .3s linear both; }
+.tr-rear .tr-led { fill: #ff2a1a; }
+
+/* Hjul: mørkt nærbilde, rødt glødende felgkant som spinner, opphengsarmer foran */
+.tr-wheel { background: linear-gradient(135deg, #2d3036, #0a0b0e 60%); }
+.tr-tyre { fill: #121316; }
+.tr-rim { fill: none; stroke: #ff2a1f; stroke-width: 22; }
+.tr-rim-glow { fill: none; stroke: #ff7a3a; stroke-width: 60; opacity: .8; }
+.tr-dash { fill: none; stroke: #ffb08a; stroke-width: 8; stroke-dasharray: 8 26; opacity: .7; }
+.tr-spin { transform-origin: 1000px 450px; }
+.tr-arms rect { fill: #050506; }
+.tr-edge { stroke: rgba(255, 255, 255, .8); stroke-width: 6; }
+.tr-wheel-2 .tr-arms { transform: scale(-1, 1); transform-origin: 800px 450px; }
+.tr-wheel.is-on .tr-spin { animation: tr-spin .3s linear both; }
+.tr-wheel.is-on .tr-svg { animation: tr-shake .3s linear both; }
+
+@keyframes tr-led { from { opacity: .12; } to { opacity: 1; } }
+@keyframes tr-dolly { from { transform: scale(1.04); } to { transform: scale(1.1) translateX(-1%); } }
+@keyframes tr-spin { to { transform: rotate(80deg); } }
+@keyframes tr-shake { 0% { transform: translate(0, 0) scale(1.05); } 50% { transform: translate(-8px, 4px) scale(1.07); } 100% { transform: translate(6px, -3px) scale(1.09); } }
+@keyframes tr-push { from { transform: scale(1); } to { transform: scale(1.18); } }
+@keyframes tr-rush { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 500px, 0 0, 0 0; } }
+@keyframes tr-strip { from { transform: scaleX(0) rotate(var(--r, 0deg)); opacity: 0; } }
+@keyframes tr-pulse { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: .4; } }
+@keyframes tr-pan-r { from { transform: translateX(-4vw); } to { transform: translateX(6vw); } }
+@keyframes tr-pan-l { from { transform: translateX(6vw); } to { transform: translateX(-4vw); } }
+@keyframes tr-bars { from { transform: scaleX(0); } }
+@keyframes tr-smoke { from { transform: translateX(40%) scaleX(.4); opacity: 0; } 40% { opacity: 1; } to { transform: translateX(-10%) scaleX(1.2); opacity: .9; } }
+@keyframes tr-draw { from { stroke-dashoffset: 1600; } }
+@keyframes tr-carin { from { opacity: 0; transform: translateX(-3vw); } }
+@keyframes tr-rushcam { from { transform: scale(1); filter: grayscale(1) invert(1) contrast(1.5) blur(0); } to { transform: scale(4) translateX(-8%); filter: grayscale(1) invert(1) contrast(1.5) blur(18px); } }
+@keyframes tr-whiteout { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tr-sketch .tr-car, .tr-nose .tr-car { width: 520vw; left: -380vw; top: calc(50vh - 70vw); }
+  .tr-flow .tr-car { width: 130vw; left: -15vw; bottom: 30vh; }
+  .tr-lines { top: 40vh; height: 22vh; }
+  .tr-zoom .tr-car { width: 170vw; left: -35vw; }
+}
+
+/* Line-up (F1-plakaten: stripe med logo, rødt lys, førerne side om side) */
+.ti-grid { display: flex; flex-direction: column; background: radial-gradient(65% 60% at 50% 42%, #8a0b0b 0%, #3a0508 50%, #070709 100%); }
+.tg-bar { display: flex; align-items: center; gap: 18px; padding: 14px 0; background: #000; }
+.tg-bar i { flex: 1; height: 18px; background: linear-gradient(180deg, #fff 0 50%, transparent 50% 66%, #fff 66%); }
+.tg-bar i:first-child { clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%); }
+.tg-bar i:last-child { clip-path: polygon(18px 0, 100% 0, 100% 100%, 0 100%); }
+.tg-bar .brand-mark, .tg-bar .brand-year { font-size: clamp(22px, 3vw, 34px); }
+.tg-row { flex: 1; min-height: 0; display: flex; justify-content: center; align-items: flex-end; overflow: hidden; }
+.tg-driver { position: relative; z-index: 1; height: 86%; margin: 0 -3vw; display: flex; align-items: flex-end; filter: brightness(.7) saturate(.85); }
+.tg-driver.is-front { z-index: 2; height: 100%; filter: drop-shadow(0 0 30px rgba(0, 0, 0, .6)); }
+.tg-driver img {
+  height: 100%; width: auto; max-width: 30vw; object-fit: contain; object-position: bottom;
+  -webkit-mask-image: linear-gradient(0deg, transparent 0%, #000 18%); mask-image: linear-gradient(0deg, transparent 0%, #000 18%);
+}
+.tg-code { font-weight: 900; font-size: 10vh; padding: 0 4vw 12vh; }
+.ti-grid.is-on .tg-bar i { animation: tg-bar .6s cubic-bezier(.2,.9,.3,1) both; }
+.ti-grid.is-on .tg-bar i:first-child { transform-origin: right; }
+.ti-grid.is-on .tg-bar i:last-child { transform-origin: left; }
+.ti-grid.is-on .tg-driver { animation: tg-driver .8s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(.2s + var(--d) * 140ms); }
+.tg-driver:nth-child(1) { --d: 2; } .tg-driver:nth-child(2) { --d: 0; } .tg-driver:nth-child(3) { --d: 1; } .tg-driver:nth-child(4) { --d: 3; }
+@keyframes tg-bar { from { transform: scaleX(0); } }
+@keyframes tg-driver { from { opacity: 0; transform: translateY(6%); filter: brightness(0); } }
+@keyframes ti-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+.ti-grid-title { padding: 14px 6vw 4px; background: linear-gradient(0deg, #060608 40%, transparent); margin-top: -40px; position: relative; z-index: 3; text-align: center; }
+.ti-grid-title p { margin: 0; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size: 13px; }
+.ti-grid-title h2 { margin: 4px 0 0; font-weight: 900; font-size: clamp(34px, 5.5vw, 72px); text-transform: uppercase; line-height: 1; }
+.ti-grid-title .brand-mark { font-size: .8em; }
+.ti-grid.is-on .ti-grid-title { animation: ti-up .45s ease .8s both; }
+
+
+@media (max-aspect-ratio: 4/5) {
+  /* Smal skjerm: to rader i hver kolonne, bakerste øverst og fremste nederst, litt overlappende. */
+  .tg-row { display: grid; grid-template-columns: 1fr 1fr; padding: 2vh 2vw 0; }
+  .tg-driver { grid-row: 1; height: 60%; margin: 0; justify-content: center; align-self: start; }
+  .tg-driver.is-front { height: 60%; align-self: end; }
+  .tg-driver:nth-child(-n+2) { grid-column: 1; }
+  .tg-driver:nth-child(n+3) { grid-column: 2; }
+  .tg-driver img { max-width: 50vw; }
+}

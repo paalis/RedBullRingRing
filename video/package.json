@@ -1,23 +1,13 @@
 {
-  "name": "redbullringring-video",
+  "name": "video",
   "version": "1.0.0",
-  "description": "Remotion-videoer for Red Bull Ring 2027",
-  "scripts": {
-    "dev": "remotion studio",
-    "build": "remotion bundle",
-    "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc",
-    "render": "remotion render src/index.ts RedBullRingIntro out/red-bull-ring-intro.mp4",
-    "still": "remotion still src/index.ts RedBullRingIntro out/poster.png --frame=90",
-    "assets": "node scripts/prepare-assets.mjs",
-    "predev": "npm run assets",
-    "prebuild": "npm run assets",
-    "prerender": "npm run assets",
-    "prestill": "npm run assets",
-    "render:intro": "node scripts/render-intro.mjs"
-  },
+  "description": "My Remotion video",
   "repository": {},
   "license": "UNLICENSED",
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
+  "private": true,
   "dependencies": {
     "@remotion/cli": "4.0.539",
     "@remotion/fonts": "4.0.539",
@@ -34,8 +24,13 @@
     "prettier": "3.8.1",
     "typescript": "5.9.3"
   },
-  "engines": {
-    "node": "^20.19.0 || ^22.13.0 || >=24"
+  "scripts": {
+    "dev": "remotion studio",
+    "build": "remotion bundle",
+    "upgrade": "remotion upgrade",
+    "lint": "eslint src && tsc"
   },
-  "private": true
+  "allowScripts": {
+    "esbuild": false
+  }
 }

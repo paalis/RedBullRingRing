@@ -1,13 +1,9 @@
-/**
- * Note: When using the Node.JS APIs, the config file
- * doesn't apply. Instead, pass options directly to the APIs.
- *
- * All configuration options: https://remotion.dev/docs/config
- */
-
+// Remotion-oppsett for introfilmen. Bilder, fonter og musikk hentes rett fra nettsidens assets-mappe,
+// så det finnes bare én kopi av hvert bilde i repoet.
 import { Config } from "@remotion/cli/config";
 
 Config.setRspack(true);
 Config.setVideoImageFormat("jpeg");
 Config.setOverwriteOutput(true);
 Config.setDefaultPremountInSeconds(2);
+Config.setPublicDir("../site/assets");
