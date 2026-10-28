@@ -5,3 +5,4 @@ brag-output/work/*.wav
 brag-output/work/*.png
 brag-output/work/*.jpg
 .vercel
+node_modules/
