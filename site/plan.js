@@ -65,6 +65,7 @@ function renderBars() {
         me = { uid: cred.user.uid, name: form.name.value };
         renderAll();
       } catch (ex) {
+        console.error("Kunne ikke bli med:", ex);
         me = null;
         joinError = /permission/i.test(ex.message) ? "Feil lagkode." : "Noe gikk galt – prøv igjen.";
         renderBars();
@@ -84,17 +85,115 @@ onAuthStateChanged(auth, async (user) => {
   renderAll();
 });
 
+// ---------- Pris ----------
+const PEOPLE = CREW.length;
+const kr = (n) => `${Math.round(n).toLocaleString("nb-NO")} kr`;
+const hasTotal = (c) => Number.isInteger(c.total);
+const nightsFor = (slot) => (STAYS.find((s) => s.id === slot) || {}).nights || 0;
+
+function priceBlock(c) {
+  if (!hasTotal(c)) {
+    return c.price
+      ? `<p class="plan-price is-missing">Oppgitt pris: <b class="plan-legacy">${esc(c.price)}</b> – trykk «Endre pris» og legg inn totalpris for alle, så kommer den med i budsjettet.</p>`
+      : `<p class="plan-price is-missing">Pris mangler</p>`;
+  }
+  const nights = nightsFor(c.slot);
+  const per = [`${kr(c.total / PEOPLE)} per person`];
+  if (nights > 1) per.push(`${kr(c.total / nights)} per natt`);
+  return `
+    <div class="plan-price">
+      <b>${kr(c.total)}</b><span>totalt</span>
+      <small>${per.join(" · ")}</small>
+    </div>`;
+}
+
+// Det som teller i budsjettet: booket forslag, ellers det med flest stemmer som har pris.
+function chosen(slot) {
+  const list = candidates.filter((c) => c.slot === slot);
+  const booked = list.find((c) => c.status === "booket");
+  if (booked) return { c: booked, how: "Booket" };
+  const lead = list.filter(hasTotal).sort((a, b) => (b.votes || []).length - (a.votes || []).length)[0];
+  return lead ? { c: lead, how: "Flest stemmer" } : null;
+}
+
+function renderBudget() {
+  const rows = [...STAYS.map((s) => ({ slot: s.id, label: `${s.city} · ${s.nights} ${s.nights === 1 ? "natt" : "netter"}` })), { slot: "car", label: "Leiebil" }];
+  let sum = 0;
+  let missing = 0;
+  const lines = rows.map(({ slot, label }) => {
+    const pick = chosen(slot);
+    const ok = pick && hasTotal(pick.c);
+    if (ok) sum += pick.c.total; else missing++;
+    return `
+      <li class="${ok ? "" : "is-missing"}">
+        <span class="budget-label">${esc(label)}<small>${ok ? `${esc(pick.how)}: ${esc(pick.c.name)}` : "Ingen pris ennå"}</small></span>
+        <span class="budget-val">${ok ? kr(pick.c.total) : "–"}</span>
+      </li>`;
+  }).join("");
+  const html = `
+    <div class="budget">
+      <div class="budget-total">
+        <p class="budget-kicker">Totalpris overnatting + leiebil</p>
+        <p class="budget-big">${kr(sum)}</p>
+        <p class="budget-pp"><b>${kr(sum / PEOPLE)}</b> per person</p>
+        ${missing ? `<p class="budget-note">${missing} av ${rows.length} mangler pris ennå</p>` : ""}
+      </div>
+      <ul class="budget-lines">${lines}</ul>
+    </div>`;
+  document.querySelectorAll(".plan-budget").forEach((el) => (el.innerHTML = html));
+}
+
+// ---------- Navn, bilde og fakta fra annonsen ----------
+const triedPreview = new Set();
+const str = (v, n) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+async function fetchPreview(url) {
+  if (!url) return {};
+  try {
+    const r = await fetch(`/api/preview?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) return {};
+    const d = await r.json();
+    const image = str(d.image, 1000);
+    return {
+      image: /^https:\/\//.test(image) ? image : "",
+      name: str(d.name, 80),
+      area: str(d.area, 60),
+      details: str(d.details, 200),
+      type: ["Hotell", "Airbnb"].includes(d.type) ? d.type : "",
+    };
+  } catch (_) {
+    return {};
+  }
+}
+
+// Forslag lagt inn før dette fantes: første medlem som ser dem henter bilde og fakta.
+function backfillPreviews() {
+  if (!me) return;
+  candidates
+    .filter((c) => c.url && (!("image" in c) || !("details" in c)) && !triedPreview.has(c.id))
+    .forEach(async (c) => {
+      triedPreview.add(c.id);
+      const pv = await fetchPreview(c.url);
+      const patch = {};
+      if (!("image" in c) && pv.image) patch.image = pv.image;
+      if (!("details" in c) && pv.name) patch.details = pv.details || "";
+      if (Object.keys(patch).length) await updateDoc(doc(db, "candidates", c.id), patch).catch(() => {});
+    });
+}
+
 // ---------- Forslag ----------
 function candidateItem(c) {
   const votes = c.votes || [];
   const mine = me && votes.includes(me.name);
-  const meta = [c.type, c.area, c.price].filter(Boolean).map(esc).join(" · ");
+  const meta = [c.type, c.area].filter(Boolean).map(esc).join(" · ");
   const booked = c.status === "booket";
   return `
     <li class="stay-option plan-item is-${booked ? "booked" : "candidate"}" data-id="${c.id}">
+      ${c.image ? `<a class="plan-photo" href="${esc(c.url || c.image)}" target="_blank" rel="noopener"><img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.remove()"></a>` : ""}
       <span class="stay-status">${booked ? "Booket" : "Kandidat"}</span>
       <p class="stay-name">${esc(c.name)}</p>
+      ${c.details ? `<p class="plan-details">${esc(c.details)}</p>` : ""}
       ${meta ? `<p class="stay-meta">${meta}</p>` : ""}
+      ${priceBlock(c)}
       ${c.note ? `<p class="plan-note">${esc(c.note)}</p>` : ""}
       ${c.url ? `<a class="stay-link" href="${esc(c.url)}" target="_blank" rel="noopener">Se tilbudet →</a>` : ""}
       <div class="plan-votes">
@@ -105,6 +204,7 @@ function candidateItem(c) {
       ${me ? `
         <div class="plan-actions">
           <button type="button" class="plan-btn plan-vote${mine ? " is-on" : ""}" data-act="vote">${mine ? "Stemt" : "Stem"}</button>
+          <button type="button" class="btn-ghost" data-act="price">Endre pris</button>
           <button type="button" class="btn-ghost" data-act="book">${booked ? "Angre booket" : "Merk som booket"}</button>
           <button type="button" class="btn-ghost plan-del" data-act="del">Slett</button>
         </div>` : ""}
@@ -117,13 +217,14 @@ function addForm(slot) {
     <details class="plan-add">
       <summary>+ Legg til ${car ? "tilbud" : "forslag"}</summary>
       <form class="plan-form" data-slot="${slot}">
+        <label class="plan-wide">Lenke<input name="url" type="url" maxlength="500" placeholder="Lim inn lenken – navn og bilde hentes automatisk"></label>
+        <div class="plan-fetch plan-wide" aria-live="polite"></div>
         <label>${car ? "Utleier" : "Navn på stedet"}<input name="name" required maxlength="80" placeholder="${car ? "F.eks. Sixt" : "F.eks. Hotel Daniel"}"></label>
         ${car
           ? `<label>Bil<input name="area" maxlength="60" placeholder="F.eks. VW Passat stasjonsvogn"></label>`
           : `<label>Type<select name="type"><option>Hotell</option><option>Airbnb</option></select></label>
              <label>Nabolag<input name="area" maxlength="60" placeholder="F.eks. Neubau"></label>`}
-        <label>Pris<input name="price" maxlength="40" placeholder="F.eks. 1 200 kr per person"></label>
-        <label>Lenke<input name="url" type="url" maxlength="500" placeholder="https://…"></label>
+        <label>Totalpris for alle (kr)<input name="total" type="number" inputmode="numeric" min="0" max="1000000" step="1" placeholder="${car ? "F.eks. 3600" : "F.eks. 4800"}"></label>
         <label class="plan-wide">Notat<input name="note" maxlength="200" placeholder="Hvorfor dette?"></label>
         <button class="plan-btn" type="submit">Legg til</button>
       </form>
@@ -160,7 +261,7 @@ function renderCarBooking(b) {
   if (b) {
     set("company", esc(b.name));
     set("model", b.area ? esc(b.area) : '<span class="car-tbc">–</span>');
-    set("price", b.price ? esc(b.price) : '<span class="car-tbc">–</span>');
+    set("price", hasTotal(b) ? `${kr(b.total)} <small class="car-pp">${kr(b.total / PEOPLE)} per person</small>` : '<span class="car-tbc">–</span>');
     set("link", b.url ? `<a class="stay-link" href="${esc(b.url)}" target="_blank" rel="noopener">Se bestillingen →</a>` : "");
   }
 }
@@ -168,12 +269,16 @@ function renderCarBooking(b) {
 function renderAll() {
   renderBars();
   document.querySelectorAll(".plan-live").forEach(renderSlot);
+  renderBudget();
+  backfillPreviews();
   document.querySelectorAll(".car-todo li").forEach((li) => (li.querySelector(".car-check").disabled = !me));
 }
 
 onSnapshot(collection(db, "candidates"), (snap) => {
   candidates = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   document.querySelectorAll(".plan-live").forEach(renderSlot);
+  renderBudget();
+  backfillPreviews();
 });
 
 // ---------- Handlinger ----------
@@ -188,6 +293,12 @@ document.addEventListener("click", async (e) => {
     if (btn.dataset.act === "vote") {
       const on = (c.votes || []).includes(me.name);
       await updateDoc(ref, { votes: on ? arrayRemove(me.name) : arrayUnion(me.name) });
+    } else if (btn.dataset.act === "price") {
+      const v = prompt(`Totalpris for alle (kr) – ${c.name}`, hasTotal(c) ? c.total : (c.price || "").replace(/[^0-9]/g, ""));
+      if (v !== null) {
+        const n = parseInt(String(v).replace(/[^0-9]/g, ""), 10);
+        if (Number.isInteger(n)) await updateDoc(ref, { total: n });
+      }
     } else if (btn.dataset.act === "book") {
       await updateDoc(ref, { status: c.status === "booket" ? "kandidat" : "booket" });
     } else if (btn.dataset.act === "del" && confirm(`Slette «${c.name}»?`)) {
@@ -206,15 +317,21 @@ document.addEventListener("submit", async (e) => {
   const f = form.elements;
   const url = f.url.value.trim();
   if (url && !/^https:\/\//.test(url)) return alert("Lenken må starte med https://");
-  form.querySelector("button").disabled = true;
+  const submit = form.querySelector("button");
+  submit.disabled = true;
+  submit.textContent = url ? "Henter bilde …" : "Legger til …";
   try {
+    const pv = form._preview && form._preview.url === url ? form._preview : await fetchPreview(url);
     await addDoc(collection(db, "candidates"), {
+      ...(pv.image ? { image: pv.image } : {}),
+      ...(pv.details ? { details: pv.details } : {}),
       slot: form.dataset.slot,
       type: f.type ? f.type.value : "Leiebil",
       name: f.name.value.trim(),
       url,
       area: f.area.value.trim(),
-      price: f.price.value.trim(),
+      price: "",
+      ...(f.total.value !== "" ? { total: parseInt(f.total.value, 10) } : {}),
       note: f.note.value.trim(),
       status: "kandidat",
       votes: [me.name],
@@ -223,8 +340,53 @@ document.addEventListener("submit", async (e) => {
     });
   } catch (ex) {
     alert("Kunne ikke lagre: " + ex.message);
-    form.querySelector("button").disabled = false;
+    submit.disabled = false;
+    submit.textContent = "Legg til";
   }
+});
+
+// Lim inn lenke → fyll inn navn, sted og type automatisk.
+let fetchTimer;
+document.addEventListener("input", (e) => {
+  const input = e.target.closest(".plan-form input[name=url]");
+  if (!input) return;
+  clearTimeout(fetchTimer);
+  fetchTimer = setTimeout(() => autofill(input.form), 500);
+});
+
+async function autofill(form) {
+  const url = form.elements.url.value.trim();
+  const status = form.querySelector(".plan-fetch");
+  if (!/^https:\/\/.+\..+/.test(url)) {
+    status.innerHTML = "";
+    return;
+  }
+  status.innerHTML = `<span class="plan-fetch-wait">Henter navn og bilde …</span>`;
+  const pv = await fetchPreview(url);
+  if (form.elements.url.value.trim() !== url) return; // lenken ble endret i mellomtiden
+  form._preview = { ...pv, url };
+  const fill = (field, value) => {
+    const el = form.elements[field];
+    if (!el || !value) return;
+    if (!el.value || el.dataset.auto === "1") {
+      el.value = value;
+      el.dataset.auto = "1";
+    }
+  };
+  fill("name", pv.name);
+  if (form.dataset.slot !== "car") {
+    fill("area", pv.area);
+    if (pv.type) form.elements.type.value = pv.type;
+  }
+  status.innerHTML = pv.name || pv.image
+    ? `<div class="plan-fetch-found">${pv.image ? `<img src="${esc(pv.image)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}
+         <div><b>${esc(pv.name || "Fant bilde")}</b>${pv.details ? `<span>${esc(pv.details)}</span>` : ""}</div></div>`
+    : `<span class="plan-fetch-wait">Fant ikke navn automatisk – skriv det inn selv.</span>`;
+}
+
+document.addEventListener("input", (e) => {
+  const el = e.target.closest(".plan-form input[name=name], .plan-form input[name=area]");
+  if (el && e.isTrusted) el.dataset.auto = "";
 });
 
 // ---------- Leiebil: avkrysning ----------
