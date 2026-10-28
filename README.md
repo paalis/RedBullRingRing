@@ -18,3 +18,11 @@ cd site && python3 -m http.server 8000
 ## Publisering
 
 Vercel-prosjektet har `site/` som rotmappe. Push til `main` publiserer automatisk.
+
+## Planleggingstavla (Firebase)
+
+Overnatting og leiebil kan planlegges rett på siden: legg til forslag, stem, merk som booket og huk av punkter.
+
+- Data ligger i Firestore i Firebase-prosjektet `rbr27-70136e6c`. Koden er `site/plan.js`, og Firebase-biblioteket er bundlet i `site/assets/vendor/firebase.js`.
+- Alle kan se planen. For å skrive må man velge navn og oppgi lagkoden. Koden ligger i `config/team` i databasen og kan ikke leses fra nettsiden.
+- Sikkerhetsreglene ligger i `firebase/firestore.rules`. Publiser endringer med `firebase deploy --only firestore:rules`.

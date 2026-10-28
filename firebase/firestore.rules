@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// Planleggingstavla på nettsiden.
+// Alle kan lese forslag og avkrysninger. Bare medlemmer kan skrive.
+// Man blir medlem ved å oppgi lagkoden, som ligger i config/team og aldri kan leses av klienter.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember() {
+      return signedIn() && exists(/databases/$(db)/documents/members/$(request.auth.uid));
+    }
+
+    function memberName() {
+      return get(/databases/$(db)/documents/members/$(request.auth.uid)).data.name;
+    }
+
+    function shortString(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    match /config/{doc} {
+      allow read, write: if false;
+    }
+
+    match /members/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'code', 'joinedAt'])
+        && request.resource.data.code == get(/databases/$(db)/documents/config/team).data.code
+        && shortString(request.resource.data.name, 40)
+        && request.resource.data.name.size() > 0;
+    }
+
+    function validCandidate(d) {
+      return d.keys().hasOnly(['slot', 'type', 'name', 'url', 'area', 'price', 'note', 'status', 'votes', 'by', 'createdAt'])
+        && d.slot in ['wien-1', 'graz', 'wien-2', 'car']
+        && d.status in ['kandidat', 'booket']
+        && shortString(d.name, 80) && d.name.size() > 0
+        && shortString(d.type, 30)
+        && shortString(d.area, 60)
+        && shortString(d.price, 40)
+        && shortString(d.note, 200)
+        && shortString(d.url, 500) && (d.url == '' || d.url.matches('^https://.+'))
+        && d.votes is list && d.votes.size() <= 10
+        && shortString(d.by, 40);
+    }
+
+    match /candidates/{id} {
+      allow read: if true;
+      allow create: if isMember() && validCandidate(request.resource.data)
+        && request.resource.data.by == memberName()
+        && request.resource.data.status == 'kandidat';
+      allow update: if isMember() && validCandidate(request.resource.data)
+        && request.resource.data.slot == resource.data.slot
+        && request.resource.data.by == resource.data.by;
+      allow delete: if isMember();
+    }
+
+    match /todos/{id} {
+      allow read: if true;
+      allow write: if isMember()
+        && request.resource.data.keys().hasOnly(['done', 'by'])
+        && request.resource.data.done is bool
+        && request.resource.data.by == memberName();
+    }
+  }
+}

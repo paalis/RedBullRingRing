@@ -336,6 +336,7 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .stay-dates { margin: 0; font-weight: 900; font-size: 22px; }
 .stay-note { margin: 4px 0 16px; color: var(--muted); font-size: 15px; }
 .stay-empty { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; border: 2px dashed var(--line); border-radius: 10px; }
+.stay-empty[hidden] { display: none; }
 .stay-empty b { font-weight: 700; color: var(--muted); }
 .stay-empty span { font-size: 13px; color: var(--muted); opacity: .8; }
 .stay-options { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -386,6 +387,54 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .car-check { width: 16px; height: 16px; flex: none; margin-top: 3px; border-radius: 4px; border: 2px solid var(--muted); }
 .car-todo li.is-done { color: var(--muted); text-decoration: line-through; }
 .car-todo li.is-done .car-check { background: var(--green); border-color: var(--green); }
+
+/* ---------- PLANLEGGING (Firebase) ---------- */
+.plan-bar { margin-top: 24px; }
+.plan-bar:empty { display: none; }
+.plan-bar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 16px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); font-size: 15px; }
+.plan-bar-in.is-member { border-color: rgba(0,210,106,.45); }
+.plan-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); flex: none; }
+.plan-dot.is-off { background: var(--muted); }
+.plan-join-text { color: var(--muted); font-weight: 600; margin-right: auto; }
+.plan-bar-in.is-member .btn-ghost { margin-left: auto; }
+.plan-bar select, .plan-bar input, .plan-form input, .plan-form select {
+  font: 600 15px/1.2 "Titillium", sans-serif; color: var(--text); background: var(--bg-3);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; min-width: 0;
+}
+.plan-bar input { width: 130px; }
+.plan-btn {
+  font: 700 13px/1 "Titillium", sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+  color: #fff; background: var(--red); border: 0; border-radius: 999px; padding: 10px 16px;
+}
+.plan-btn:hover { background: var(--red-hot); }
+.plan-btn:disabled { opacity: .5; cursor: default; }
+.plan-error { flex-basis: 100%; margin: 0; color: var(--red-hot); font-weight: 700; font-size: 14px; }
+.plan-error:empty { display: none; }
+.plan-live { margin-top: 10px; }
+.plan-live:empty { display: none; }
+.plan-list { margin-bottom: 10px; }
+.plan-note { margin: 4px 0 0; font-size: 14px; color: #cfcfd8; }
+.plan-votes { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 10px; }
+.plan-count { font-weight: 900; color: var(--green); }
+.plan-voters { font-size: 13px; color: var(--muted); }
+.plan-by { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.plan-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.plan-actions .btn-ghost { padding: 8px 12px; font-size: 11px; }
+.plan-vote.is-on { background: var(--green); color: var(--bg); }
+.plan-del:hover { color: var(--red-hot); border-color: var(--red-hot); }
+.plan-empty { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+.plan-add summary { cursor: pointer; font-weight: 700; color: var(--text); padding: 8px 0; list-style: none; }
+.plan-add summary::-webkit-details-marker { display: none; }
+.plan-add summary:hover { color: var(--red-hot); }
+.plan-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; background: var(--bg-3); border-radius: 10px; margin-top: 6px; }
+.plan-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.plan-form input, .plan-form select { background: var(--bg-2); text-transform: none; letter-spacing: 0; }
+.plan-form .plan-wide, .plan-form button { grid-column: 1 / -1; }
+@media (max-width: 480px) { .plan-form { grid-template-columns: 1fr; } .plan-bar input { width: 100%; } .plan-bar select { flex: 1; } }
+.car-offers-body { padding: 8px 20px 18px; }
+.car-check { padding: 0; background: transparent; cursor: pointer; }
+.car-check:disabled { cursor: default; }
+.car-todo li.is-done .car-check { background: var(--green); }
 
 /* ---------- CHECKLIST ---------- */
 .pack-progress { font-size: 22px; font-weight: 700; margin: 24px 0 8px; }
