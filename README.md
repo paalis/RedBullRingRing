@@ -6,8 +6,9 @@ Nettsiden for turen vår til Østerrikes Grand Prix på Red Bull Ring, juli 2027
 
 - `site/`: selve nettsiden (statisk HTML/CSS/JS, uten byggesteg). Det er denne mappen Vercel publiserer.
   - `app.js`: øverst ligger tripdata som er lett å endre: løpsstart, teamet (`CREW`), flyreiser (`FLIGHTS`), overnatting (`STAYS`), leiebil (`CAR`), pakkeliste og teamradio-sitater.
-  - `assets/intro.mp4`: introsnutten som spilles i toppen av siden.
-- `brag-output/`: introvideoen i full oppløsning (`brag.mp4`), plakatbilde, plan og delingstekst, laget med `/brag-slim`. Skriptene som lager videoen ligger i `brag-output/work/`. Lydsporet til nettsideintroen (`site/assets/intro-theme.mp3`: introvideoen, horn under teamintroen og motorlyd når bilen kjører over skjermen) lages med `brag-output/work/theme.py`.
+  - `assets/intro.mp4` og `assets/intro-mobile.mp4`: introfilmen (liggende og stående), laget med Remotion i `video/`. `assets/f1-theme.m4a` er musikken den er synket til.
+- `brag-output/`: introvideoen i full oppløsning (`brag.mp4`), plakatbilde, plan og delingstekst, laget med `/brag-slim`. Skriptene som lager videoen ligger i `brag-output/work/`.
+- `video/`: Remotion-prosjektet for introfilmen: åpningen (startlys, ruten, banen), bilen som overgang og teamintroen med alle fire førerne, synket til F1-temaet. Tidslinjen ligger i `video/src/timeline.ts`. Se `video/README.md` for forhåndsvisning og rendering.
 
 ## Lokalt
 
