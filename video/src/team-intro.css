@@ -20,8 +20,9 @@
 .ti-stage { position: absolute; inset: 0; }
 .ti-scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
 .ti-scene.is-on { visibility: visible; opacity: 1; }
-.ti-scene.is-off { visibility: visible; opacity: 1; animation: ti-out .35s cubic-bezier(.7,0,.9,.4) both; z-index: 2; }
-@keyframes ti-out { 99% { visibility: visible; } to { transform: translateX(-150%) skewX(-12deg); visibility: hidden; } }
+/* Forrige scene ligger under den nye mens den tones inn (TeamIntro.tsx styrer overtoningen). */
+.ti-scene.is-on { z-index: 2; }
+.ti-scene.is-off { visibility: visible; opacity: 1; z-index: 1; }
 
 
 /* Én fører: samme scene som førerintroen, i høyere tempo */
@@ -203,7 +204,7 @@
 @keyframes tp-line { from { clip-path: inset(0 100% 0 0); transform: translateX(-20px); } to { clip-path: inset(0 -10% 0 0); } }
 
 /* Scenene som står lenge, får en sakte kamerabevegelse */
-.tx.is-on { animation: ti-drift 3.4s linear both; }
+.tx.is-on, .tz.is-on, .tp.is-on, .tw.is-on { animation: ti-drift 3.4s linear both; }
 @keyframes ti-drift { from { transform: scale(1); } to { transform: scale(1.06); } }
 
 @media (max-aspect-ratio: 4/5) {

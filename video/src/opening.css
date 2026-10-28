@@ -25,6 +25,8 @@
 .op .city circle { fill: var(--bg); stroke: var(--text); stroke-width: 3; }
 .op .city text { fill: var(--text); font-weight: 700; font-size: 22px; }
 .op .city .code { fill: var(--muted); font-size: 14px; letter-spacing: .12em; }
+/* Mørk kant rundt teksten, så den alltid ligger lesbart over reiselinjene */
+.op .city text { paint-order: stroke; stroke: var(--bg); stroke-width: 6px; stroke-linejoin: round; }
 .op .city-hub circle { fill: var(--red); stroke: #fff; }
 .op .city-track circle { fill: var(--yellow); stroke: var(--bg); }
 .op .city { opacity: 0; }

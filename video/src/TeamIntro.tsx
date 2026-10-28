@@ -6,18 +6,19 @@ import { TEAM_AT, teamSchedule } from "./timeline";
 import "./team-intro.css";
 
 const SCHEDULE = teamSchedule(CREW.length);
-const OUT = 0.35; // så lenge forrige scene glir ut (ti-out i team-intro.css)
+const BLEND = 0.32; // overtoning mellom vinkler hos samme fører (bilklippene er harde kutt)
+const smooth = (x: number) => x * x * (3 - 2 * x);
 const SKIP = new Set(["offset", "computedOffset", "easing", "composite"]);
 const kebab = (p: string) => p.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
 // Spoler CSS-animasjonene i scenene til `since` sekunder og skriver resultatet som statisk CSS.
 // Chromium kjører transform/opacity-animasjoner på compositor-tråden, som ikke får med seg en pause før
 // Remotion tar bildet. Derfor leses de beregnede verdiene på hovedtråden og settes fast med animation: none.
-function bake(scenes: HTMLElement[], since: number, sheet: HTMLStyleElement) {
+function bake(scenes: [HTMLElement, number][], sheet: HTMLStyleElement) {
   sheet.textContent = "";
   const targets = new Map<string, { el: Element; pseudo: string | null; props: Set<string> }>();
   let n = 0;
-  for (const scene of scenes) {
+  for (const [scene, since] of scenes) {
     for (const a of scene.getAnimations({ subtree: true })) {
       a.pause();
       a.currentTime = since * 1000;
@@ -59,19 +60,26 @@ export const TeamIntro: React.FC = () => {
     let k = 0;
     while (k + 1 < SCHEDULE.length && SCHEDULE[k + 1][0] <= t + 1e-6) k++;
     const [at, name] = SCHEDULE[k];
-    const prev = k > 0 ? SCHEDULE[k - 1][1] : null;
     const since = Math.max(0, t - at);
+    // Vinkelbytter hos samme fører tones mykt over; inn- og utgang via bilklipp er harde kutt.
+    const prev = k > 0 ? SCHEDULE[k - 1] : null;
+    const blend = prev && !name.startsWith("t") && !prev[1].startsWith("t") && since < BLEND;
+    const fade = blend ? smooth(since / BLEND) : 1;
     sheet.current!.textContent = "";
-    const shown: HTMLElement[] = [];
+    const shown: [HTMLElement, number][] = [];
     ref.current!.querySelectorAll<HTMLElement>(".ti-scene").forEach((scene) => {
       const id = scene.dataset.scene;
       const on = id === name;
-      const off = id === prev && since < OUT;
+      const off = !!blend && id === prev![1];
       scene.classList.toggle("is-on", on);
       scene.classList.toggle("is-off", off);
-      if (on || off) shown.push(scene);
+      scene.style.opacity = on ? String(fade) : "";
+      scene.style.filter = on && fade < 1 ? `blur(${(1 - fade) * 10}px)` : "";
+      scene.style.translate = on && fade < 1 ? `${(1 - fade) * 2.5}% 0` : "";
+      if (on) shown.push([scene, since]);
+      if (off) shown.push([scene, t - prev![0]]);
     });
-    bake(shown, since, sheet.current!);
+    bake(shown, sheet.current!);
   }, [t]);
 
   return (
