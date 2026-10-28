@@ -7,10 +7,18 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="RedBullRingIntro"
         component={RedBullRingIntro}
-        durationInFrames={180}
+        durationInFrames={1563}
         fps={30}
-        width={1280}
-        height={720}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="RedBullRingIntroMobile"
+        component={RedBullRingIntro}
+        durationInFrames={1563}
+        fps={30}
+        width={720}
+        height={1280}
       />
     </>
   );

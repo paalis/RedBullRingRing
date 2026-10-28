@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "file": "audio/f1theme-source.m4a",
+    "sha256": "4a56fc218e1247aaf9a5688719f45914f701fca381ec9bc691fc52a48ec5ca7c",
+    "bytes": 859705,
+    "codec": "aac",
+    "channels": 2,
+    "sampleRate": 44100,
+    "containerDurationSeconds": 52.152018,
+    "startTimestampSeconds": 0.063855
+  },
+  "normalized": {
+    "file": "audio/f1theme.wav",
+    "codec": "pcm_f32le",
+    "channels": 2,
+    "sampleRate": 44100,
+    "durationSeconds": 52.088163,
+    "startTimestampSeconds": 0,
+    "processing": "Decode the supplied AAC to stereo 44.1 kHz float PCM; asetpts=PTS-STARTPTS. No gain, fades, speed changes or musical edits."
+  },
+  "analysis": {
+    "matchesOriginalAnalyzedSource": true,
+    "auditioned": false,
+    "method": "Waveform, frequency-band energy, spectral flux and onset autocorrelation of the decoded audio.",
+    "caution": "The 15.375s structure change is a candidate for the drums/horns entrance, not an identification confirmed by listening. Audition before locking musical interpretation. Times are relative to the first decoded sample, not the container timestamps.",
+    "approximateBpm": 100,
+    "needsNewAnalysis": false,
+    "measuredOriginalIntegratedLufs": -11.9,
+    "measuredOriginalTruePeakDbtp": 0.7,
+    "sourceEndsAtSilence": false,
+    "suggestedGainDb": -3,
+    "suggestedEndFadeSeconds": [
+      1.2,
+      1.5
+    ]
+  },
+  "suggestedTimeline": {
+    "fps": 30,
+    "durationInFrames": 1563,
+    "durationSeconds": 52.1,
+    "markers": [
+      {
+        "seconds": 0,
+        "frameAt30Fps": 0,
+        "description": "Opening"
+      },
+      {
+        "seconds": 5.178,
+        "frameAt30Fps": 155,
+        "description": "Build"
+      },
+      {
+        "seconds": 15.375,
+        "frameAt30Fps": 461,
+        "description": "Measured energy return; candidate driver presentation start"
+      },
+      {
+        "seconds": 39.979,
+        "frameAt30Fps": 1199,
+        "description": "Final build"
+      },
+      {
+        "seconds": 47.183,
+        "frameAt30Fps": 1415,
+        "description": "Title reveal"
+      },
+      {
+        "seconds": 50.824,
+        "frameAt30Fps": 1525,
+        "description": "Last accent; handoff and audio fade"
+      }
+    ],
+    "mainSectionFourBeatMarkersSeconds": [
+      17.78,
+      20.184,
+      22.579,
+      24.983,
+      27.378,
+      29.782,
+      32.177,
+      34.581
+    ]
+  }
+}
