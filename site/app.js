@@ -178,13 +178,8 @@ const TEAM_TIMELINE = [["title", 1300], ...CREW.map((_, i) => [`d${i}`, 1900]), 
 // Rekkefølge i line-upen fra venstre: ytterst bak, innerst foran (som F1-plakaten).
 const LINEUP = [2, 0, 1, 3];
 
-function openTeamIntro() {
-  const el = document.createElement("div");
-  el.className = "tintro";
-  el.setAttribute("role", "dialog");
-  el.setAttribute("aria-modal", "true");
-  el.setAttribute("aria-label", "Teamintro: line-up RBR '27");
-  el.innerHTML = `
+function teamIntroMarkup(extra = "") {
+  return `
     <div class="ti-stage">
       <section class="ti-scene ti-title" data-scene="title">
         <div class="ti-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -211,16 +206,17 @@ function openTeamIntro() {
           <button type="button" class="btn-ghost" data-act="close">Lukk</button>
         </div>
       </section>
+      ${extra}
       <button type="button" class="dintro-close" data-act="close" aria-label="Lukk">✕</button>
       <p class="ti-skip" aria-hidden="true">Trykk for å hoppe over</p>
     </div>`;
-  document.body.append(el);
-  document.body.classList.add("has-modal");
+}
 
+// Bytter scene: den gamle glir ut, den nye starter inngangsanimasjonen sin.
+function sceneSwitcher(el) {
   const stage = el.querySelector(".ti-stage");
   const scenes = Object.fromEntries([...el.querySelectorAll(".ti-scene")].map((s) => [s.dataset.scene, s]));
-  let timers = [];
-  const show = (name) => {
+  return (name) => {
     for (const s of Object.values(scenes)) {
       if (s.classList.contains("is-on")) {
         s.classList.remove("is-on");
@@ -231,6 +227,21 @@ function openTeamIntro() {
     scenes[name].classList.add("is-on");
     stage.dataset.scene = name;
   };
+}
+
+function openTeamIntro() {
+  const el = document.createElement("div");
+  el.className = "tintro";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", "Teamintro: line-up RBR '27");
+  el.innerHTML = teamIntroMarkup();
+  document.body.append(el);
+  document.body.classList.add("has-modal");
+
+  const stage = el.querySelector(".ti-stage");
+  const show = sceneSwitcher(el);
+  let timers = [];
   const toEnd = () => {
     timers.forEach(clearTimeout);
     timers = [];
@@ -542,29 +553,102 @@ const navIo = new IntersectionObserver((entries) => {
 }, { rootMargin: "-45% 0px -50% 0px" });
 document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 
-// ---------- Introvideo ----------
-// Spilles én gang (dempet) over heroen, deretter tar sideinnholdet over.
+// ---------- Nettsideintro: introvideo → teamintro → bil over skjermen, synket til lydsporet ----------
+// Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s,
+// bilen kommer inn rett før motorlyden topper (24,3 s), og siden åpnes på sluttslaget (25 s).
+const SITE_INTRO = [[12, "title"], [14, "d0"], [16, "d1"], [18, "d2"], [20, "d3"], [22, "grid"], [23.6, "car"], [25, "end"]];
+// Generisk F1-bil i mørkeblått, rødt og gult (ingen logoer), sett fra siden og på vei mot høyre.
+const CAR_SVG = `<svg class="si-car-svg" viewBox="0 0 600 150" aria-hidden="true">
+  <path d="M22 26h50v12H22z" fill="#1b2a5c"/><path d="M22 26h50v4H22z" fill="#d6001c"/>
+  <path d="M28 22h9v74h-9z" fill="#10172f"/><path d="M58 38l14 0-6 42h-8z" fill="#10172f"/>
+  <path d="M50 116L52 82l98-10 45-22 18-22h30l17 28 38 6 120 14 100 14 40 10-2 8-555 8z" fill="#1b2a5c"/>
+  <path d="M118 116l12-26q20-10 70-10l130 4q24 4 32 32z" fill="#14204a"/>
+  <path d="M136 98q40-8 110-6l120 6-4 6-120-4q-62-2-106 6z" fill="#d6001c"/>
+  <path d="M470 90l90 12 5 6-95-10z" fill="#ffcc00"/>
+  <path d="M213 28h30l6 10h-40z" fill="#d6001c"/>
+  <circle cx="286" cy="58" r="13" fill="#e9e9ec"/><path d="M280 52h17v8h-15z" fill="#10172f"/>
+  <path d="M258 60q34-26 76 4" fill="none" stroke="#0b0b10" stroke-width="5" stroke-linecap="round"/>
+  <path d="M40 116h520" stroke="#0b0b10" stroke-width="5"/>
+  <path d="M452 112h140v9H452z" fill="#10172f"/><path d="M452 112h140v3H452z" fill="#d6001c"/><path d="M584 96h9v26h-9z" fill="#10172f"/>
+  <g class="si-wheel"><circle cx="112" cy="106" r="36" fill="#111"/><circle cx="112" cy="106" r="22" fill="#2b2b33"/><path d="M112 86v40M92 106h40" stroke="#555" stroke-width="4"/><circle cx="112" cy="106" r="6" fill="#ffcc00"/></g>
+  <g class="si-wheel"><circle cx="476" cy="108" r="32" fill="#111"/><circle cx="476" cy="108" r="19" fill="#2b2b33"/><path d="M476 91v34M459 108h34" stroke="#555" stroke-width="4"/><circle cx="476" cy="108" r="6" fill="#ffcc00"/></g>
+</svg>`;
+
 const hero = document.querySelector(".hero");
 const video = document.querySelector(".hero-video");
-function endIntro() {
-  if (!hero.classList.contains("intro")) return;
-  hero.classList.remove("intro");
-  setTimeout(() => { video.pause(); video.muted = true; }, 800);
-}
-function startIntro({ sound = false } = {}) {
-  hero.classList.add("intro");
-  video.muted = !sound;
-  video.currentTime = 0;
-  return video.play();
-}
-if (video) {
-  video.addEventListener("ended", endIntro);
-  video.addEventListener("error", endIntro);
-  document.querySelector(".intro-skip").addEventListener("click", endIntro);
-  document.querySelector(".intro-replay").addEventListener("click", () => {
-    startIntro({ sound: true }).catch(endIntro);
-  });
-  if (reduceMotion) endIntro();
-  else startIntro().catch(endIntro); // autoplay blokkert → rett til siden
+let siteIntro = null;
 
+function startIntro({ sound = false } = {}) {
+  stopIntro(true);
+  const el = document.createElement("div");
+  el.className = "tintro is-site";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-label", "Intro: line-up RBR '27");
+  el.innerHTML = teamIntroMarkup(`<div class="si-car" aria-hidden="true"><div class="si-trail"></div>${CAR_SVG}</div>`);
+  const show = sceneSwitcher(el);
+  const audio = sound ? new Audio("assets/intro-theme.mp3") : null;
+  const run = { el, audio, raf: 0, next: 0, t0: 0, shown: false };
+  siteIntro = run;
+
+  hero.classList.add("intro");
+  video.muted = true;
+  video.currentTime = 0;
+  // Klokka er lydsporet når det spiller, ellers sanntid fra start.
+  const clock = () => (audio && !audio.paused && audio.currentTime > 0 ? audio.currentTime : (performance.now() - run.t0) / 1000);
+  const tick = () => {
+    if (siteIntro !== run) return;
+    const t = clock();
+    while (run.next < SITE_INTRO.length && t >= SITE_INTRO[run.next][0]) {
+      const [, name] = SITE_INTRO[run.next++];
+      if (name === "end") return stopIntro();
+      if (name === "car") { el.classList.add("car-go"); continue; }
+      if (!run.shown) {
+        run.shown = true;
+        document.body.append(el);
+        document.body.classList.add("has-modal");
+        hero.classList.remove("intro");
+        video.pause();
+      }
+      show(name);
+    }
+    run.raf = requestAnimationFrame(tick);
+  };
+  el.addEventListener("click", () => stopIntro());
+  const begin = () => {
+    run.t0 = performance.now();
+    run.raf = requestAnimationFrame(tick);
+  };
+  const plays = [video.play()];
+  if (audio) plays.push(audio.play().catch(() => {})); // lyd blokkert → kjører videre uten lyd
+  return Promise.all(plays).then(begin, (err) => { stopIntro(); throw err; });
+}
+
+// Avslutter introen (hopp over, Esc, ferdig): lyden tones ut og siden kommer fram.
+function stopIntro(instant = false) {
+  const run = siteIntro;
+  hero.classList.remove("intro");
+  setTimeout(() => { if (!hero.classList.contains("intro")) { video.pause(); video.muted = true; } }, 800);
+  if (!run) return;
+  siteIntro = null;
+  cancelAnimationFrame(run.raf);
+  if (run.audio) {
+    const a = run.audio;
+    const fade = setInterval(() => { a.volume = Math.max(0, a.volume - 0.1); if (a.volume <= 0) { a.pause(); clearInterval(fade); } }, 40);
+  }
+  if (!run.el.isConnected) return;
+  document.body.classList.remove("has-modal");
+  if (instant) return run.el.remove();
+  run.el.classList.add("si-leave");
+  setTimeout(() => run.el.remove(), 600);
+}
+
+if (video) {
+  video.addEventListener("error", () => stopIntro());
+  document.querySelector(".intro-skip").addEventListener("click", () => stopIntro());
+  document.addEventListener("keydown", (e) => e.key === "Escape" && siteIntro && stopIntro());
+  document.querySelector(".intro-replay").addEventListener("click", () => {
+    startIntro({ sound: true }).catch(() => stopIntro());
+  });
+  if (reduceMotion) stopIntro();
+  else startIntro().catch(() => stopIntro()); // autoplay blokkert → rett til siden
 }
