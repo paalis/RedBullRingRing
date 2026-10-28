@@ -144,8 +144,9 @@
   .tx .tx-name { flex-direction: column; align-items: center; gap: 0; }
   .tx .tx-first { margin-bottom: .05em; font-size: 10vw; }
   .tx .tx-last { font-size: 9vw; }
-  .tx-studio .tx-name { top: auto; bottom: 18vh; }
-  .tx-studio .tx-home { right: 50%; translate: 50% 0; bottom: 13vh; }
+  /* Navnet over hodet (under de store bokstavene), så det ikke ligger over klærne */
+  .tx-studio .tx-name { top: 12vh; bottom: auto; }
+  .tx-studio .tx-home { right: 50%; translate: 50% 0; top: 23vh; bottom: auto; }
   .tx-echo .tx-driver { height: 110vh; top: 2vh; left: 50%; }
   .tx-echo .tx-name { left: 50%; right: auto; top: auto; bottom: 10vh; translate: -50% 0; }
   .tx-echo .tx-last { font-size: 7.6vw; }
@@ -157,10 +158,10 @@
   .tx-corridor .tx-home { left: 50% !important; top: 8vh !important; translate: -50% 0; }
   .tx-ghostword span { font-size: 30vh; }
   .tx-tilt { left: -8%; right: -8%; transform: rotate(-10deg); }
-  .tx-diagonal .tx-driver, .tx-reflect { height: 34vh; left: 50%; }
+  .tx-diagonal .tx-driver, .tx-reflect { height: 44vh; left: 50%; }
   .tx-diagonal .tx-name { left: 50%; translate: -50% 0; bottom: auto; top: 58.5%; flex-direction: row; align-items: baseline; }
-  .tx-diagonal .tx-first { font-size: 7vw; margin: 0; }
-  .tx-diagonal .tx-last { font-size: 8.5vw; }
+  .tx-diagonal .tx-first { font-size: 8vw; margin: 0; }
+  .tx-diagonal .tx-last { font-size: 10vw; }
   .tx-diagonal .tx-meta { display: none; }
   .tx-big { font-size: 20vh; }
   .tx-big-top { top: -6vh; }
@@ -241,8 +242,9 @@
   .tz-face { height: 150vh; top: 4vh; }
   .tz-face.is-tight { height: 56vh; top: 16vh; }
   .tz-word span { font-size: 26vh; }
-  .tw-driver { height: 52vh; bottom: 21.6vh; }
-  .tw-stage { width: 90vw; bottom: 17vh; }
+  .tw-driver { height: 64vh; bottom: 15.6vh; }
+  .tw-stage { width: 100vw; bottom: 11vh; }
+  .tw-cone { width: 120vw; }
   .tw-stats { right: 50%; translate: 50% 0; bottom: 4vh; align-items: center; flex-direction: row; gap: 14px; letter-spacing: .25em; }
   .tw-stats b { font-size: 9vw; }
   .tw-word span { font-size: 16vh; }

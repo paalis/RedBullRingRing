@@ -1,7 +1,8 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { MAP_SVG, TRACK_SVG } from "./svg";
-import { CAR, OPENING } from "./timeline";
+import { CREW } from "./crew";
+import { LINEUP_AT, OPENING } from "./timeline";
 import "./opening.css";
 
 const easeOut = Easing.out(Easing.cubic);
@@ -11,8 +12,9 @@ const prog = (t: number, a: number, b: number, ease: (x: number) => number = (x)
   interpolate(t, [a, b], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: ease });
 
 const O = OPENING;
-const SCENES = { s1: [0, O.lightsOut], s2: [O.lightsOut, O.track], s3: [O.track, O.punch[0]], s4: [O.punch[0], Infinity] } as const;
-const WIPES = [O.track, O.punch[0]];
+const SCENES = { s1: [0, O.lightsOut], s2: [O.lightsOut, O.numbers[0]], s5: [O.numbers[0], O.track], s3: [O.track, O.punchWipe], s4: [O.punchWipe, Infinity] } as const;
+const WIPES = [O.punchWipe];
+const FLEX = ["s1", "s4", "s5"];
 
 const markup = () => `
   <section class="scene" id="s1">
@@ -21,6 +23,12 @@ const markup = () => `
   </section>
   <section class="scene" id="s2">
     <div class="mapwrap">${MAP_SVG.replace('viewBox="0 0 640 600"', 'viewBox="70 15 590 590"')}</div>
+  </section>
+  <section class="scene" id="s5">
+    <div class="bignum"><i class="bar"></i><b></b><span></span></div>
+    <div class="numrow">${CREW.map((d) => `<i style="--team:${d.team}">${d.number}</i>`).join("")}</div>
+    <div class="dw"><span class="skew">8.–12.</span><span class="skew">juli</span><span class="skew red">2027</span></div>
+    <div class="kerbbar"></div>
   </section>
   <section class="scene" id="s3">
     <div class="trackwrap">${TRACK_SVG}</div>
@@ -40,12 +48,13 @@ const markup = () => `
   </section>
   <div class="wipe"></div>`;
 
-// Åpningen (0–15,4 s): de fire scenene fra den første introvideoen, nå lagt på anslagene i F1-temaet.
+// Scenene fra den første introvideoen, lagt på anslagene i F1-temaet: startlys, ruten og førernumrene med datoen
+// i åpningen, banen og «4 kamerater. 3 byer. 1 løp.» etter førerne. `offset` er filmtiden når sekvensen starter.
 // Scenene er SVG/HTML som oppdateres direkte for hver frame (samme oppskrift som den gamle render(t)).
-export const Opening: React.FC = () => {
+export const Opening: React.FC<{ offset?: number }> = ({ offset = 0 }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
-  const t = frame / fps;
+  const t = offset + frame / fps;
   const portrait = height > width;
   const stageW = portrait ? 1080 : 1920;
   const ref = useRef<HTMLDivElement>(null);
@@ -76,7 +85,7 @@ export const Opening: React.FC = () => {
       line.setAttribute("stroke-dasharray", "1 1");
     }
 
-    for (const [id, [a, b]] of Object.entries(SCENES)) $(`#${id}`).style.display = t >= a && t < b ? (id === "s1" || id === "s4" ? "flex" : "block") : "none";
+    for (const [id, [a, b]] of Object.entries(SCENES)) $(`#${id}`).style.display = t >= a && t < b ? (FLEX.includes(id) ? "flex" : "block") : "none";
 
     // 1 · Startlys på anslagene, sakte zoom inn
     $$("#s1 .gantry i").forEach((l, i) => l.classList.toggle("on", t >= O.lights[i]));
@@ -98,6 +107,33 @@ export const Opening: React.FC = () => {
     masks[4].setAttribute("stroke-dashoffset", String(1 - prog(t, graz, rbr, easeInOut)));
     cities[5].style.opacity = String(prog(t, rbr, rbr + 0.2, easeOut));
     $$<SVGPathElement>("#s2 .route-fly").forEach((r) => (r.style.strokeDashoffset = String(-30 * ((t - O.lightsOut) / 1.4))));
+
+    // Førernumrene: ett stort nummer per slag i lagfargen, så alle fire på rad og datoen ord for ord
+    const n = O.numbers.filter((at) => t >= at).length - 1;
+    const big = $("#s5 .bignum");
+    const inDate = t >= O.dateWords[0];
+    if (n >= 0 && !inDate) {
+      const d = CREW[n];
+      const p = prog(t, O.numbers[n], O.numbers[n] + 0.18, easeOut);
+      big.style.display = "grid";
+      big.style.setProperty("--team", d.team);
+      big.querySelector("b")!.textContent = String(d.number);
+      big.querySelector("span")!.textContent = d.code;
+      big.style.opacity = String(p);
+      big.querySelector("b")!.style.transform = `skewX(-8deg) scale(${1.45 - 0.45 * p})`;
+      (big.querySelector(".bar") as HTMLElement).style.transform = `skewX(-18deg) translateX(${-120 + 120 * p}%)`;
+    } else big.style.display = "none";
+    $$("#s5 .numrow i").forEach((el, i) => {
+      const p = prog(t, O.dateWords[0] + i * 0.05, O.dateWords[0] + 0.25 + i * 0.05, easeOut);
+      el.style.opacity = String(p);
+      el.style.transform = `skewX(-8deg) translateY(${-40 * (1 - p)}px)`;
+    });
+    $$("#s5 .dw span").forEach((s, i) => {
+      const p = prog(t, O.dateWords[i], O.dateWords[i] + 0.2, easeOut);
+      s.style.opacity = String(p);
+      s.style.transform = `skewX(-8deg) translateX(${-120 * (1 - p)}px)`;
+    });
+    $("#s5").style.transform = `scale(${1 + 0.05 * prog(t, O.dateWords[0], O.dateWords[0] + 2)})`;
 
     // 3 · Banen tegnes, bilen kjører runder, tallene smeller inn på slagene
     const line = $<SVGPathElement>("#s3 .track-line");
@@ -132,7 +168,7 @@ export const Opening: React.FC = () => {
       l.style.background = green ? "#00d26a" : "#2a0a0a";
       l.style.boxShadow = green ? "inset 0 0 0 5px #111, 0 0 24px #00d26a" : "inset 0 0 0 5px #111";
     });
-    $("#s4").style.transform = `scale(${1 + 0.04 * prog(t, O.punch[0], CAR.from)})`;
+    $("#s4").style.transform = `scale(${1 + 0.04 * prog(t, O.punchWipe, LINEUP_AT)})`;
 
     // Kantstein-visker over kuttene
     const wipe = $(".wipe");

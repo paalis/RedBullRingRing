@@ -3,7 +3,7 @@ import { AbsoluteFill, interpolate, Sequence, staticFile, useCurrentFrame, useVi
 import { CarPass } from "./CarPass";
 import { Opening } from "./Opening";
 import { TeamIntro } from "./TeamIntro";
-import { CAR, DURATION, FADE_OUT, TEAM_AT } from "./timeline";
+import { BEAT, CAR, DRIVERS_END, DURATION, FADE_OUT, LINEUP_AT, TEAM_AT } from "./timeline";
 import "./fonts";
 
 const FadeOut: React.FC = () => {
@@ -12,8 +12,8 @@ const FadeOut: React.FC = () => {
   return <AbsoluteFill style={{ zIndex: 20, background: "#0b0b10", opacity: interpolate(frame / fps, [DURATION - FADE_OUT, DURATION], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }} />;
 };
 
-// Introfilmen til nettsiden, synket til F1-temaet: åpningen (startlys, rute, bane, punchline),
-// bilen som overgang, og teamintroen med alle fire førerne og line-upen.
+// Introfilmen til nettsiden, synket til F1-temaet: åpningen (startlys, rute, førernumre og dato), bilen som
+// overgang, de fire førerne, så banen og «4 kamerater. 3 byer. 1 løp.», og til slutt line-upen.
 export const Intro: React.FC = () => {
   const { fps } = useVideoConfig();
   return (
@@ -27,6 +27,9 @@ export const Intro: React.FC = () => {
       </Sequence>
       <Sequence name="Teamintro" from={Math.round(TEAM_AT * fps)}>
         <TeamIntro />
+      </Sequence>
+      <Sequence name="Bane og punchline" from={Math.round(DRIVERS_END * fps)} durationInFrames={Math.round((LINEUP_AT - BEAT - DRIVERS_END) * fps)}>
+        <Opening offset={DRIVERS_END} />
       </Sequence>
       <Sequence name="Bilen" from={Math.round(CAR.from * fps)} durationInFrames={Math.round((TEAM_AT + 0.3 - CAR.from) * fps)}>
         <CarPass />
