@@ -173,16 +173,31 @@ function whenReady(el, maxMs) {
   return Promise.race([Promise.all([...imgs, font]), new Promise((r) => setTimeout(r, maxMs))]);
 }
 
-// ---------- Teamintro: korte bilklipp mellom førerne (tunnel, skisse, nærbilde, vindtunnel, zoom) ----------
-const TRANSITIONS = ["tunnel", "sketch", "nose", "flow", "zoom"];
+// ---------- Teamintro: korte bilklipp mellom førerne, to kutt per overgang ----------
+const SHOTS = [["tunnel", "wing"], ["sketch", "wheel"], ["nose", "wing tr-wing-red"], ["flow", "rear"], ["wheel tr-wheel-2", "zoom"]];
 const FLOW_LINES = [0, 1, 2, 3, 4, 5, 6].map((k) => {
   const y = 150 + k * 22;
   return `<path d="M-20 ${y + 60} C 260 ${y + 60}, 420 ${y - 40}, 640 ${y - 70} S 1000 ${y - 30}, 1240 ${y - 10}" style="--k:${k}"/>`;
 }).join("");
+const LEDS = (x, y0, n, step) => Array.from({ length: n }, (_, k) => `<circle class="tr-led" cx="${x}" cy="${y0 + k * step}" r="${step * 0.36}" style="--n:${k}"/>`).join("");
+const RING = (cx, cy, r, n) => Array.from({ length: n }, (_, k) => {
+  const a = (k / n) * Math.PI * 2;
+  return `<circle class="tr-led" cx="${(cx + r * Math.cos(a)).toFixed(1)}" cy="${(cy + r * Math.sin(a)).toFixed(1)}" r="7" style="--n:${k}"/>`;
+}).join("");
+// Bakvinge i silhuett: tre vingeblader og endeplate med LED-regnlys.
+const WING = `
+  <path d="M-60 150 C 400 140 900 120 1115 100 L1125 168 C 900 185 400 215 -60 236Z"/>
+  <path d="M-60 296 C 400 286 900 266 1105 236 L1115 298 C 900 328 400 358 -60 378Z"/>
+  <path d="M-60 428 C 400 418 900 398 1095 368 L1100 398 C 900 428 400 458 -60 468Z"/>
+  <path d="M1122 52 L1168 40 L1172 330 C1162 520 1082 650 962 900 L898 900 C1018 650 1108 520 1118 330Z"/>`;
 
 function transitionScene(i) {
-  const kind = TRANSITIONS[i % TRANSITIONS.length];
+  return SHOTS[i % SHOTS.length].map((kind, k) => shot(kind, `t${i}${"ab"[k]}`)).join("");
+}
+
+function shot(kind, name) {
   const car = `<img class="tr-car" src="assets/car.webp" alt="">`;
+  const base = kind.split(" ")[0];
   const body = {
     tunnel: `<div class="tr-floor"></div><i class="tr-strip tr-strip-a"></i><i class="tr-strip tr-strip-b"></i><div class="tr-glow"></div>`,
     sketch: `${car}<div class="tr-redbars"><i></i><i></i></div>`,
@@ -191,8 +206,26 @@ function transitionScene(i) {
         <defs><linearGradient id="tr-flow-g" x1="0" x2="1"><stop offset="0" stop-color="#ff2a1f"/><stop offset=".55" stop-color="#ffd6d6"/><stop offset="1" stop-color="#fff" stop-opacity=".4"/></linearGradient></defs>
         ${FLOW_LINES}</svg><div class="tr-redfloor"></div>`,
     zoom: `${car}<div class="tr-white"></div>`,
-  }[kind];
-  return `<section class="ti-scene tr tr-${kind}" data-scene="t${i}" aria-hidden="true">${body}</section>`;
+    wing: `<svg class="tr-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">${WING}${LEDS(1146, 74, 14, 18)}</svg>`,
+    rear: `<svg class="tr-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+        <g transform="translate(260 40) scale(.62)">${WING}${LEDS(1146, 74, 14, 18)}</g>
+        <path d="M250 900 C 330 720 520 650 600 560 C 650 480 700 430 770 430 C 840 430 880 480 920 560 C 1000 650 1150 720 1220 900Z"/>
+        <path d="M560 560 L600 330 L630 330 L620 560Z M900 560 L880 330 L910 330 L950 560Z"/>
+        <rect x="1240" y="540" width="330" height="420" rx="100"/>
+        <rect x="140" y="560" width="230" height="400" rx="80"/>
+        ${RING(770, 800, 42, 18)}</svg>`,
+    wheel: `<svg class="tr-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+        <defs><filter id="tr-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10"/></filter></defs>
+        <ellipse class="tr-tyre" cx="1050" cy="430" rx="560" ry="520"/>
+        <ellipse class="tr-rim-glow" cx="1000" cy="450" rx="400" ry="370" filter="url(#tr-blur)"/>
+        <ellipse class="tr-rim" cx="1000" cy="450" rx="400" ry="370"/>
+        <g class="tr-spin"><ellipse class="tr-dash" cx="1000" cy="450" rx="350" ry="322"/></g>
+        <g class="tr-arms"><rect x="-200" y="210" width="1500" height="120" transform="rotate(-18 550 270)"/>
+          <rect x="-200" y="520" width="1500" height="90" transform="rotate(-12 550 565)"/>
+          <rect x="560" y="-100" width="170" height="1100" transform="rotate(24 645 450)"/>
+          <path class="tr-edge" d="M690 -60 L1110 950" /></g></svg>`,
+  }[base];
+  return `<section class="ti-scene tr tr-${kind}" data-scene="${name}" aria-hidden="true">${body}</section>`;
 }
 
 // ---------- Teamintro: én scene per fører, hver i sin egen stil (som F1-sesongens førerpresentasjoner) ----------
@@ -247,7 +280,9 @@ function driverScene(d, i) {
 
 // ---------- Teamintro (F1 «line-up»-stil) ----------
 // Mellom hver fører (og før line-upen) kommer et kort bilklipp, «t0»–«t4».
-const TEAM_TIMELINE = [["title", 1300], ...CREW.flatMap((_, i) => [[`t${i}`, 600], [`d${i}`, 1500]]), [`t${CREW.length}`, 600], ["grid", 0]];
+// Hvert bilklipp er to raske kutt på 0,3 s («t0a», «t0b» …).
+const cut = (i) => [[`t${i}a`, 300], [`t${i}b`, 300]];
+const TEAM_TIMELINE = [["title", 1300], ...CREW.flatMap((_, i) => [...cut(i), [`d${i}`, 1500]]), ...cut(CREW.length), ["grid", 0]];
 // Rekkefølge i line-upen fra venstre: ytterst bak, innerst foran (som F1-plakaten).
 const LINEUP = [2, 0, 1, 3];
 
@@ -630,7 +665,8 @@ document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 // ---------- Nettsideintro: introvideo → teamintro → bil over skjermen, synket til lydsporet ----------
 // Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s,
 // bilen kommer inn rett før motorlyden topper (24,3 s), og siden åpnes på sluttslaget (25 s).
-const SITE_INTRO = [[12, "title"], [13.4, "t0"], [14, "d0"], [15.4, "t1"], [16, "d1"], [17.4, "t2"], [18, "d2"], [19.4, "t3"], [20, "d3"], [21.4, "t4"], [22, "grid"], [23.6, "car"], [25, "end"]];
+const SITE_INTRO = [[12, "title"], [13.4, "t0a"], [13.7, "t0b"], [14, "d0"], [15.4, "t1a"], [15.7, "t1b"], [16, "d1"], [17.4, "t2a"], [17.7, "t2b"], [18, "d2"],
+  [19.4, "t3a"], [19.7, "t3b"], [20, "d3"], [21.4, "t4a"], [21.7, "t4b"], [22, "grid"], [23.6, "car"], [25, "end"]];
 // Bilen som suser over line-upen (utklippet bilde, kjører mot høyre).
 const CAR_IMG = `<img class="si-car-img" src="assets/car.webp" alt="" decoding="async">`;
 

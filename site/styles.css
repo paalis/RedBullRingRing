@@ -805,10 +805,10 @@ body.has-modal { overflow: hidden; }
 .tr-strip-a { left: -5%; top: 45%; width: 42%; transform: rotate(-2deg); }
 .tr-strip-b { right: -5%; top: 4%; width: 34%; transform: rotate(-32deg); transform-origin: right; }
 .tr-glow { position: absolute; left: 50%; top: 44%; width: 30vw; height: 30vw; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(200, 230, 255, .55), transparent 65%); }
-.tr-tunnel.is-on { animation: tr-push .6s cubic-bezier(.5, 0, .7, 1) both; }
-.tr-tunnel.is-on .tr-floor { animation: tr-rush .6s linear both; }
-.tr-tunnel.is-on .tr-strip { animation: tr-strip .35s cubic-bezier(.2, .9, .3, 1) both; }
-.tr-tunnel.is-on .tr-glow { animation: tr-pulse .6s ease both; }
+.tr-tunnel.is-on { animation: tr-push .3s cubic-bezier(.5, 0, .7, 1) both; }
+.tr-tunnel.is-on .tr-floor { animation: tr-rush .3s linear both; }
+.tr-tunnel.is-on .tr-strip { animation: tr-strip .2s cubic-bezier(.2, .9, .3, 1) both; }
+.tr-tunnel.is-on .tr-glow { animation: tr-pulse .3s ease both; }
 
 /* Skisse: invertert nærbilde av nesen, røde striper over */
 .tr-sketch { background: #eceef1; }
@@ -817,16 +817,16 @@ body.has-modal { overflow: hidden; }
 .tr-redbars i { position: absolute; left: 14%; right: 0; height: 5.5vh; clip-path: polygon(3vh 0, 100% 0, 100% 100%, 0 100%); transform-origin: right; }
 .tr-redbars i:first-child { top: 44%; background: linear-gradient(90deg, rgba(225, 6, 0, .25), rgba(225, 6, 0, .8)); }
 .tr-redbars i:last-child { top: 51%; background: var(--red); }
-.tr-sketch.is-on .tr-car { animation: tr-pan-r .6s linear both; }
-.tr-sketch.is-on .tr-redbars i { animation: tr-bars .45s cubic-bezier(.2, .9, .3, 1) both; }
+.tr-sketch.is-on .tr-car { animation: tr-pan-r .3s linear both; }
+.tr-sketch.is-on .tr-redbars i { animation: tr-bars .22s cubic-bezier(.2, .9, .3, 1) both; }
 .tr-sketch.is-on .tr-redbars i:last-child { animation-delay: .06s; }
 
 /* Nærbilde: mørk nese med rødt kantlys og rosa røyk */
 .tr-nose .tr-car { filter: grayscale(.5) brightness(.42) contrast(1.35) drop-shadow(0 -3px 3px rgba(255, 40, 30, .95)); }
 .tr-smoke { position: absolute; left: -10%; top: 46%; width: 85%; height: 12vh; border-radius: 50%; filter: blur(16px);
   background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255, 160, 170, .8), rgba(255, 120, 130, .3) 55%, transparent 75%); }
-.tr-nose.is-on .tr-car { animation: tr-pan-l .6s linear both; }
-.tr-nose.is-on .tr-smoke { animation: tr-smoke .6s ease-out both; }
+.tr-nose.is-on .tr-car { animation: tr-pan-l .3s linear both; }
+.tr-nose.is-on .tr-smoke { animation: tr-smoke .3s ease-out both; }
 
 /* Vindtunnel: mørk bil i rødt lys, strømningslinjer fra rødt til hvitt */
 .tr-flow { background: radial-gradient(ellipse 80% 70% at 60% 45%, #2a2b30, #08080b 70%); }
@@ -834,16 +834,43 @@ body.has-modal { overflow: hidden; }
 .tr-lines { position: absolute; left: 0; top: 31vh; width: 100%; height: 42vh; z-index: 2; scale: -1 1; }
 .tr-lines path { fill: none; stroke: url(#tr-flow-g); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1600; filter: drop-shadow(0 0 6px rgba(255, 120, 120, .8)); }
 .tr-redfloor { position: absolute; right: -10%; bottom: -10%; width: 50%; height: 40%; background: radial-gradient(ellipse at 70% 60%, rgba(225, 6, 0, .55), transparent 70%); filter: blur(10px); }
-.tr-flow.is-on .tr-lines path { animation: tr-draw .55s cubic-bezier(.3, .6, .4, 1) both; animation-delay: calc(var(--k) * 25ms); }
-.tr-flow.is-on .tr-car { animation: tr-carin .6s ease-out both; }
+.tr-flow.is-on .tr-lines path { animation: tr-draw .26s cubic-bezier(.3, .6, .4, 1) both; animation-delay: calc(var(--k) * 6ms); }
+.tr-flow.is-on .tr-car { animation: tr-carin .3s ease-out both; }
 
 /* Zoom: bilen suser mot kamera med bevegelsesuskarphet, så hvitt blink */
 .tr-zoom { background: #eceef1; }
 .tr-zoom .tr-car { width: 90vw; left: 5vw; top: 50%; translate: 0 -50%; filter: grayscale(1) invert(1) contrast(1.5); }
 .tr-white { position: absolute; inset: 0; background: #fff; opacity: 0; }
-.tr-zoom.is-on .tr-car { animation: tr-rushcam .6s cubic-bezier(.6, 0, .9, .6) both; }
-.tr-zoom.is-on .tr-white { animation: tr-whiteout .6s ease-in both; }
+.tr-zoom.is-on .tr-car { animation: tr-rushcam .3s cubic-bezier(.6, 0, .9, .6) both; }
+.tr-zoom.is-on .tr-white { animation: tr-whiteout .3s ease-in both; }
 
+/* Bakvinge: grå himmel, svarte vingeblader, LED-regnlyset tennes nedover */
+.tr-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tr-wing, .tr-rear { background: linear-gradient(180deg, #7e8187 0%, #b9bcc2 55%, #d9dbdf 100%); }
+.tr-wing-red { background: radial-gradient(ellipse 70% 80% at 30% 50%, #93394a, #4a1420 55%, #1c060b 100%); }
+.tr-wing path, .tr-rear path, .tr-rear rect { fill: #08080a; }
+.tr-led { fill: #ff6a2a; opacity: .12; }
+.is-on .tr-led { animation: tr-led .08s linear both; animation-delay: calc(var(--n) * 14ms); filter: drop-shadow(0 0 6px #ff3a1a); }
+.tr-wing.is-on .tr-svg, .tr-rear.is-on .tr-svg { animation: tr-dolly .3s linear both; }
+.tr-rear .tr-led { fill: #ff2a1a; }
+
+/* Hjul: mørkt nærbilde, rødt glødende felgkant som spinner, opphengsarmer foran */
+.tr-wheel { background: linear-gradient(135deg, #2d3036, #0a0b0e 60%); }
+.tr-tyre { fill: #121316; }
+.tr-rim { fill: none; stroke: #ff2a1f; stroke-width: 22; }
+.tr-rim-glow { fill: none; stroke: #ff7a3a; stroke-width: 60; opacity: .8; }
+.tr-dash { fill: none; stroke: #ffb08a; stroke-width: 8; stroke-dasharray: 8 26; opacity: .7; }
+.tr-spin { transform-origin: 1000px 450px; }
+.tr-arms rect { fill: #050506; }
+.tr-edge { stroke: rgba(255, 255, 255, .8); stroke-width: 6; }
+.tr-wheel-2 .tr-arms { transform: scale(-1, 1); transform-origin: 800px 450px; }
+.tr-wheel.is-on .tr-spin { animation: tr-spin .3s linear both; }
+.tr-wheel.is-on .tr-svg { animation: tr-shake .3s linear both; }
+
+@keyframes tr-led { from { opacity: .12; } to { opacity: 1; } }
+@keyframes tr-dolly { from { transform: scale(1.04); } to { transform: scale(1.1) translateX(-1%); } }
+@keyframes tr-spin { to { transform: rotate(80deg); } }
+@keyframes tr-shake { 0% { transform: translate(0, 0) scale(1.05); } 50% { transform: translate(-8px, 4px) scale(1.07); } 100% { transform: translate(6px, -3px) scale(1.09); } }
 @keyframes tr-push { from { transform: scale(1); } to { transform: scale(1.18); } }
 @keyframes tr-rush { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 500px, 0 0, 0 0; } }
 @keyframes tr-strip { from { transform: scaleX(0) rotate(var(--r, 0deg)); opacity: 0; } }
