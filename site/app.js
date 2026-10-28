@@ -452,9 +452,9 @@ const navIo = new IntersectionObserver((entries) => {
 document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 
 // ---------- Introfilmen ----------
-// Filmen lages med Remotion i video/ og er synket til F1-temaet: åpning, bilen som overgang (14,15 s) og teamintroen
+// Filmen lages med Remotion i video/ og er synket til F1-temaet: åpning, bilsekvensen (13,6 s, vroom 14,8 s) og teamintroen
 // fra 15,36 s. assets/intro.mp4 er liggende, assets/intro-mobile.mp4 stående. «Spill teamintro» starter ved bilen.
-const TEAM_INTRO_AT = 14.15;
+const TEAM_INTRO_AT = 13.6;
 const hero = document.querySelector(".hero");
 const video = document.querySelector(".hero-video");
 const portrait = matchMedia("(max-aspect-ratio: 4/5)");

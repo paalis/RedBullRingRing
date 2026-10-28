@@ -22,13 +22,13 @@ export const Intro: React.FC = () => {
         src={staticFile("f1-theme.m4a")}
         volume={(f) => interpolate(f / fps, [DURATION - FADE_OUT, DURATION], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
       />
-      <Sequence name="Åpning" durationInFrames={Math.round(TEAM_AT * fps)}>
+      <Sequence name="Åpning" durationInFrames={Math.round(CAR.from * fps)}>
         <Opening />
       </Sequence>
       <Sequence name="Teamintro" from={Math.round(TEAM_AT * fps)}>
         <TeamIntro />
       </Sequence>
-      <Sequence name="Bilen" from={Math.round(CAR.from * fps)} durationInFrames={Math.round((TEAM_AT + 0.6 - CAR.from) * fps)}>
+      <Sequence name="Bilen" from={Math.round(CAR.from * fps)} durationInFrames={Math.round((TEAM_AT + 0.3 - CAR.from) * fps)}>
         <CarPass />
       </Sequence>
       <FadeOut />

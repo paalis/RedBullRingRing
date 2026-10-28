@@ -43,10 +43,8 @@
 .op #s1 .flag-at { width: 54px; height: 36px; }
 
 /* 2 · Ruten */
-.op #s2 .copy { position: absolute; left: 140px; top: 330px; width: 760px; }
-.op #s2 h2 { font-size: 150px; }
-.op #s2 .copy p.sub { margin: 30px 0 0; font-size: 40px; color: #d8d8e0; font-weight: 600; }
-.op #s2 .mapwrap { position: absolute; right: 90px; top: 60px; width: 1030px; height: 966px; }
+/* Bare reisegrafikken, sentrert, med luft til kantene så alle bynavn vises */
+.op #s2 .mapwrap { position: absolute; left: 50%; top: 50%; width: 1000px; height: 1000px; translate: -50% -50%; }
 .op #s2 .mapwrap svg { width: 100%; height: 100%; color: var(--text); }
 
 /* 3 · Banen */
@@ -82,9 +80,7 @@
 .op.is-portrait .gantry { gap: 22px; padding: 24px 28px; }
 .op.is-portrait .gantry i { width: 150px; height: 150px; }
 .op.is-portrait #s1 .kick { font-size: 34px; flex-direction: column; text-align: center; }
-.op.is-portrait #s2 .copy { left: 80px; top: 170px; width: 920px; }
-.op.is-portrait #s2 h2 { font-size: 160px; }
-.op.is-portrait #s2 .mapwrap { left: 25px; right: auto; top: 820px; width: 1030px; height: 966px; }
+.op.is-portrait #s2 .mapwrap { width: 1040px; height: 1040px; }
 .op.is-portrait #s3 .trackwrap { left: 30px; top: 180px; width: 1020px; }
 .op.is-portrait #s3 .copy { left: 80px; top: 1000px; width: 920px; }
 .op.is-portrait #s3 h2 { font-size: 130px; }
