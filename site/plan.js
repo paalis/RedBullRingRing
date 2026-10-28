@@ -143,6 +143,32 @@ function renderBudget() {
   document.querySelectorAll(".plan-budget").forEach((el) => (el.innerHTML = html));
 }
 
+// ---------- Forsidebilde fra annonsen ----------
+const triedPreview = new Set();
+async function fetchPreview(url) {
+  if (!url) return "";
+  try {
+    const r = await fetch(`/api/preview?url=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) return "";
+    const { image } = await r.json();
+    return typeof image === "string" && /^https:\/\//.test(image) && image.length <= 1000 ? image : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+// Forslag lagt inn før bildestøtten kom: første medlem som ser dem henter bildet.
+function backfillPreviews() {
+  if (!me) return;
+  candidates
+    .filter((c) => c.url && !("image" in c) && !triedPreview.has(c.id))
+    .forEach(async (c) => {
+      triedPreview.add(c.id);
+      const image = await fetchPreview(c.url);
+      if (image) await updateDoc(doc(db, "candidates", c.id), { image }).catch(() => {});
+    });
+}
+
 // ---------- Forslag ----------
 function candidateItem(c) {
   const votes = c.votes || [];
@@ -151,6 +177,7 @@ function candidateItem(c) {
   const booked = c.status === "booket";
   return `
     <li class="stay-option plan-item is-${booked ? "booked" : "candidate"}" data-id="${c.id}">
+      ${c.image ? `<a class="plan-photo" href="${esc(c.url || c.image)}" target="_blank" rel="noopener"><img src="${esc(c.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.remove()"></a>` : ""}
       <span class="stay-status">${booked ? "Booket" : "Kandidat"}</span>
       <p class="stay-name">${esc(c.name)}</p>
       ${meta ? `<p class="stay-meta">${meta}</p>` : ""}
@@ -230,6 +257,7 @@ function renderAll() {
   renderBars();
   document.querySelectorAll(".plan-live").forEach(renderSlot);
   renderBudget();
+  backfillPreviews();
   document.querySelectorAll(".car-todo li").forEach((li) => (li.querySelector(".car-check").disabled = !me));
 }
 
@@ -237,6 +265,7 @@ onSnapshot(collection(db, "candidates"), (snap) => {
   candidates = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   document.querySelectorAll(".plan-live").forEach(renderSlot);
   renderBudget();
+  backfillPreviews();
 });
 
 // ---------- Handlinger ----------
@@ -275,9 +304,13 @@ document.addEventListener("submit", async (e) => {
   const f = form.elements;
   const url = f.url.value.trim();
   if (url && !/^https:\/\//.test(url)) return alert("Lenken må starte med https://");
-  form.querySelector("button").disabled = true;
+  const submit = form.querySelector("button");
+  submit.disabled = true;
+  submit.textContent = url ? "Henter bilde …" : "Legger til …";
   try {
+    const image = await fetchPreview(url);
     await addDoc(collection(db, "candidates"), {
+      ...(image ? { image } : {}),
       slot: form.dataset.slot,
       type: f.type ? f.type.value : "Leiebil",
       name: f.name.value.trim(),
@@ -293,7 +326,8 @@ document.addEventListener("submit", async (e) => {
     });
   } catch (ex) {
     alert("Kunne ikke lagre: " + ex.message);
-    form.querySelector("button").disabled = false;
+    submit.disabled = false;
+    submit.textContent = "Legg til";
   }
 });
 
