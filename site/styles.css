@@ -432,7 +432,7 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .plan-price .plan-legacy { font-size: 16px; color: var(--text); }
 .car-pp { display: block; font-size: 13px; font-weight: 600; color: var(--yellow); }
 .plan-budget:empty { display: none; }
-.budget { display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 0; margin-top: 14px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.budget { display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 0; margin-top: 40px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
 .budget-total { padding: 18px 20px; background: linear-gradient(135deg, rgba(225,6,0,.22), var(--bg-3)); border-right: 1px solid var(--line); }
 .budget-total p { margin: 0; }
 .budget-kicker { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
