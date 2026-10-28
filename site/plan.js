@@ -17,13 +17,37 @@ const app = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
 
-const NAMES = CREW.map((c) => c.name);
 let me = null; // { uid, name } når man er medlem
 let joinError = "";
-let joinName = "";
+let joining = false;
 let candidates = [];
 
 // ---------- Medlemskap ----------
+// Innloggingen på siden er nok: lagkoden hentes fra /api/member (bak innloggings-cookien), så her
+// trenger du bare å si hvem du er – og det huskes fra innloggingen.
+const savedName = () => { try { return localStorage.getItem("rbr-name") || ""; } catch (_) { return ""; } };
+
+async function join(name) {
+  if (joining) return;
+  joining = true;
+  joinError = "";
+  try {
+    const res = await fetch("/api/member", { cache: "no-store" });
+    if (!res.ok) throw new Error(`member ${res.status}`);
+    const { code } = await res.json();
+    const cred = auth.currentUser ? { user: auth.currentUser } : await signInAnonymously(auth);
+    await setDoc(doc(db, "members", cred.user.uid), { name, code, joinedAt: serverTimestamp() });
+    try { localStorage.setItem("rbr-name", name); } catch (_) {}
+    me = { uid: cred.user.uid, name };
+    syncWatchers();
+  } catch (ex) {
+    console.error("Kunne ikke koble til planleggeren:", ex);
+    joinError = "Fikk ikke koblet til – prøv igjen.";
+  }
+  joining = false;
+  renderAll();
+}
+
 function renderBars() {
   document.querySelectorAll(".plan-bar").forEach((bar) => {
     if (me) {
@@ -31,47 +55,24 @@ function renderBars() {
         <div class="plan-bar-in is-member">
           <span class="plan-dot"></span>
           <span>Planlegger som <b>${esc(me.name)}</b> – legg til forslag, stem og huk av.</span>
-          <button class="btn-ghost plan-leave" type="button">Logg ut</button>
+          <button class="btn-ghost plan-leave" type="button">Bytt person</button>
         </div>`;
-      bar.querySelector(".plan-leave").addEventListener("click", () => signOut(auth));
+      bar.querySelector(".plan-leave").addEventListener("click", async () => {
+        try { localStorage.removeItem("rbr-name"); } catch (_) {}
+        await signOut(auth);
+      });
       return;
     }
     bar.innerHTML = `
-      <form class="plan-bar-in plan-join">
+      <div class="plan-bar-in plan-join">
         <span class="plan-dot is-off"></span>
-        <span class="plan-join-text">Vil du legge inn forslag eller stemme?</span>
-        <select name="name" required aria-label="Hvem er du">
-          <option value="">Hvem er du?</option>
-          ${NAMES.map((n) => `<option${n === joinName ? " selected" : ""}>${esc(n)}</option>`).join("")}
-        </select>
-        <input name="code" type="password" required placeholder="Lagkode" autocomplete="off" aria-label="Lagkode">
-        <button class="plan-btn" type="submit">Bli med</button>
+        <span class="plan-join-text">${joining ? "Kobler til …" : "Hvem er du?"}</span>
+        <div class="plan-who">
+          ${CREW.map((c) => `<button type="button" class="plan-who-btn" data-name="${esc(c.name)}" style="--team:${c.team}"${joining ? " disabled" : ""}><i>${c.number}</i>${esc(c.name)}</button>`).join("")}
+        </div>
         <p class="plan-error" role="alert">${esc(joinError)}</p>
-      </form>`;
-    const form = bar.querySelector("form");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      joinName = form.name.value;
-      joinError = "";
-      form.querySelector(".plan-error").textContent = "";
-      form.querySelector("button").disabled = true;
-      try {
-        const cred = auth.currentUser ? { user: auth.currentUser } : await signInAnonymously(auth);
-        await setDoc(doc(db, "members", cred.user.uid), {
-          name: form.name.value,
-          code: form.code.value.trim(),
-          joinedAt: serverTimestamp(),
-        });
-        me = { uid: cred.user.uid, name: form.name.value };
-        syncWatchers();
-        renderAll();
-      } catch (ex) {
-        console.error("Kunne ikke bli med:", ex);
-        me = null;
-        joinError = /permission/i.test(ex.message) ? "Feil lagkode." : "Noe gikk galt – prøv igjen.";
-        renderBars();
-      }
-    });
+      </div>`;
+    bar.querySelectorAll(".plan-who-btn").forEach((b) => b.addEventListener("click", () => join(b.dataset.name)));
   });
 }
 
@@ -84,6 +85,9 @@ function syncWatchers() {
     unwatch = [];
     candidates = [];
   }
+  // Pakkelisten (app.js) lagrer i Firebase så lenge du er medlem.
+  window.rbrPlan = me ? { pack: (key, done) => setTodo(`pack-${myIndex()}-${key}`, done) } : undefined;
+  document.querySelectorAll(".team-check").forEach((b) => (b.disabled = !me));
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -96,6 +100,8 @@ onAuthStateChanged(auth, async (user) => {
   }
   syncWatchers();
   renderAll();
+  // Kjent navn fra innloggingen → bli medlem automatisk, uten å spørre.
+  if (!me && savedName() && !joinError) join(savedName());
 });
 
 // ---------- Pris ----------
@@ -139,7 +145,7 @@ function renderBudget() {
     if (ok) sum += pick.c.total; else missing++;
     return `
       <li class="${ok ? "" : "is-missing"}">
-        <span class="budget-label">${esc(label)}<small>${ok ? `${esc(pick.how)}: ${esc(pick.c.name)}` : "Ingen pris ennå"}</small></span>
+        <span class="budget-label">${esc(label)}<small>${ok ? `${esc(pick.how)}: ${esc(pick.c.name)}` : "Gridposisjon ledig"}</small></span>
         <span class="budget-val">${ok ? kr(pick.c.total) : "–"}</span>
       </li>`;
   }).join("");
@@ -147,9 +153,10 @@ function renderBudget() {
     <div class="budget">
       <div class="budget-total">
         <p class="budget-kicker">Totalpris overnatting + leiebil</p>
-        <p class="budget-big">${kr(sum)}</p>
-        <p class="budget-pp"><b>${kr(sum / PEOPLE)}</b> per person</p>
-        ${missing ? `<p class="budget-note">${missing} av ${rows.length} mangler pris ennå</p>` : ""}
+        ${sum ? `<p class="budget-big">${kr(sum)}</p>
+        <p class="budget-pp"><b>${kr(sum / PEOPLE)}</b> per person</p>` : `<p class="budget-big is-empty">Gridposisjon ledig</p>
+        <p class="budget-pp">Ingen priser ennå – legg inn forslag med totalpris under Base camp og Leiebil.</p>`}
+        ${missing && sum ? `<p class="budget-note">${missing} av ${rows.length} mangler pris ennå</p>` : ""}
       </div>
       <ul class="budget-lines">${lines}</ul>
     </div>`;
@@ -539,6 +546,10 @@ document.addEventListener("input", (e) => {
 });
 
 // ---------- Leiebil: avkrysning ----------
+const myIndex = () => CREW.findIndex((c) => c.name === (me && me.name));
+const setTodo = (id, done) =>
+  setDoc(doc(db, "todos", id), { done, by: me.name }).catch((ex) => alert("Kunne ikke lagre: " + ex.message));
+
 function watchTodos() {
   return onSnapshot(collection(db, "todos"), (snap) => {
     const state = Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
@@ -552,14 +563,40 @@ function watchTodos() {
     });
     const count = document.querySelector("[data-todo-count]");
     if (count) count.textContent = `${done} / ${CAR.todo.length}`;
+
+    // Teamstatus: hvem som huket av, i lagfargen sin
+    let teamDone = 0;
+    const teamItems = document.querySelectorAll(".team-checks li");
+    teamItems.forEach((li) => {
+      const s = state[li.dataset.todo];
+      const isDone = !!(s && s.done);
+      const who = isDone && CREW.find((c) => c.name === s.by);
+      li.classList.toggle("is-done", isDone);
+      const by = li.querySelector(".team-by");
+      by.textContent = who ? who.code : "";
+      by.style.setProperty("--team", who ? who.team : "transparent");
+      by.title = who ? `Huket av ${who.name}` : "";
+      if (isDone) teamDone++;
+    });
+    const tc = document.querySelector("[data-team-count]");
+    if (tc) tc.textContent = `${teamDone} / ${teamItems.length}`;
+
+    // Pakkelisten: mine avkrysninger + fremdriften til alle fire
+    const boxes = [...document.querySelectorAll(".checklist input[data-pack]")];
+    boxes.forEach((b) => (b.checked = !!(state[`pack-${myIndex()}-${b.dataset.pack}`] || {}).done));
+    const countEl = document.querySelector(".pack-count");
+    if (countEl) countEl.textContent = boxes.filter((b) => b.checked).length;
+    const crew = document.querySelector(".pack-crew");
+    if (crew) crew.innerHTML = CREW.map((c, i) => {
+      const n = boxes.filter((b) => (state[`pack-${i}-${b.dataset.pack}`] || {}).done).length;
+      return `<div class="pack-who" style="--team:${c.team}" title="${esc(c.name)}: ${n} av ${boxes.length}">
+        <span>${esc(c.code)}</span><i style="--p:${boxes.length ? n / boxes.length : 0}"></i><b>${n}/${boxes.length}</b></div>`;
+    }).join("");
   });
 }
-
 document.addEventListener("click", async (e) => {
-  const check = e.target.closest(".car-check");
+  const check = e.target.closest(".car-check, .team-check");
   if (!check || !me) return;
   const li = check.closest("li");
-  await setDoc(doc(db, "todos", li.dataset.todo), { done: !li.classList.contains("is-done"), by: me.name }).catch((ex) =>
-    alert("Kunne ikke lagre: " + ex.message),
-  );
+  await setTodo(li.dataset.todo, !li.classList.contains("is-done"));
 });

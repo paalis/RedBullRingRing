@@ -41,7 +41,7 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 
 /* ---------- NAV ---------- */
 .nav {
-  position: sticky; top: 0; z-index: 50;
+  position: sticky; top: 0; z-index: 50; flex-wrap: wrap;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 12px var(--gutter);
   background: rgba(11, 11, 16, .82);
@@ -125,19 +125,10 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
 .lights span {
   width: 26px; height: 26px; border-radius: 50%;
   background: #2a0a0a; box-shadow: inset 0 0 0 3px #111;
-  animation: 6s infinite step-end;
+  transition: background .15s, box-shadow .15s;
 }
-/* Lights come on one by one, then all go out together at 3s – lights out. */
-.lights span:nth-child(1) { animation-name: light1; }
-@keyframes light1 { 0% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } 0.01% { background: var(--red-hot); box-shadow: inset 0 0 0 3px #111, 0 0 18px var(--red); } 50% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } }
-.lights span:nth-child(2) { animation-name: light2; }
-@keyframes light2 { 0% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } 8.34% { background: var(--red-hot); box-shadow: inset 0 0 0 3px #111, 0 0 18px var(--red); } 50% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } }
-.lights span:nth-child(3) { animation-name: light3; }
-@keyframes light3 { 0% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } 16.68% { background: var(--red-hot); box-shadow: inset 0 0 0 3px #111, 0 0 18px var(--red); } 50% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } }
-.lights span:nth-child(4) { animation-name: light4; }
-@keyframes light4 { 0% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } 25.01% { background: var(--red-hot); box-shadow: inset 0 0 0 3px #111, 0 0 18px var(--red); } 50% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } }
-.lights span:nth-child(5) { animation-name: light5; }
-@keyframes light5 { 0% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } 33.34% { background: var(--red-hot); box-shadow: inset 0 0 0 3px #111, 0 0 18px var(--red); } 50% { background: #2a0a0a; box-shadow: inset 0 0 0 3px #111; } }
+/* Tennes ett og ett når du scroller (app.js). */
+.lights span.on { background: var(--red-hot); box-shadow: inset 0 0 0 3px #111, 0 0 18px var(--red); }
 
 .countdown {
   display: inline-block; background: rgba(21,21,30,.8); border: 1px solid var(--line);
@@ -708,3 +699,94 @@ body.has-modal { overflow: hidden; }
 .wx-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
 .wx-src { margin: 12px 0 0; font-size: 11px; color: var(--muted); }
 .wx-src a { color: inherit; }
+
+/* ---------- Neste økt (under menyen) ---------- */
+.nextup {
+  flex: 0 0 calc(100% + 2 * var(--gutter)); display: flex; align-items: center; gap: 12px; margin: 8px calc(-1 * var(--gutter)) -12px;
+  padding: 7px var(--gutter); border-top: 1px solid var(--line); background: rgba(225, 6, 0, .07); font-size: 14px;
+}
+.mini-lights { display: flex; gap: 4px; flex: none; }
+.mini-lights i { width: 9px; height: 9px; border-radius: 50%; background: #3a0d0d; transition: background .15s, box-shadow .15s; }
+.mini-lights i.on { background: var(--red-hot); box-shadow: 0 0 8px var(--red); }
+.nextup.is-out .mini-lights i { background: #0b3d22; }
+.nextup-text { margin: 0; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nextup-label { font-weight: 700; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--red); margin-right: 4px; }
+.nextup.is-live .nextup-label { color: #00d26a; }
+.nextup-title { font-weight: 900; }
+.nextup-when { color: var(--muted); margin-left: 6px; }
+.nextup-cal {
+  flex: none; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+  padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--text);
+}
+.nextup-cal:hover { border-color: var(--red); }
+@media (max-width: 720px) {
+  .nextup { font-size: 13px; gap: 8px; margin-bottom: -8px; }
+  .nextup-text { white-space: normal; line-height: 1.25; }
+  .nextup-when { display: block; margin: 0; font-size: 12px; }
+  .nextup-cal { padding: 4px 10px; font-size: 11px; }
+}
+
+/* ---------- Velg person (planleggeren) ---------- */
+.plan-who { display: flex; flex-wrap: wrap; gap: 6px; }
+.plan-who-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 999px; cursor: pointer;
+  background: var(--bg); border: 1px solid var(--line); color: var(--text); font: 700 14px/1 "Titillium", sans-serif;
+}
+.plan-who-btn i { font-style: normal; font-weight: 900; font-size: 12px; min-width: 24px; padding: 4px 0; text-align: center; border-radius: 999px; background: var(--team); color: #0b0b10; }
+.plan-who-btn:hover { border-color: var(--team); }
+.plan-who-btn:disabled { opacity: .5; cursor: wait; }
+
+/* ---------- Pit wall: teamstatus + pakkeliste ---------- */
+.pitwall { display: grid; grid-template-columns: 1fr 1.3fr; gap: 16px; margin-top: 32px; align-items: start; }
+.pw-card { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px 18px; }
+.pw-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.pw-head > b { font-weight: 900; text-transform: uppercase; letter-spacing: .06em; }
+.pw-count { font-weight: 700; color: var(--yellow); font-variant-numeric: tabular-nums; }
+.pw-count b { font-weight: 900; }
+.team-checks { list-style: none; margin: 0; padding: 0; }
+.team-checks li { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.team-checks li:first-child { border-top: 0; }
+.team-check {
+  flex: none; width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--muted); background: none; cursor: pointer; position: relative;
+}
+.team-check:disabled { cursor: default; opacity: .6; }
+.team-checks li.is-done .team-check { background: #00d26a; border-color: #00d26a; }
+.team-checks li.is-done .team-check::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid #0b0b10; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+.team-checks li.is-done span { color: var(--muted); text-decoration: line-through; }
+.team-checks span { flex: 1; font-weight: 600; }
+.team-by { font-style: normal; font-weight: 900; font-size: 11px; letter-spacing: .06em; padding: 3px 7px; border-radius: 999px; background: var(--team); color: #0b0b10; }
+.team-by:empty { display: none; }
+.pack-crew { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.pack-crew:empty { display: none; }
+.pack-who { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 6px; font-size: 12px; }
+.pack-who span { font-weight: 900; color: var(--team); }
+.pack-who b { grid-column: 2; grid-row: 1; justify-self: end; color: var(--muted); font-weight: 700; }
+.pack-who i { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--team) calc(var(--p) * 100%), rgba(255,255,255,.1) 0); }
+.pitwall .checklist { margin: 0; }
+.pitwall .pack-reset { margin-top: 12px; }
+@media (max-width: 900px) { .pitwall { grid-template-columns: 1fr; } }
+
+/* ---------- Budsjett uten priser ---------- */
+.budget-big.is-empty { font-size: clamp(26px, 3.4vw, 36px); color: var(--muted); }
+
+/* ---------- Regler for banen ---------- */
+.btn-rules {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 10px 16px; cursor: pointer;
+  font: 700 13px/1 "Titillium", sans-serif; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text); background: var(--bg-2); border: 1px solid var(--yellow); border-radius: 999px;
+}
+.btn-rules::before { content: "!"; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--yellow); color: #0b0b10; font-weight: 900; letter-spacing: 0; }
+.btn-rules:hover { background: rgba(255, 210, 0, .1); }
+.rules { width: min(620px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); color: var(--text); }
+.rules::backdrop { background: rgba(0, 0, 0, .7); backdrop-filter: blur(4px); }
+.rules-box { padding: 20px 22px 18px; border-top: 4px solid var(--yellow); }
+.rules-box header { position: relative; padding-right: 40px; }
+.rules-box h3 { font-weight: 900; text-transform: uppercase; font-size: clamp(24px, 4vw, 32px); }
+.rules-close { position: absolute; right: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--text); cursor: pointer; }
+.rules-list { list-style: none; margin: 16px 0 0; padding: 0; }
+.rules-list li { display: grid; grid-template-columns: 150px 1fr; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); }
+.rules-list b { font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: .06em; color: var(--yellow); padding-top: 2px; }
+.rules-list span { color: #d8d8e0; }
+.rules-src { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.rules-src a { color: inherit; }
+@media (max-width: 560px) { .rules-list li { grid-template-columns: 1fr; gap: 2px; } }
