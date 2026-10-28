@@ -4,7 +4,7 @@ import { next } from "@vercel/functions";
 
 export const config = {
   // Alt unntatt innloggingssiden og det den trenger (fonter, Firebase-biblioteket, innloggings-API-et).
-  matcher: ["/((?!login\\.html|api/login|api/logout|assets/fonts/|assets/vendor/firebase\\.js|favicon).*)"],
+  matcher: ["/((?!login\\.html|api/login|api/logout|assets/fonts/|assets/icons/|site\\.webmanifest|apple-touch-icon|assets/vendor/firebase\\.js|favicon).*)"],
 };
 
 const COOKIE = "rbr_pass";
