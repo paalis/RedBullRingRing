@@ -6,3 +6,6 @@ build
 
 # Ignore the output video from Git but not videos you import into src/.
 out
+
+# Recreated from the retained source M4A by scripts/prepare-assets.mjs.
+public/audio/f1theme.wav
