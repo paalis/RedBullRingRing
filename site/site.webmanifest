@@ -1,0 +1,12 @@
+{
+  "name": "RBR '27 · Østerrikes Grand Prix",
+  "short_name": "RBR '27",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#0b0b10",
+  "theme_color": "#0b0b10",
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
