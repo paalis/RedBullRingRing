@@ -678,3 +678,33 @@ body.has-modal { overflow: hidden; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* Vær på banen */
+.weather { margin-top: 24px; padding: 18px 20px 14px; background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); }
+.wx-title { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.wx-loading { margin: 0; color: var(--muted); }
+.wx-cur { display: flex; align-items: center; gap: 14px; }
+.wx-cur .wx-icon { width: 52px; height: 52px; }
+.wx-cur b { font-weight: 900; font-size: 48px; line-height: 1; font-variant-numeric: tabular-nums; }
+.wx-cur span { display: flex; flex-direction: column; font-weight: 700; font-size: 17px; }
+.wx-cur small { font-weight: 600; font-size: 13px; color: var(--muted); }
+.wx-icon { width: 30px; height: 30px; fill: none; stroke: #f4f4f6; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.wx-icon .f { fill: rgba(255, 255, 255, .08); }
+.wx-sun, .wx-part > path:not(.f) { stroke: var(--yellow); }
+.wx-rain path:not(.f), .wx-snow path:not(.f) { stroke: #6cb8ff; }
+.wx-storm .bolt { stroke: var(--yellow); }
+.wx-days { list-style: none; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center; }
+.wx-days li { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: var(--muted); text-transform: capitalize; }
+.wx-days b { color: var(--text); font-weight: 900; font-size: 18px; line-height: 1; }
+.wx-days span { font-size: 13px; }
+.wx-days i { font-style: normal; font-size: 11px; color: #6cb8ff; }
+.wx-days:empty { display: none; }
+.wx-race:not(:empty) { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.wx-race .wx-title { color: var(--red); }
+.wx-days-race { grid-template-columns: repeat(3, 1fr); margin: 0; padding: 0; border: 0; }
+.wx-norm { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; }
+.wx-norm dt { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.wx-norm dd { margin: 2px 0 0; font-weight: 900; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.05; font-variant-numeric: tabular-nums; }
+.wx-note { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.wx-src { margin: 12px 0 0; font-size: 11px; color: var(--muted); }
+.wx-src a { color: inherit; }

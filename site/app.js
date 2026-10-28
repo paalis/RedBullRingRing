@@ -523,3 +523,71 @@ if (video) {
   if (reduceMotion) stopIntro(true);
   else startIntro({ sound: fresh }).catch(() => stopIntro(true)); // autoplay blokkert → rett til siden
 }
+
+// ---------- Vær på Red Bull Ring (Open-Meteo, ingen nøkkel) ----------
+const WX = { lat: 47.2197, lon: 14.7647, race: ["2027-07-09", "2027-07-10", "2027-07-11"] };
+const WX_DAYS = ["Fre", "Lør", "Søn"];
+const WX_ICONS = {
+  sun: '<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5.3 5.3 7 7M17 17l1.7 1.7M5.3 18.7 7 17M17 7l1.7-1.7"/>',
+  part: '<path d="M8.5 3.5v1.6M3.5 8.5h1.6M5 5l1.1 1.1M12 5l-1.1 1.1"/><path d="M5.8 11.2a3.2 3.2 0 1 1 5.6-2.9"/><path class="f" d="M8 19.5h9.2a3.6 3.6 0 0 0 .4-7.2 5 5 0 0 0-9.5 1.2A3 3 0 0 0 8 19.5z"/>',
+  cloud: '<path class="f" d="M6.5 18.5h11a4 4 0 0 0 .4-8 5.6 5.6 0 0 0-10.7 1.4 3.3 3.3 0 0 0-.7 6.6z"/>',
+  fog: '<path d="M4 9h16M3 13h18M5 17h14"/>',
+  rain: '<path class="f" d="M6.5 14.5h11a4 4 0 0 0 .4-8 5.6 5.6 0 0 0-10.7 1.4 3.3 3.3 0 0 0-.7 6.6z"/><path d="M8.5 17.5 7.5 20M12.5 17.5l-1 2.5M16.5 17.5l-1 2.5"/>',
+  snow: '<path class="f" d="M6.5 14.5h11a4 4 0 0 0 .4-8 5.6 5.6 0 0 0-10.7 1.4 3.3 3.3 0 0 0-.7 6.6z"/><path d="M8 18.5h.01M12 20h.01M16 18.5h.01"/>',
+  storm: '<path class="f" d="M6.5 14.5h11a4 4 0 0 0 .4-8 5.6 5.6 0 0 0-10.7 1.4 3.3 3.3 0 0 0-.7 6.6z"/><path class="bolt" d="M12.5 14 10 18h3l-1.5 4"/>',
+};
+// WMO-værkoder → ikon og tekst
+const wxCode = (c) =>
+  c === 0 ? ["sun", "Klart"] : c <= 2 ? ["part", "Lettskyet"] : c === 3 ? ["cloud", "Overskyet"] : c <= 48 ? ["fog", "Tåke"]
+  : c <= 67 || (c >= 80 && c <= 82) ? ["rain", c >= 80 ? "Regnbyger" : "Regn"] : c <= 77 || c === 85 || c === 86 ? ["snow", "Snø"] : ["storm", "Torden"];
+const wxIcon = (c) => `<svg class="wx-icon wx-${wxCode(c)[0]}" viewBox="0 0 24 24" aria-hidden="true">${WX_ICONS[wxCode(c)[0]]}</svg>`;
+const deg = (t) => `${Math.round(t)}°`;
+const wxDay = (iso) => new Date(iso + "T12:00").toLocaleDateString("nb-NO", { weekday: "short", day: "numeric" }).replace(".", "");
+
+async function loadWeather() {
+  const box = document.querySelector(".weather");
+  if (!box) return;
+  const q = `latitude=${WX.lat}&longitude=${WX.lon}&timezone=Europe%2FVienna`;
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?${q}&current=temperature_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=16`);
+    if (!r.ok) throw new Error(r.status);
+    const w = await r.json();
+    const c = w.current;
+    box.querySelector(".wx-now").innerHTML = `
+      <p class="wx-title">Været på banen nå</p>
+      <div class="wx-cur">${wxIcon(c.weather_code)}<b>${deg(c.temperature_2m)}</b><span>${wxCode(c.weather_code)[1]}<small>Vind ${Math.round(c.wind_speed_10m / 3.6)} m/s</small></span></div>`;
+    const d = w.daily;
+    const row = (i) => `<li>${wxDay(d.time[i])}${wxIcon(d.weather_code[i])}<b>${deg(d.temperature_2m_max[i])}</b><span>${deg(d.temperature_2m_min[i])}</span>${d.precipitation_probability_max[i] >= 20 ? `<i>${d.precipitation_probability_max[i]}%</i>` : ""}</li>`;
+    box.querySelector(".wx-days").innerHTML = [1, 2, 3, 4, 5].map(row).join("");
+    const race = WX.race.map((day) => d.time.indexOf(day));
+    if (race.every((i) => i >= 0)) {
+      box.querySelector(".wx-race").innerHTML = `<p class="wx-title">Varsel for løpshelgen</p><ol class="wx-days wx-days-race">${race.map((i, n) => row(i).replace(wxDay(d.time[i]), WX_DAYS[n])).join("")}</ol>`;
+    } else await loadRaceNormals(box, q);
+  } catch (_) {
+    box.querySelector(".wx-now").innerHTML = `<p class="wx-title">Været på banen nå</p><p class="wx-loading">Fikk ikke hentet været akkurat nå.</p>`;
+  }
+}
+
+// Før varselet rekker frem: hvordan 9.–11. juli har vært de siste ti årene.
+async function loadRaceNormals(box, q) {
+  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 1 - i);
+  const res = await Promise.all(years.map((y) =>
+    fetch(`https://archive-api.open-meteo.com/v1/archive?${q}&start_date=${y}-07-09&end_date=${y}-07-11&daily=temperature_2m_max,temperature_2m_min,precipitation_sum`)
+      .then((r) => (r.ok ? r.json() : null)).catch(() => null)));
+  const days = res.filter(Boolean).flatMap((r) => r.daily.time.map((_, i) => ({ max: r.daily.temperature_2m_max[i], min: r.daily.temperature_2m_min[i], rain: r.daily.precipitation_sum[i] })))
+    .filter((x) => x.max != null);
+  if (!days.length) return;
+  const avg = (k) => days.reduce((s, x) => s + x[k], 0) / days.length;
+  const wet = Math.round((100 * days.filter((x) => x.rain >= 1).length) / days.length);
+  const hot = Math.max(...days.map((x) => x.max));
+  box.querySelector(".wx-race").innerHTML = `
+    <p class="wx-title">Løpshelgen 9.–11. juli · typisk vær</p>
+    <dl class="wx-norm">
+      <div><dt>Dag</dt><dd>${deg(avg("max"))}</dd></div>
+      <div><dt>Natt</dt><dd>${deg(avg("min"))}</dd></div>
+      <div><dt>Regndager</dt><dd>${wet}%</dd></div>
+      <div><dt>Varmest</dt><dd>${deg(hot)}</dd></div>
+    </dl>
+    <p class="wx-note">Snitt for de samme datoene ${years.at(-1)}–${years[0]}. Ekte varsel dukker opp her ca. 16 dager før.</p>`;
+}
+loadWeather();
