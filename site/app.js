@@ -197,7 +197,8 @@ STAYS.forEach((s) => {
       <p class="stay-note">${esc(s.note)}</p>
       ${shown.length
         ? `<ul class="stay-options">${shown.map(option).join("")}</ul>`
-        : `<div class="stay-empty"><b>Ikke booket ennå</b><span>Hotell eller Airbnb – send lenke eller skjermdump.</span></div>`}
+        : `<div class="stay-empty"><b>Ikke booket ennå</b><span>Hotell eller Airbnb – legg til et forslag.</span></div>`}
+      <div class="plan-live" data-slot="${s.id}"></div>
     </div>`;
   staysEl.append(li);
   if (booked) {
@@ -224,16 +225,23 @@ function carStop(label, s) {
     <article class="car-card${booked ? " is-booked" : ""}">
       <header class="car-head">
         <span class="car-title">${CAR_ICON} Leiebil</span>
-        <span class="car-status">${booked ? "Booket" : "Planlegges"}</span>
+        <span class="car-status" data-car="status">${booked ? "Booket" : "Planlegges"}</span>
       </header>
       <dl class="car-facts">
-        <div><dt>Utleier</dt><dd>${val(CAR.company)}</dd></div>
-        <div><dt>Bil</dt><dd>${val(CAR.model)}</dd></div>
+        <div><dt>Utleier</dt><dd data-car="company">${val(CAR.company)}</dd></div>
+        <div><dt>Bil</dt><dd data-car="model">${val(CAR.model)}</dd></div>
         <div><dt>Størrelse</dt><dd>${val(CAR.size)}</dd></div>
-        <div><dt>Pris</dt><dd>${val(CAR.price)}</dd></div>
+        <div><dt>Pris</dt><dd data-car="price">${val(CAR.price)}</dd></div>
         <div class="car-wide"><dt>Sjåfører</dt><dd>${CAR.drivers.length ? CAR.drivers.map(esc).join(" · ") : val("")}</dd></div>
       </dl>
-      ${CAR.url ? `<a class="stay-link" href="${esc(CAR.url)}" target="_blank" rel="noopener">Se bestillingen →</a>` : ""}
+      <div data-car="link">${CAR.url ? `<a class="stay-link" href="${esc(CAR.url)}" target="_blank" rel="noopener">Se bestillingen →</a>` : ""}</div>
+    </article>
+    <article class="car-card car-offers">
+      <header class="car-head car-head-plain">
+        <span class="car-title">Tilbud</span>
+        <span class="car-status">Stem på favoritten</span>
+      </header>
+      <div class="car-offers-body"><div class="plan-live" data-slot="car"></div></div>
     </article>
     <article class="car-card car-route">
       ${carStop("Henting", CAR.pickup)}
@@ -243,10 +251,10 @@ function carStop(label, s) {
     <article class="car-card">
       <header class="car-head car-head-plain">
         <span class="car-title">Å avklare</span>
-        <span class="car-status">${done} / ${CAR.todo.length}</span>
+        <span class="car-status" data-todo-count>${done} / ${CAR.todo.length}</span>
       </header>
       <ul class="car-todo">
-        ${CAR.todo.map((t) => `<li class="${t.done ? "is-done" : ""}"><span class="car-check" aria-hidden="true"></span>${esc(t.text)}</li>`).join("")}
+        ${CAR.todo.map((t, i) => `<li class="${t.done ? "is-done" : ""}" data-todo="car-${i}"><button class="car-check" type="button" disabled aria-label="Huk av: ${esc(t.text)}"></button><span>${esc(t.text)}</span></li>`).join("")}
       </ul>
     </article>`;
 }
