@@ -25,16 +25,21 @@
     <nav aria-label="Hovedmeny">
       <ul class="nav-links">
         <li><a href="#helgen">Løpshelgen</a></li>
+        <li><a href="#teamet">Teamet</a></li>
         <li><a href="#ruten">Ruten</a></li>
         <li><a href="#fly">Fly</a></li>
         <li><a href="#basecamp">Base camp</a></li>
         <li><a href="#leiebil">Leiebil</a></li>
         <li><a href="#budsjett">Budsjett</a></li>
         <li><a href="#banen">Banen</a></li>
-        <li><a href="#teamet">Teamet</a></li>
         <li><a href="#pitwall">Pit wall</a></li>
       </ul>
     </nav>
+    <div class="nextup" aria-live="polite">
+      <div class="mini-lights" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="nextup-text"><span class="nextup-label">Neste økt</span> <b class="nextup-title">…</b> <span class="nextup-when"></span></p>
+      <a class="nextup-cal" href="#" download="rbr27.ics">Legg i kalender</a>
+    </div>
   </header>
 
   <main>
@@ -161,6 +166,23 @@
         </li>
       </ol>
       <p class="fineprint">Datoene bygger på den forventede 2027-kalenderen (9.–11. juli). Vi oppdaterer når F1 bekrefter.</p>
+    </section>
+
+    <div class="kerb" aria-hidden="true"></div>
+
+    <!-- TEAMET -->
+    <section class="section" id="teamet">
+      <div class="section-head">
+        <p class="section-kicker">Startgrid</p>
+        <h2>Teamet</h2>
+        <p class="section-lede">Fire førere, tre hjemmebaner, null pitstopp-strategi.</p>
+        <button class="intro-replay team-intro-btn" type="button">
+          <svg class="play-mark" viewBox="0 0 34 22" aria-hidden="true"><path class="play-badge" d="M8 0h26l-8 22H0z"/><path class="play-tri" d="M14 6l9 5-9 5z"/></svg>
+          Spill teamintro
+        </button>
+      </div>
+
+      <ol class="tower" aria-label="Teamets førere"></ol>
     </section>
 
     <div class="kerb" aria-hidden="true"></div>
@@ -310,6 +332,7 @@
 
     <!-- BANEN -->
     <section class="section section-split section-track" id="banen">
+      <div class="track-col">
       <figure class="track">
         <svg viewBox="0 0 600 420" role="img" aria-labelledby="track-title">
           <title id="track-title">Skjematisk banekart over Red Bull Ring</title>
@@ -334,6 +357,16 @@
         </svg>
         <figcaption>Tegnet fra GPS-data av banen. Kjøreretning med klokka.</figcaption>
       </figure>
+        <div class="weather" aria-live="polite">
+          <div class="wx-now">
+            <p class="wx-title">Været på banen nå</p>
+            <p class="wx-loading">Henter vær …</p>
+          </div>
+          <ol class="wx-days" aria-label="Varsel neste dager"></ol>
+          <div class="wx-race"></div>
+          <p class="wx-src">Vær fra <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></p>
+        </div>
+      </div>
 
       <div class="section-head">
         <p class="section-kicker">Spielberg, Steiermark</p>
@@ -347,15 +380,7 @@
           <div><dt>Rundetidsrekord</dt><dd>1:05.619<small>Sainz · 2020</small></dd></div>
           <div><dt>Første GP</dt><dd>1970<small>Österreichring</small></dd></div>
         </dl>
-        <div class="weather" aria-live="polite">
-          <div class="wx-now">
-            <p class="wx-title">Været på banen nå</p>
-            <p class="wx-loading">Henter vær …</p>
-          </div>
-          <ol class="wx-days" aria-label="Varsel neste dager"></ol>
-          <div class="wx-race"></div>
-          <p class="wx-src">Vær fra <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a></p>
-        </div>
+        <button class="btn-rules" type="button" data-open="rules">Regler for banen</button>
         <div class="ticket">
           <p class="ticket-kicker"><svg class="ticket-mark" viewBox="0 0 34 22" aria-hidden="true"><path class="play-badge" d="M8 0h26l-8 22H0z"/><path class="play-tri" d="M11 6h13v3.2a1.8 1.8 0 0 0 0 3.6V16H11v-3.2a1.8 1.8 0 0 0 0-3.6z"/></svg> Vår billett</p>
           <p class="ticket-title">General admission</p>
@@ -366,40 +391,47 @@
 
     <div class="kerb" aria-hidden="true"></div>
 
-    <!-- TEAMET -->
-    <section class="section" id="teamet">
-      <div class="section-head">
-        <p class="section-kicker">Startgrid</p>
-        <h2>Teamet</h2>
-        <p class="section-lede">Fire førere, tre hjemmebaner, null pitstopp-strategi.</p>
-        <button class="intro-replay team-intro-btn" type="button">
-          <svg class="play-mark" viewBox="0 0 34 22" aria-hidden="true"><path class="play-badge" d="M8 0h26l-8 22H0z"/><path class="play-tri" d="M14 6l9 5-9 5z"/></svg>
-          Spill teamintro
-        </button>
-      </div>
-
-      <ol class="tower" aria-label="Teamets førere"></ol>
-    </section>
-
-    <div class="kerb" aria-hidden="true"></div>
-
     <!-- PIT WALL -->
-    <section class="section section-split" id="pitwall">
+    <section class="section" id="pitwall">
       <div class="section-head">
         <p class="section-kicker">Pit wall</p>
-        <h2>Pakkeliste</h2>
-        <p class="section-lede">Huk av mens du pakker. Listen huskes i nettleseren din.</p>
-        <p class="pack-progress"><b class="pack-count">0</b> / <span class="pack-total">0</span> klart</p>
-        <button class="btn-ghost pack-reset" type="button">Nullstill</button>
+        <h2>Sjekkliste</h2>
+        <p class="section-lede">Teamstatus er felles for alle fire. Pakkelisten er din egen, men alle ser hvor langt de andre har kommet.</p>
       </div>
 
-      <ul class="checklist"></ul>
+      <div class="pitwall">
+        <div class="pw-card">
+          <header class="pw-head"><b>Teamstatus</b><span class="pw-count" data-team-count>0 / 0</span></header>
+          <ul class="team-checks"></ul>
+        </div>
+        <div class="pw-card">
+          <header class="pw-head"><b>Min pakkeliste</b><span class="pw-count"><b class="pack-count">0</b> / <span class="pack-total">0</span></span></header>
+          <div class="pack-crew" aria-label="Pakkestatus for teamet"></div>
+          <ul class="checklist"></ul>
+          <button class="btn-ghost pack-reset" type="button">Nullstill min liste</button>
+        </div>
+      </div>
     </section>
 
     <section class="radio" aria-label="Teamradio">
       <p class="radio-label"><span class="radio-dot"></span> Teamradio</p>
       <blockquote class="radio-quote">«Box, box. Schnitzel er klar.»</blockquote>
     </section>
+    <dialog class="rules" id="rules" aria-labelledby="rules-title">
+      <div class="rules-box">
+        <header><p class="section-kicker">Red Bull Ring</p><h3 id="rules-title">Regler for banen</h3>
+          <button class="rules-close" type="button" aria-label="Lukk">✕</button></header>
+        <ul class="rules-list">
+          <li><b>Bagasje</b><span>Alle vesker og sekker sjekkes i inngangen. Store sekker og vesker større enn A4 (29,7 × 42 cm) er ikke lov på tribunene.</span></li>
+          <li><b>Stol og sitteunderlag</b><span>Klappstoler er lov i ståplassområdene, der GA-sonen vår ligger.</span></li>
+          <li><b>Paraply</b><span>Bare små, sammenleggbare paraplyer – og bare i ståplassområdene. Ta heller med regnponcho.</span></li>
+          <li><b>Drikke</b><span>Plastflasker og bokser er lov. Ikke glass eller andre knusbare flasker. Egen alkohol er ikke lov å ta med inn.</span></li>
+          <li><b>Forbudt</b><span>Glass, pyroteknikk, grill og kokeutstyr, og droner eller andre fjernstyrte fartøy.</span></li>
+          <li><b>Vårt tips</b><span>Kom tidlig for en god plass i GA-sonen ved sving 3. Ta med sitteunderlag, solkrem, ørepropper og regntøy.</span></li>
+        </ul>
+        <p class="rules-src">Basert på Red Bull Rings egne regler. De oppdateres før hvert løp – sjekk <a href="https://www.redbullring.com/en/events-tickets/formula-1/glossary/" target="_blank" rel="noopener">redbullring.com</a> før avreise.</p>
+      </div>
+    </dialog>
   </main>
 
   <footer class="footer">

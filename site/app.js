@@ -71,15 +71,25 @@ const CAR = {
   ],
 };
 
+// Felles: bookinger og ting én av oss ordner for alle. Lagres i Firebase med hvem som huket av.
+const TEAM_CHECKS = [
+  "GA-billetter kjøpt til alle",
+  "Hotell Wien (8.–10. juli) booket",
+  "Hotell Graz (10.–11. juli) booket",
+  "Hotell Wien (11.–12. juli) booket",
+  "Leiebil booket",
+  "Parkering ved Red Bull Ring ordnet",
+  "Plan for oppgjør (hvem betaler hva)",
+];
+
+// Personlig pakkeliste. Følger deg mellom enheter når du er innlogget, og alle ser fremdriften til hverandre.
 const PACKING = [
   "Pass / ID",
   "Flybillett",
-  "GA-billett (helg)",
+  "GA-billett på mobilen",
   "Sitteunderlag",
   "Førerkort",
-  "Leiebil bekreftet",
-  "Hotell Wien bekreftet",
-  "Hotell Graz bekreftet",
+  "Reiseforsikring og helsetrygdkort",
   "Euro i kontanter",
   "Ørepropper",
   "Regnjakke / poncho",
@@ -251,7 +261,7 @@ function leg(label, f) {
     return f.map((seg, i) => `${seg.layover ? `<p class="pass-layover">${BIKE_ICON}<span>${seg.layover}</span></p>` : ""}${leg(`${label} ${i + 1}/${f.length}`, seg)}`).join("");
   }
   if (!f) {
-    return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Ikke booket ennå</p></div>`;
+    return `<div class="pass-leg pass-pending"><p class="pass-label">${label}</p><p class="pass-tbc">Gridposisjon ledig</p></div>`;
   }
   return `
     <div class="pass-leg">
@@ -307,7 +317,7 @@ STAYS.forEach((s) => {
       <div class="plan-map" data-slot="${s.id}" hidden></div>
       ${shown.length
         ? `<ul class="stay-options">${shown.map(option).join("")}</ul>`
-        : `<div class="stay-empty"><b>Ikke booket ennå</b><span>Hotell eller Airbnb – legg til et forslag.</span></div>`}
+        : `<div class="stay-empty"><b>Gridposisjon ledig</b><span>Hotell eller Airbnb – legg til et forslag.</span></div>`}
       <div class="plan-live" data-slot="${s.id}"></div>
     </div>`;
   staysEl.append(li);
@@ -369,7 +379,9 @@ function carStop(label, s) {
     </article>`;
 }
 
-// ---------- Pakkeliste ----------
+// ---------- Sjekkliste ----------
+// Uten Firebase-økt huskes pakkelisten lokalt; plan.js tar over lagringen når du er medlem (window.rbrPlan).
+const slug = (t) => t.toLowerCase().normalize("NFD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const STORE_KEY = "rbr27-pack";
 const load = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; } };
 const save = (v) => { try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); } catch {} };
@@ -379,17 +391,18 @@ const countEl = document.querySelector(".pack-count");
 document.querySelector(".pack-total").textContent = PACKING.length;
 
 function renderCount() {
-  countEl.textContent = PACKING.filter((item) => packed[item]).length;
+  countEl.textContent = list.querySelectorAll("input:checked").length;
 }
 PACKING.forEach((item) => {
   const li = document.createElement("li");
   const label = document.createElement("label");
   const box = document.createElement("input");
   box.type = "checkbox";
+  box.dataset.pack = slug(item);
   box.checked = !!packed[item];
   box.addEventListener("change", () => {
-    packed[item] = box.checked;
-    save(packed);
+    if (window.rbrPlan) window.rbrPlan.pack(box.dataset.pack, box.checked);
+    else { packed[item] = box.checked; save(packed); }
     renderCount();
   });
   label.append(box, document.createTextNode(item));
@@ -398,11 +411,21 @@ PACKING.forEach((item) => {
 });
 renderCount();
 document.querySelector(".pack-reset").addEventListener("click", () => {
+  list.querySelectorAll("input:checked").forEach((b) => {
+    b.checked = false;
+    if (window.rbrPlan) window.rbrPlan.pack(b.dataset.pack, false);
+  });
   for (const k of Object.keys(packed)) delete packed[k];
   save(packed);
-  list.querySelectorAll("input").forEach((b) => (b.checked = false));
   renderCount();
 });
+
+document.querySelector(".team-checks").innerHTML = TEAM_CHECKS.map((t) => `
+  <li data-todo="team-${slug(t)}">
+    <button class="team-check" type="button" disabled aria-label="Huk av: ${esc(t)}"></button>
+    <span>${esc(t)}</span><i class="team-by"></i>
+  </li>`).join("");
+document.querySelector("[data-team-count]").textContent = `0 / ${TEAM_CHECKS.length}`;
 
 // ---------- Teamradio ----------
 const quote = document.querySelector(".radio-quote");
@@ -591,3 +614,94 @@ async function loadRaceNormals(box, q) {
     <p class="wx-note">Snitt for de samme datoene ${years.at(-1)}–${years[0]}. Ekte varsel dukker opp her ca. 16 dager før.</p>`;
 }
 loadWeather();
+
+// ---------- Neste økt ----------
+// Turens tidslinje (CEST). Flyene hentes fra FLIGHTS; resten er programmet. Øktene på banen er
+// forventede tider til F1 publiserer 2027-programmet.
+const at = (day, time) => new Date(`2027-07-${String(day).padStart(2, "0")}T${time}:00+02:00`);
+const dayOf = (label) => Number((label.match(/(\d+)\./) || [])[1]);
+const EVENTS = [
+  ...FLIGHTS.flatMap((g) => [g.out, ...[].concat(g.ret || [])].filter((f) => f && f.dep).map((f) => ({
+    start: at(dayOf(f.date), f.dep), end: f.arr ? at(dayOf(f.date), f.arr) : null,
+    title: `Fly ${f.from} → ${f.to}`, who: g.who.join(", "), where: f.airline || "",
+  }))),
+  { start: at(8, "22:30"), end: at(9, "01:00"), title: "Hele teamet samlet i Wien", where: "Wien" },
+  { start: at(9, "10:00"), end: at(9, "23:00"), title: "En hel dag i Wien", where: "Prater · Naschmarkt · Heuriger" },
+  { start: at(10, "07:30"), end: at(10, "09:30"), title: "Hent leiebil og kjør til Graz", where: CAR.pickup.where },
+  { start: at(10, "16:00"), end: at(10, "17:00"), title: "Kvalifisering", where: "Red Bull Ring · forventet tid" },
+  { start: at(11, "15:00"), end: at(11, "17:00"), title: "Løpsstart – Østerrikes Grand Prix", where: "Red Bull Ring" },
+  { start: at(11, "18:00"), end: at(11, "21:00"), title: "Kjør tilbake til Wien", where: "Spielberg → Wien" },
+  { start: at(12, "07:00"), end: at(12, "07:30"), title: "Lever leiebil", where: CAR.dropoff.where },
+].sort((a, b) => a.start - b.start)
+  // samme fly for flere grupper → én hendelse med alle navnene
+  .filter((e, i, all) => {
+    const twin = all.findIndex((o) => o.title === e.title && +o.start === +e.start);
+    if (twin !== i) { all[twin].who += `, ${e.who}`; return false; }
+    return true;
+  });
+
+const nextup = document.querySelector(".nextup");
+function relTime(ms) {
+  const m = Math.round(ms / 60000);
+  if (m < 60) return `om ${m} min`;
+  if (m < 48 * 60) return `om ${Math.floor(m / 60)} t ${m % 60} min`;
+  return `om ${Math.round(m / 1440)} dager`;
+}
+const whenText = (d) => d.toLocaleString("nb-NO", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Vienna" });
+function renderNextup() {
+  if (!nextup) return;
+  const now = Date.now();
+  const live = EVENTS.find((e) => e.start <= now && e.end && now < e.end);
+  const next = EVENTS.find((e) => e.start > now);
+  const set = (label, title, when, isLive) => {
+    nextup.querySelector(".nextup-label").textContent = label;
+    nextup.querySelector(".nextup-title").textContent = title;
+    nextup.querySelector(".nextup-when").textContent = when;
+    nextup.classList.toggle("is-live", !!isLive);
+  };
+  if (live) set("Nå", live.title + (live.who ? ` · ${live.who}` : ""), next ? `Neste: ${next.title} ${relTime(next.start - now)}` : "", true);
+  else if (next) set("Neste økt", next.title + (next.who ? ` · ${next.who}` : ""), `${whenText(next.start)} · ${relTime(next.start - now)}`);
+  else set("Ferdig", "Chequered flag – takk for turen!", "");
+}
+renderNextup();
+setInterval(renderNextup, 30000);
+
+// Kalenderfil (.ics) med hele programmet
+const icsDate = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+const icsText = (t) => String(t).replace(/[\\,;]/g, (c) => "\\" + c);
+function buildIcs() {
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//RBR27//Tur//NO", "CALSCALE:GREGORIAN", "X-WR-CALNAME:RBR '27"];
+  EVENTS.forEach((e, i) => lines.push(
+    "BEGIN:VEVENT", `UID:rbr27-${i}-${icsDate(e.start)}@redbullringring`, `DTSTAMP:${icsDate(new Date())}`,
+    `DTSTART:${icsDate(e.start)}`, `DTEND:${icsDate(e.end || new Date(+e.start + 3600000))}`,
+    `SUMMARY:${icsText(e.title)}`, `DESCRIPTION:${icsText([e.who, e.where].filter(Boolean).join(" · "))}`,
+    `LOCATION:${icsText(e.where || "")}`, "END:VEVENT"));
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+const cal = document.querySelector(".nextup-cal");
+if (cal) cal.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(buildIcs());
+
+// ---------- Startlys som tennes når du scroller ----------
+// Lysene i toppen tennes ett og ett mens du blar deg gjennom siden; nederst går de av – lights out.
+const heroLights = [...document.querySelectorAll(".lights span")];
+const miniLights = [...document.querySelectorAll(".mini-lights i")];
+function paintLights() {
+  const max = document.documentElement.scrollHeight - innerHeight;
+  const p = max > 0 ? scrollY / max : 0;
+  const out = p > 0.985;
+  miniLights.forEach((l, i) => l.classList.toggle("on", !out && p >= (i + 1) * 0.16));
+  if (nextup) nextup.classList.toggle("is-out", out);
+  const hero = document.querySelector(".hero");
+  const hp = hero ? scrollY / Math.max(1, hero.offsetHeight * 0.55) : 0;
+  heroLights.forEach((l, i) => l.classList.toggle("on", hp >= (i + 1) * 0.18 && hp < 1.15));
+}
+addEventListener("scroll", paintLights, { passive: true });
+addEventListener("resize", paintLights);
+paintLights();
+
+// ---------- Regler for banen ----------
+const rules = document.getElementById("rules");
+document.querySelectorAll('[data-open="rules"]').forEach((b) => b.addEventListener("click", () => rules.showModal()));
+rules.querySelector(".rules-close").addEventListener("click", () => rules.close());
+rules.addEventListener("click", (e) => { if (e.target === rules) rules.close(); });

@@ -35,7 +35,14 @@
 .tx-first { font-family: "Mr Dafoe", cursive; font-weight: 400; color: var(--team); font-size: clamp(34px, 4.6vw, 72px); line-height: 1; padding-right: .12em;
   text-shadow: 0 2px 6px rgba(0, 0, 0, .5); }
 .tx-last { position: relative; font-weight: 900; font-size: clamp(28px, 5.4vw, 88px); line-height: 1; letter-spacing: -.01em; }
-.tx-last em { font-style: normal; }
+/* Etternavnet avsløres av et lysbånd i lagfargen som feier over fra venstre: bokstavene lyser i lagfargen
+   idet de dukker opp og legger seg i grunnfargen (--fg) når båndet har passert – farge med en grunn. */
+.tx-last {
+  --fg: #fff; color: transparent;
+  background: linear-gradient(100deg, var(--fg) 0 40%, var(--team) 44% 51%, transparent 56%) 100% 0 / 250% 100% no-repeat;
+  -webkit-background-clip: text; background-clip: text;
+}
+@keyframes tx-sweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
 .tx-tag { font-family: "Orbitron", sans-serif; position: absolute; z-index: 3; font-weight: 900; font-style: normal; font-size: clamp(13px, 1.5vw, 22px); }
 .tx-home { position: absolute; z-index: 3; font-weight: 700; font-size: clamp(10px, 1vw, 14px); letter-spacing: .22em; }
 
@@ -47,9 +54,7 @@
 .tx-studio .tx-tag { color: #16161c; }
 .tx-studio .tx-driver { filter: drop-shadow(0 24px 22px rgba(0, 0, 0, .25)); }
 .tx-studio .tx-name { left: 50%; top: 45%; translate: -50% 0; }
-.tx-studio .tx-last { color: #15152a; }
-.tx-studio .tx-last em { color: transparent; -webkit-text-stroke: 2px #15152a; }
-.tx-studio .tx-last::after { content: attr(data-t); position: absolute; inset: 0; color: var(--red); clip-path: inset(0 0 0 100%); }
+.tx-studio .tx-last { --fg: #15152a; }
 .tx-studio .tx-home { right: 8%; bottom: 10%; color: #55555e; }
 
 /* 2 · Ekko (Hamilton/Leclerc): rødt studio, gigantiske bokstaver i omriss, uskarpe ekko-kopier til hver side */
@@ -63,7 +68,7 @@
 .tx-echo .tx-driver { height: 150vh; bottom: auto; top: 3vh; left: 38%; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, .45)); }
 .tx-echo .tx-name { right: 4%; top: 42%; align-items: center; gap: .2em; }
 .tx-echo .tx-first { color: #fff; font-size: clamp(36px, 5vw, 80px); }
-.tx-echo .tx-last { color: #fff; font-size: clamp(26px, 4.6vw, 80px); text-shadow: 0 6px 30px rgba(60, 0, 0, .5); }
+.tx-echo .tx-last { font-size: clamp(26px, 4.6vw, 80px); filter: drop-shadow(0 6px 24px rgba(60, 0, 0, .5)); }
 .tx-echo .tx-tag, .tx-echo .tx-home { color: #fff; }
 
 /* 3 · Diagonal: røde kjempebokstaver, så et skrått bånd med rødt gulv og speilbilde */
@@ -79,7 +84,7 @@
 .tx-reflect { position: absolute; left: 47%; top: 57%; height: 48vh; translate: -50% 0; transform: scaleY(-1); z-index: 1;
   filter: brightness(0) invert(13%) sepia(90%) saturate(6000%) hue-rotate(350deg) blur(3px); opacity: .55; }
 .tx-diagonal .tx-name { left: 31%; bottom: 43.6%; z-index: 3; }
-.tx-diagonal .tx-last { color: #f4f4f6; font-size: clamp(30px, 6.4vw, 104px); }
+.tx-diagonal .tx-last { --fg: #f4f4f6; font-size: clamp(30px, 6.4vw, 104px); }
 .tx-meta { align-self: flex-start; margin-left: .6em; display: flex; flex-direction: column; gap: 4px; color: #f4f4f6;
   font-weight: 700; font-size: clamp(10px, 1vw, 14px); letter-spacing: .22em; }
 .tx-meta b { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: clamp(18px, 2.4vw, 36px); letter-spacing: 0; }
@@ -93,15 +98,13 @@
 .tx-corridor .tx-driver { left: 55%; bottom: -4vh; height: 80vh; filter: drop-shadow(0 0 30px rgba(255, 30, 20, .35)); }
 .tx-corridor .tx-name { left: 34%; top: 46%; }
 .tx-corridor .tx-first { color: #fff; }
-.tx-corridor .tx-last { color: #fff; }
 .tx-corridor .tx-tag, .tx-corridor .tx-home { color: #fff; }
 
 /* Animasjoner (~2 s per fører) */
 .tx.is-on .tx-driver { animation: tx-in .7s cubic-bezier(.2, .8, .2, 1) .1s both; }
 .tx.is-on .tx-first { animation: rv-write .6s cubic-bezier(.5, 0, .3, 1) .45s both; }
-.tx.is-on .tx-last { animation: tx-smear .5s cubic-bezier(.2, .9, .3, 1) .25s both; }
-.tx-tail { font-style: normal; }
-.tx.is-on .tx-tail { animation: tx-tail 1.1s steps(1) .25s both; }
+.tx.is-on .tx-last { animation: tx-sweep .9s cubic-bezier(.45, 0, .25, 1) .25s both, tx-smear .5s cubic-bezier(.2, .9, .3, 1) .25s both; }
+.is-on:not(.tx) .tx-last { animation: tx-sweep .9s cubic-bezier(.45, 0, .25, 1) .3s both; }
 .tx-corridor.is-on .tx-hall { animation: tx-zoomin .7s cubic-bezier(.2, .8, .2, 1) both; }
 @media (max-aspect-ratio: 4/5) { .tx-corridor.is-on .tx-hall { animation: none; } }
 .tx-corridor.is-on .tx-laser { animation: tx-flicker .5s steps(1) .1s both; }
@@ -110,7 +113,6 @@
 .tx.is-on :is(.tx-tag, .tx-home, .tx-meta) { animation: di-fade .4s ease .6s both; }
 .tx-studio.is-on .tx-big-top { animation: tx-drift-l 2.4s linear both; }
 .tx-studio.is-on .tx-big-bottom { animation: tx-drift-r 2.4s linear both; }
-.tx-studio.is-on .tx-last::after { animation: tx-wipe .9s cubic-bezier(.6, 0, .3, 1) .5s both; }
 .tx-echo.is-on .tx-ghost-l { animation: tx-ghost-l 1.1s cubic-bezier(.2, .8, .2, 1) both; }
 .tx-echo.is-on .tx-ghost-r { animation: tx-ghost-r 1.1s cubic-bezier(.2, .8, .2, 1) both; }
 .tx-echo.is-on .tx-driver { animation: tx-push 1.5s cubic-bezier(.2, .8, .2, 1) both; }
@@ -131,7 +133,6 @@
 @keyframes tx-ghost-r { from { opacity: .7; transform: translateX(-35%); filter: blur(14px); } to { opacity: .3; } }
 @keyframes tx-outline { from { opacity: 0; transform: scale(1.15); } to { opacity: 1; transform: scale(1); } }
 @keyframes tx-smear { from { opacity: 0; transform: translateX(80px) skewX(-12deg); filter: blur(12px); } }
-@keyframes tx-tail { 0% { color: var(--red); } 100% { color: inherit; } }
 @keyframes tx-zoomin { from { transform: scale(1.35); filter: blur(10px); } to { transform: scale(1); filter: blur(0); } }
 @keyframes tx-blurin { from { opacity: 0; transform: scale(1.25); filter: blur(16px); } 50% { opacity: 1; } to { transform: scale(1); filter: blur(0) drop-shadow(0 0 30px rgba(255, 30, 20, .35)); } }
 @keyframes tx-push { from { opacity: 0; transform: scale(1.08); } 25% { opacity: 1; } to { transform: scale(1); } }
@@ -193,13 +194,14 @@
 .tp-scan { position: absolute; inset: 0; z-index: 3; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .25) 0 2px, transparent 2px 5px); pointer-events: none; }
 .tp-name { position: absolute; z-index: 4; left: 7%; bottom: 14vh; display: flex; flex-direction: column; align-items: flex-start; }
 .tp-name .tx-first { color: var(--team); margin-bottom: -.15em; }
-.tp-name .tx-last { color: #fff; font-weight: 900; font-size: clamp(30px, 6vw, 100px); line-height: 1; }
+.tp-name .tx-last { font-weight: 900; font-size: clamp(30px, 6vw, 100px); line-height: 1; }
 .tp-meta { margin-top: 12px; color: #d8d8de; font-weight: 700; letter-spacing: .22em; font-size: clamp(10px, 1vw, 14px); }
 .tp.is-on .tp-face { animation: tp-pan 1.5s linear both; }
 .tp.is-on .tp-num span { animation: tp-num 1.5s ease-out both; }
 .tp.is-on .tp-name > * { animation: tp-line .45s cubic-bezier(.2, .9, .3, 1) both; }
 .tp.is-on .tp-name > :nth-child(2) { animation-delay: .1s; }
 .tp.is-on .tp-name > :nth-child(3) { animation-delay: .2s; }
+.tp.is-on .tp-name > .tx-last { animation: tp-line .45s cubic-bezier(.2, .9, .3, 1) .1s both, tx-sweep .9s cubic-bezier(.45, 0, .25, 1) .1s both; }
 @keyframes tp-pan { from { transform: scaleX(-1) translateX(-3vw) scale(1.06); filter: grayscale(1) contrast(1.35) brightness(.95) blur(6px); }
   20% { filter: grayscale(1) contrast(1.35) brightness(.95) blur(0); } to { transform: scaleX(-1) translateX(2vw) scale(1); } }
 @keyframes tp-num { from { transform: translateX(-6%); opacity: 0; } to { transform: translateX(2%); opacity: 1; } }
@@ -392,3 +394,10 @@
   .tg-driver:nth-child(n+3) { grid-column: 2; }
   .tg-driver img { max-width: 50vw; }
 }
+
+/* Lysstriper som feier over kuttene (styres per frame i TeamIntro.tsx) */
+.ti-fx { position: absolute; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; display: none; }
+.ti-fx i { position: absolute; left: 0; width: 100%; transform: skewX(-24deg); }
+.ti-fx i:nth-child(1) { top: 14%; height: 2.2%; background: #fff; box-shadow: 0 0 30px rgba(255, 255, 255, .8); }
+.ti-fx i:nth-child(2) { top: 17.5%; height: .9%; background: #fff; }
+.ti-fx i:nth-child(3) { top: 70%; height: 4%; background: var(--red, #e10600); box-shadow: 0 0 40px rgba(225, 6, 0, .9); }
