@@ -194,8 +194,17 @@ const REF_POINTS = {
     { name: "Flyplassen (VIE)", lat: 48.1103, lng: 16.5697 },
   ],
 };
-const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const TILES_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bidragsytere';
+// Esri «Dark Gray Canvas»: mørkt, rolig grunnkart + navn som eget lag. Ingen API-nøkkel.
+const ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas";
+const TILES = `${ESRI}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`;
+const LABELS = `${ESRI}/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`;
+const TILES_ATTR = 'Kart &copy; Esri, HERE, Garmin, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-bidragsytere';
+
+function addBaseLayers(L, map) {
+  const opts = { attribution: TILES_ATTR, maxNativeZoom: 16, maxZoom: 18 };
+  L.tileLayer(TILES, opts).addTo(map);
+  L.tileLayer(LABELS, { maxNativeZoom: 16, maxZoom: 18, pane: "overlayPane" }).addTo(map);
+}
 const smallMaps = {};
 let leafletReady;
 
@@ -264,7 +273,7 @@ async function renderMaps() {
         zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
         boxZoom: false, keyboard: false, touchZoom: false, tap: false,
       });
-      L.tileLayer(TILES, { attribution: TILES_ATTR, maxZoom: 19 }).addTo(map);
+      addBaseLayers(L, map);
       sm = smallMaps[slot] = { map, layer: L.layerGroup().addTo(map) };
       el.addEventListener("click", () => openBigMap(slot));
     }
@@ -288,9 +297,9 @@ async function openBigMap(slot) {
   document.body.append(modal);
   document.body.classList.add("has-modal");
   const map = L.map(modal.querySelector(".map-modal-canvas"));
-  L.tileLayer(TILES, { attribution: TILES_ATTR, maxZoom: 19 }).addTo(map);
+  addBaseLayers(L, map);
   const pts = addMarkers(L, L.layerGroup().addTo(map), slot, true);
-  map.fitBounds(pts, { padding: [40, 40], maxZoom: 15 });
+  map.fitBounds(pts, { padding: [40, 40], maxZoom: 16 });
   const close = () => {
     map.remove();
     modal.remove();
