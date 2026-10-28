@@ -140,6 +140,118 @@ CREW.forEach((d, i) => {
   tower.append(li);
 });
 
+// ---------- Teamintro (F1 «starting grid»-stil) ----------
+const TEAM_TIMELINE = [["title", 1300], ...CREW.map((_, i) => [`d${i}`, 1500]), ["grid", 0]];
+
+function splitName(d) {
+  const words = d.fullName.split(" ");
+  const last = words.length > 1 ? words.pop() : d.fullName;
+  return { first: words.length ? words.join(" ") : d.name, last };
+}
+
+function openTeamIntro() {
+  const el = document.createElement("div");
+  el.className = "tintro";
+  el.setAttribute("role", "dialog");
+  el.setAttribute("aria-modal", "true");
+  el.setAttribute("aria-label", "Teamintro: startgrid RBR '27");
+  el.innerHTML = `
+    <div class="ti-stage">
+      <section class="ti-scene ti-title" data-scene="title">
+        <div class="ti-stripes" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p class="ti-kicker">Østerrikes Grand Prix · Spielberg 2027</p>
+        <h2>Startgrid</h2>
+        <p class="ti-sub"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></p>
+      </section>
+      ${CREW.map((d, i) => {
+        const n = splitName(d);
+        return `
+        <section class="ti-scene ti-driver" data-scene="d${i}" style="--team:${d.team}">
+          <div class="ti-sweep" aria-hidden="true"></div>
+          <div class="ti-num" aria-hidden="true">${d.number}</div>
+          <div class="ti-photo">${d.photo ? `<img src="${d.photo}" alt="${d.fullName}" style="object-position:${d.photoPos || "center 20%"}">` : `<span>${d.code}</span>`}</div>
+          <div class="ti-name">
+            <p class="ti-pos">P${i + 1} · ${d.code}</p>
+            <p class="ti-first">${n.first}</p>
+            <p class="ti-last">${n.last}</p>
+            <p class="ti-meta">${d.home} · ${d.role}</p>
+          </div>
+        </section>`;
+      }).join("")}
+      <section class="ti-scene ti-grid" data-scene="grid">
+        <div class="ti-cols">
+          ${CREW.map((d, i) => `
+            <figure class="ti-col" style="--team:${d.team};--i:${i}">
+              ${d.photo ? `<img src="${d.photo}" alt="${d.fullName}" style="object-position:${d.photoPos || "center 20%"}">` : `<span class="ti-col-code">${d.code}</span>`}
+              <figcaption><span class="ti-col-num">${d.number}</span><b>${d.code}</b><small>${d.name}</small></figcaption>
+            </figure>`).join("")}
+        </div>
+        <div class="ti-grid-title"><p>Østerrikes Grand Prix · 9.–11. juli 2027</p><h2>Team <span class="brand-mark">RBR</span> '27</h2></div>
+        <div class="ti-actions">
+          <button type="button" class="plan-btn" data-act="replay">Spill igjen</button>
+          <button type="button" class="btn-ghost" data-act="close">Lukk</button>
+        </div>
+      </section>
+      <button type="button" class="dintro-close" data-act="close" aria-label="Lukk">✕</button>
+      <p class="ti-skip" aria-hidden="true">Trykk for å hoppe over</p>
+    </div>`;
+  document.body.append(el);
+  document.body.classList.add("has-modal");
+
+  const stage = el.querySelector(".ti-stage");
+  const scenes = Object.fromEntries([...el.querySelectorAll(".ti-scene")].map((s) => [s.dataset.scene, s]));
+  let timers = [];
+  const show = (name) => {
+    for (const s of Object.values(scenes)) {
+      if (s.classList.contains("is-on")) {
+        s.classList.remove("is-on");
+        s.classList.add("is-off");
+      } else s.classList.remove("is-off");
+    }
+    void scenes[name].offsetWidth; // start inngangsanimasjonen på nytt
+    scenes[name].classList.add("is-on");
+    stage.dataset.scene = name;
+  };
+  const toEnd = () => {
+    timers.forEach(clearTimeout);
+    timers = [];
+    show("grid");
+    stage.classList.add("is-done");
+  };
+  const play = () => {
+    timers.forEach(clearTimeout);
+    stage.classList.remove("is-done");
+    let t = 0;
+    timers = TEAM_TIMELINE.map(([name, dur]) => {
+      const id = setTimeout(() => (name === "grid" ? toEnd() : show(name)), t);
+      t += dur;
+      return id;
+    });
+  };
+  const close = () => {
+    timers.forEach(clearTimeout);
+    el.remove();
+    document.body.classList.remove("has-modal");
+    document.removeEventListener("keydown", onKey);
+  };
+  const onKey = (e) => e.key === "Escape" && close();
+  document.addEventListener("keydown", onKey);
+  el.addEventListener("click", (e) => {
+    const act = e.target.closest("[data-act]");
+    if (act && act.dataset.act === "close") return close();
+    if (act && act.dataset.act === "replay") return play();
+    if (!stage.classList.contains("is-done")) toEnd();
+  });
+
+  // Vent kort på bildene så ingen scene starter tom.
+  const imgs = [...el.querySelectorAll("img")];
+  const ready = Promise.all(imgs.map((im) => (im.complete ? 1 : new Promise((r) => { im.onload = im.onerror = r; }))));
+  Promise.race([ready, new Promise((r) => setTimeout(r, 1500))]).then(() => (reduceMotion ? toEnd() : play()));
+  el.querySelector(".dintro-close").focus();
+}
+
+document.querySelector(".team-intro-btn").addEventListener("click", openTeamIntro);
+
 // ---------- Førerintro (F1-stil) ----------
 function flightLine(f) {
   if (!f) return "Ikke booket ennå";

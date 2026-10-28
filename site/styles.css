@@ -580,6 +580,95 @@ body.has-modal { overflow: hidden; }
   .dintro-skip { position: fixed; }
 }
 
+/* ---------- TEAMINTRO ---------- */
+.team-intro-btn { margin-top: 18px; }
+.tintro { position: fixed; inset: 0; z-index: 2000; background: var(--bg); overflow: hidden; }
+.ti-stage { position: absolute; inset: 0; }
+.ti-scene { position: absolute; inset: 0; visibility: hidden; opacity: 0; }
+.ti-scene.is-on { visibility: visible; opacity: 1; }
+.ti-scene.is-off { visibility: visible; opacity: 1; animation: ti-out .35s cubic-bezier(.7,0,.9,.4) both; z-index: 2; }
+@keyframes ti-out { 99% { visibility: visible; } to { transform: translateX(-150%) skewX(-12deg); visibility: hidden; } }
+
+/* Tittel */
+.ti-title { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+.ti-title h2 { font-weight: 900; font-size: clamp(56px, 13vw, 180px); text-transform: uppercase; line-height: .9; transform: skewX(-8deg); margin: 8px 0; }
+.ti-kicker { margin: 0; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-size: clamp(12px, 1.6vw, 18px); }
+.ti-sub { margin: 6px 0 0; }
+.ti-sub .brand-mark, .ti-sub .brand-year { font-size: clamp(26px, 4vw, 44px); }
+.ti-stripes { position: absolute; inset: 0; pointer-events: none; }
+.ti-stripes i { position: absolute; top: -20%; bottom: -20%; width: 30vw; background: var(--red); transform: skewX(-18deg) translateX(-150vw); }
+.ti-stripes i:nth-child(2) { width: 10vw; background: #fff; }
+.ti-stripes i:nth-child(3) { width: 18vw; background: #7a0300; }
+.ti-title.is-on .ti-stripes i { animation: di-stripe .8s cubic-bezier(.6,0,.3,1) both; }
+.ti-title.is-on .ti-stripes i:nth-child(2) { animation-delay: .07s; }
+.ti-title.is-on .ti-stripes i:nth-child(3) { animation-delay: .14s; }
+.ti-title.is-on .ti-kicker { animation: di-fade .4s ease .35s both; }
+.ti-title.is-on h2 { animation: ti-slam .5s cubic-bezier(.2,1.4,.4,1) .45s both; }
+.ti-title.is-on .ti-sub { animation: di-fade .4s ease .8s both; }
+@keyframes ti-slam { from { opacity: 0; transform: skewX(-8deg) scale(1.6); } to { opacity: 1; transform: skewX(-8deg); } }
+
+/* Én fører */
+.ti-sweep { position: absolute; inset: 0; background: var(--team); transform: skewX(-14deg) translateX(-130%); z-index: 1; }
+.ti-driver.is-on .ti-sweep { animation: ti-sweep .55s cubic-bezier(.7,0,.2,1) both; }
+@keyframes ti-sweep { 0% { transform: skewX(-14deg) translateX(-130%); } 55% { transform: skewX(-14deg) translateX(0); } 100% { transform: skewX(-14deg) translateX(130%); } }
+.ti-num { position: absolute; z-index: 2; left: -1vw; top: 50%; transform: translateY(-50%) skewX(-10deg); font-weight: 900; font-size: min(70vh, 60vw); line-height: .8; color: var(--team); opacity: .25; }
+.ti-driver.is-on .ti-num { animation: ti-num .5s cubic-bezier(.2,1.3,.4,1) .2s both; }
+@keyframes ti-num { from { opacity: 0; transform: translateY(-50%) skewX(-10deg) translateX(-25vw); } to { opacity: .25; transform: translateY(-50%) skewX(-10deg); } }
+.ti-photo { position: absolute; z-index: 3; right: 0; top: 0; bottom: 0; width: min(54vw, 680px); clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%); background: var(--bg-3); display: grid; place-items: center; }
+.ti-photo img { width: 100%; height: 100%; object-fit: cover; }
+.ti-photo span { font-weight: 900; font-size: 18vh; color: var(--team); transform: skewX(-10deg); }
+.ti-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg) 0%, transparent 30%), linear-gradient(0deg, color-mix(in srgb, var(--team) 40%, transparent), transparent 45%); }
+.ti-driver.is-on .ti-photo { animation: di-photo .5s cubic-bezier(.7,0,.2,1) .3s both; }
+.ti-driver.is-on .ti-photo img { animation: di-color .7s ease .55s both; }
+.ti-name { position: absolute; z-index: 4; left: 6vw; bottom: 14vh; max-width: 55vw; }
+.ti-name p { margin: 0; }
+.ti-pos { font-weight: 700; letter-spacing: .2em; color: var(--team); font-size: 14px; }
+.ti-first { font-weight: 700; text-transform: uppercase; font-size: clamp(20px, 3vw, 38px); margin-top: 6px !important; }
+.ti-last { font-weight: 900; text-transform: uppercase; font-size: clamp(48px, 9vw, 130px); line-height: .92; transform: skewX(-8deg); transform-origin: left; white-space: nowrap; }
+.ti-meta { margin-top: 10px !important; color: var(--muted); font-weight: 600; font-size: clamp(14px, 1.6vw, 18px); }
+.ti-driver.is-on .ti-pos { animation: di-fade .3s ease .45s both; }
+.ti-driver.is-on .ti-first { animation: ti-up .35s cubic-bezier(.2,.9,.3,1) .5s both; }
+.ti-driver.is-on .ti-last { animation: ti-left .45s cubic-bezier(.2,.9,.3,1) .6s both; }
+.ti-driver.is-on .ti-meta { animation: di-fade .3s ease .85s both; }
+@keyframes ti-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes ti-left { from { opacity: 0; transform: skewX(-8deg) translateX(-60px); } to { opacity: 1; transform: skewX(-8deg); } }
+
+/* Line-up */
+.ti-grid { display: flex; flex-direction: column; }
+.ti-cols { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding: 0 3vw; transform: skewX(-8deg); min-height: 0; }
+.ti-col { position: relative; margin: 0 -1px; overflow: hidden; border-right: 3px solid var(--bg); background: var(--bg-3); }
+.ti-col::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, color-mix(in srgb, var(--team) 85%, transparent) 0%, transparent 45%); }
+.ti-col img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: skewX(8deg) scale(1.2); }
+.ti-col-code { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 8vw; color: var(--team); transform: skewX(8deg); }
+.ti-col figcaption { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 12px 14px 16px; transform: skewX(8deg); display: flex; flex-direction: column; }
+.ti-col-num { font-weight: 900; font-size: clamp(34px, 5vw, 72px); line-height: .9; }
+.ti-col b { font-weight: 900; letter-spacing: .12em; font-size: clamp(14px, 1.8vw, 22px); }
+.ti-col small { font-weight: 600; font-size: clamp(11px, 1.2vw, 15px); opacity: .9; }
+.ti-grid.is-on .ti-col { animation: ti-col .55s cubic-bezier(.2,.9,.3,1) both; animation-delay: calc(var(--i) * 120ms); }
+.ti-grid.is-on .ti-col img { animation: di-color .8s ease both; animation-delay: calc(.3s + var(--i) * 120ms); }
+@keyframes ti-col { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: none; } }
+.ti-grid-title { padding: 18px 6vw 6px; }
+.ti-grid-title p { margin: 0; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-size: 13px; }
+.ti-grid-title h2 { margin: 4px 0 0; font-weight: 900; font-size: clamp(36px, 6vw, 80px); text-transform: uppercase; line-height: 1; transform: skewX(-8deg); transform-origin: left; }
+.ti-grid-title .brand-mark { font-size: .8em; }
+.ti-grid.is-on .ti-grid-title { animation: ti-up .45s ease .6s both; }
+.ti-actions { display: flex; gap: 8px; padding: 10px 6vw 22px; }
+.ti-grid.is-on .ti-actions { animation: di-fade .4s ease 1s both; }
+.ti-skip { position: absolute; z-index: 6; right: 20px; bottom: 16px; margin: 0; font-size: 12px; color: var(--muted); }
+.is-done .ti-skip { display: none; }
+.tintro .dintro-close { z-index: 10; }
+
+@media (max-width: 720px) {
+  .ti-photo { left: 0; width: 100%; bottom: auto; height: 58vh; clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%); }
+  .ti-photo::after { background: linear-gradient(0deg, var(--bg) 0%, transparent 45%); }
+  .ti-name { left: 18px; right: 18px; bottom: 8vh; max-width: none; }
+  .ti-last { font-size: clamp(34px, 11vw, 60px); }
+  .ti-num { top: auto; bottom: 18vh; transform: skewX(-10deg); font-size: 45vw; }
+  @keyframes ti-num { from { opacity: 0; transform: skewX(-10deg) translateX(-25vw); } to { opacity: .25; transform: skewX(-10deg); } }
+  .ti-cols { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); padding: 0 11vw; }
+  .ti-col { border-bottom: 3px solid var(--bg); }
+}
+
 /* ---------- CHECKLIST ---------- */
 .pack-progress { font-size: 22px; font-weight: 700; margin: 24px 0 8px; }
 .pack-progress b { font-weight: 900; font-size: 40px; color: var(--green); }
