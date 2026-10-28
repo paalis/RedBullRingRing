@@ -262,6 +262,12 @@ for k in range(24):
 n = int(1.5 * SR); tt = np.arange(n) / SR
 place(fx, biquad_lp(rng.standard_normal(n), 400 + 6000 * (tt / 1.5) ** 2, q=2) * (tt / 1.5) ** 2, 22.0, .45)
 
+# Whooshes on the car-detail cuts between drivers (13.4, 15.4, … 21.4 s)
+for cut in (13.4, 15.4, 17.4, 19.4, 21.4):
+    n = int(0.6 * SR); tt = np.arange(n) / SR
+    w = biquad_lp(rng.standard_normal(n), 300 + 7000 * np.sin(np.pi * tt / .6) ** 2, q=1.6) * np.sin(np.pi * tt / .6) ** 1.5
+    place(fx, w, cut - .05, .3)
+
 # ---------- Part 3: engine pass-by (stereo, left → right), peak at 24.3 s ----------
 eng_l = np.zeros(N); eng_r = np.zeros(N)
 T0, TC, TL = 23.3, 24.3, 2.0

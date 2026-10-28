@@ -789,6 +789,81 @@ body.has-modal { overflow: hidden; }
   .tx-big-bottom { bottom: -7vh; }
 }
 
+/* Teamintro: bilklipp mellom førerne (~0,6 s hver, harde kutt) */
+.tr { overflow: hidden; background: #050507; z-index: 3; }
+.tr.is-off { animation: none; visibility: hidden; }
+.tr-car { position: absolute; max-width: none; height: auto; }
+
+/* Tunnel: lysstriper og gulvlinjer som suser forbi */
+.tr-tunnel { background: radial-gradient(ellipse 60% 50% at 50% 45%, #2b2e35, #050507 70%); perspective: 420px; }
+.tr-floor { position: absolute; left: -60%; right: -60%; top: 50%; height: 140%; transform: rotateX(74deg); transform-origin: 50% 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 70px, rgba(255, 255, 255, .28) 70px 73px),
+    repeating-linear-gradient(90deg, transparent 0 26px, rgba(255, 255, 255, .12) 26px 28px),
+    linear-gradient(180deg, rgba(200, 205, 215, .05), rgba(235, 238, 245, .9)); }
+.tr-strip { position: absolute; height: 3px; background: #fff; box-shadow: 0 0 14px 3px rgba(255, 255, 255, .7); transform-origin: left; }
+.tr-strip-a { left: -5%; top: 45%; width: 42%; transform: rotate(-2deg); }
+.tr-strip-b { right: -5%; top: 4%; width: 34%; transform: rotate(-32deg); transform-origin: right; }
+.tr-glow { position: absolute; left: 50%; top: 44%; width: 30vw; height: 30vw; translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgba(200, 230, 255, .55), transparent 65%); }
+.tr-tunnel.is-on { animation: tr-push .6s cubic-bezier(.5, 0, .7, 1) both; }
+.tr-tunnel.is-on .tr-floor { animation: tr-rush .6s linear both; }
+.tr-tunnel.is-on .tr-strip { animation: tr-strip .35s cubic-bezier(.2, .9, .3, 1) both; }
+.tr-tunnel.is-on .tr-glow { animation: tr-pulse .6s ease both; }
+
+/* Skisse: invertert nærbilde av nesen, røde striper over */
+.tr-sketch { background: #eceef1; }
+.tr-sketch .tr-car, .tr-nose .tr-car { width: 330vw; left: -228vw; top: calc(50vh - 46vw); }
+.tr-sketch .tr-car { filter: grayscale(1) invert(1) contrast(1.7) brightness(1.12); }
+.tr-redbars i { position: absolute; left: 14%; right: 0; height: 5.5vh; clip-path: polygon(3vh 0, 100% 0, 100% 100%, 0 100%); transform-origin: right; }
+.tr-redbars i:first-child { top: 44%; background: linear-gradient(90deg, rgba(225, 6, 0, .25), rgba(225, 6, 0, .8)); }
+.tr-redbars i:last-child { top: 51%; background: var(--red); }
+.tr-sketch.is-on .tr-car { animation: tr-pan-r .6s linear both; }
+.tr-sketch.is-on .tr-redbars i { animation: tr-bars .45s cubic-bezier(.2, .9, .3, 1) both; }
+.tr-sketch.is-on .tr-redbars i:last-child { animation-delay: .06s; }
+
+/* Nærbilde: mørk nese med rødt kantlys og rosa røyk */
+.tr-nose .tr-car { filter: grayscale(.5) brightness(.42) contrast(1.35) drop-shadow(0 -3px 3px rgba(255, 40, 30, .95)); }
+.tr-smoke { position: absolute; left: -10%; top: 46%; width: 85%; height: 12vh; border-radius: 50%; filter: blur(16px);
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255, 160, 170, .8), rgba(255, 120, 130, .3) 55%, transparent 75%); }
+.tr-nose.is-on .tr-car { animation: tr-pan-l .6s linear both; }
+.tr-nose.is-on .tr-smoke { animation: tr-smoke .6s ease-out both; }
+
+/* Vindtunnel: mørk bil i rødt lys, strømningslinjer fra rødt til hvitt */
+.tr-flow { background: radial-gradient(ellipse 80% 70% at 60% 45%, #2a2b30, #08080b 70%); }
+.tr-flow .tr-car { width: 86vw; left: 7vw; bottom: 16vh; filter: brightness(.3) sepia(1) hue-rotate(-30deg) saturate(3.5) drop-shadow(0 -2px 3px rgba(255, 40, 30, .9)); }
+.tr-lines { position: absolute; left: 0; top: 31vh; width: 100%; height: 42vh; z-index: 2; scale: -1 1; }
+.tr-lines path { fill: none; stroke: url(#tr-flow-g); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1600; filter: drop-shadow(0 0 6px rgba(255, 120, 120, .8)); }
+.tr-redfloor { position: absolute; right: -10%; bottom: -10%; width: 50%; height: 40%; background: radial-gradient(ellipse at 70% 60%, rgba(225, 6, 0, .55), transparent 70%); filter: blur(10px); }
+.tr-flow.is-on .tr-lines path { animation: tr-draw .55s cubic-bezier(.3, .6, .4, 1) both; animation-delay: calc(var(--k) * 25ms); }
+.tr-flow.is-on .tr-car { animation: tr-carin .6s ease-out both; }
+
+/* Zoom: bilen suser mot kamera med bevegelsesuskarphet, så hvitt blink */
+.tr-zoom { background: #eceef1; }
+.tr-zoom .tr-car { width: 90vw; left: 5vw; top: 50%; translate: 0 -50%; filter: grayscale(1) invert(1) contrast(1.5); }
+.tr-white { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.tr-zoom.is-on .tr-car { animation: tr-rushcam .6s cubic-bezier(.6, 0, .9, .6) both; }
+.tr-zoom.is-on .tr-white { animation: tr-whiteout .6s ease-in both; }
+
+@keyframes tr-push { from { transform: scale(1); } to { transform: scale(1.18); } }
+@keyframes tr-rush { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 500px, 0 0, 0 0; } }
+@keyframes tr-strip { from { transform: scaleX(0) rotate(var(--r, 0deg)); opacity: 0; } }
+@keyframes tr-pulse { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: .4; } }
+@keyframes tr-pan-r { from { transform: translateX(-4vw); } to { transform: translateX(6vw); } }
+@keyframes tr-pan-l { from { transform: translateX(6vw); } to { transform: translateX(-4vw); } }
+@keyframes tr-bars { from { transform: scaleX(0); } }
+@keyframes tr-smoke { from { transform: translateX(40%) scaleX(.4); opacity: 0; } 40% { opacity: 1; } to { transform: translateX(-10%) scaleX(1.2); opacity: .9; } }
+@keyframes tr-draw { from { stroke-dashoffset: 1600; } }
+@keyframes tr-carin { from { opacity: 0; transform: translateX(-3vw); } }
+@keyframes tr-rushcam { from { transform: scale(1); filter: grayscale(1) invert(1) contrast(1.5) blur(0); } to { transform: scale(4) translateX(-8%); filter: grayscale(1) invert(1) contrast(1.5) blur(18px); } }
+@keyframes tr-whiteout { 0%, 55% { opacity: 0; } 100% { opacity: 1; } }
+
+@media (max-aspect-ratio: 4/5) {
+  .tr-sketch .tr-car, .tr-nose .tr-car { width: 520vw; left: -380vw; top: calc(50vh - 70vw); }
+  .tr-flow .tr-car { width: 130vw; left: -15vw; bottom: 30vh; }
+  .tr-lines { top: 40vh; height: 22vh; }
+  .tr-zoom .tr-car { width: 170vw; left: -35vw; }
+}
+
 /* Line-up (F1-plakaten: stripe med logo, rødt lys, førerne side om side) */
 .ti-grid { display: flex; flex-direction: column; background: radial-gradient(65% 60% at 50% 42%, #8a0b0b 0%, #3a0508 50%, #070709 100%); }
 .tg-bar { display: flex; align-items: center; gap: 18px; padding: 14px 0; background: #000; }

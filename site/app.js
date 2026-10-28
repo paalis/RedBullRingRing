@@ -173,6 +173,28 @@ function whenReady(el, maxMs) {
   return Promise.race([Promise.all([...imgs, font]), new Promise((r) => setTimeout(r, maxMs))]);
 }
 
+// ---------- Teamintro: korte bilklipp mellom førerne (tunnel, skisse, nærbilde, vindtunnel, zoom) ----------
+const TRANSITIONS = ["tunnel", "sketch", "nose", "flow", "zoom"];
+const FLOW_LINES = [0, 1, 2, 3, 4, 5, 6].map((k) => {
+  const y = 150 + k * 22;
+  return `<path d="M-20 ${y + 60} C 260 ${y + 60}, 420 ${y - 40}, 640 ${y - 70} S 1000 ${y - 30}, 1240 ${y - 10}" style="--k:${k}"/>`;
+}).join("");
+
+function transitionScene(i) {
+  const kind = TRANSITIONS[i % TRANSITIONS.length];
+  const car = `<img class="tr-car" src="assets/car.webp" alt="">`;
+  const body = {
+    tunnel: `<div class="tr-floor"></div><i class="tr-strip tr-strip-a"></i><i class="tr-strip tr-strip-b"></i><div class="tr-glow"></div>`,
+    sketch: `${car}<div class="tr-redbars"><i></i><i></i></div>`,
+    nose: `${car}<div class="tr-smoke"></div>`,
+    flow: `${car}<svg class="tr-lines" viewBox="0 0 1200 500" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="tr-flow-g" x1="0" x2="1"><stop offset="0" stop-color="#ff2a1f"/><stop offset=".55" stop-color="#ffd6d6"/><stop offset="1" stop-color="#fff" stop-opacity=".4"/></linearGradient></defs>
+        ${FLOW_LINES}</svg><div class="tr-redfloor"></div>`,
+    zoom: `${car}<div class="tr-white"></div>`,
+  }[kind];
+  return `<section class="ti-scene tr tr-${kind}" data-scene="t${i}" aria-hidden="true">${body}</section>`;
+}
+
 // ---------- Teamintro: én scene per fører, hver i sin egen stil (som F1-sesongens førerpresentasjoner) ----------
 const SCENE_STYLES = ["studio", "portrait", "diagonal", "spotlight"];
 
@@ -224,7 +246,8 @@ function driverScene(d, i) {
 }
 
 // ---------- Teamintro (F1 «line-up»-stil) ----------
-const TEAM_TIMELINE = [["title", 1300], ...CREW.map((_, i) => [`d${i}`, 1900]), ["grid", 0]];
+// Mellom hver fører (og før line-upen) kommer et kort bilklipp, «t0»–«t4».
+const TEAM_TIMELINE = [["title", 1300], ...CREW.flatMap((_, i) => [[`t${i}`, 600], [`d${i}`, 1500]]), [`t${CREW.length}`, 600], ["grid", 0]];
 // Rekkefølge i line-upen fra venstre: ytterst bak, innerst foran (som F1-plakaten).
 const LINEUP = [2, 0, 1, 3];
 
@@ -237,7 +260,8 @@ function teamIntroMarkup(extra = "") {
         <h2>Line-up</h2>
         <p class="ti-sub"><span class="brand-mark">RBR</span><span class="brand-year">'27</span></p>
       </section>
-      ${CREW.map((d, i) => driverScene(d, i)).join("")}
+      ${CREW.map((d, i) => transitionScene(i) + driverScene(d, i)).join("")}
+      ${transitionScene(CREW.length)}
       <section class="ti-scene ti-grid" data-scene="grid">
         <div class="tg-bar" aria-hidden="true"><i></i><span><span class="brand-mark">RBR</span><span class="brand-year">'27</span></span><i></i></div>
         <div class="tg-row">
@@ -606,7 +630,7 @@ document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 // ---------- Nettsideintro: introvideo → teamintro → bil over skjermen, synket til lydsporet ----------
 // Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s,
 // bilen kommer inn rett før motorlyden topper (24,3 s), og siden åpnes på sluttslaget (25 s).
-const SITE_INTRO = [[12, "title"], [14, "d0"], [16, "d1"], [18, "d2"], [20, "d3"], [22, "grid"], [23.6, "car"], [25, "end"]];
+const SITE_INTRO = [[12, "title"], [13.4, "t0"], [14, "d0"], [15.4, "t1"], [16, "d1"], [17.4, "t2"], [18, "d2"], [19.4, "t3"], [20, "d3"], [21.4, "t4"], [22, "grid"], [23.6, "car"], [25, "end"]];
 // Bilen som suser over line-upen (utklippet bilde, kjører mot høyre).
 const CAR_IMG = `<img class="si-car-img" src="assets/car.webp" alt="" decoding="async">`;
 
