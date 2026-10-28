@@ -19,16 +19,23 @@ const ALLOWED = [
 
 const allowed = (u) => u.protocol === "https:" && ALLOWED.some((re) => re.test(u.hostname.toLowerCase()));
 
-function metaImage(html) {
-  for (const key of ["og:image:secure_url", "og:image", "twitter:image"]) {
+function meta(html, keys) {
+  for (const key of keys) {
     const re = new RegExp(
       `<meta[^>]+(?:property|name)=["']${key}["'][^>]*content=["']([^"']+)["']|<meta[^>]+content=["']([^"']+)["'][^>]*(?:property|name)=["']${key}["']`,
       "i",
     );
     const m = html.match(re);
-    if (m) return (m[1] || m[2]).replace(/&amp;/g, "&");
+    if (m) return decodeEntities(m[1] || m[2]).trim();
   }
   return null;
+}
+
+function decodeEntities(s) {
+  return s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    .replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 }
 
 module.exports = async (req, res) => {
@@ -53,11 +60,14 @@ module.exports = async (req, res) => {
     });
     if (!allowed(new URL(r.url))) return res.status(400).end(JSON.stringify({ error: "Siden støttes ikke" }));
     const html = (await r.text()).slice(0, 600000);
-    const raw = metaImage(html);
-    const image = raw ? new URL(raw, r.url) : null;
-    if (!image || image.protocol !== "https:") return res.status(404).end(JSON.stringify({ error: "Fant ikke bilde" }));
+    const raw = meta(html, ["og:image:secure_url", "og:image", "twitter:image"]);
+    const img = raw ? new URL(raw, r.url) : null;
+    const image = img && img.protocol === "https:" ? img.href : "";
+    const title = (meta(html, ["og:title", "twitter:title"]) || (html.match(/<title[^>]*>([^<]*)<\/title>/i) || [])[1] || "").trim();
+    const description = meta(html, ["og:description", "twitter:description", "description"]) || "";
+    if (!image && !title) return res.status(404).end(JSON.stringify({ error: "Fant ingenting" }));
     res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
-    return res.status(200).end(JSON.stringify({ image: image.href }));
+    return res.status(200).end(JSON.stringify({ image, title: decodeEntities(title).slice(0, 300), description: description.slice(0, 500) }));
   } catch {
     return res.status(502).end(JSON.stringify({ error: "Kunne ikke hente siden" }));
   }
