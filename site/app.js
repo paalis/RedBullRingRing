@@ -2,7 +2,8 @@
 const RACE_START = new Date("2027-07-11T15:00:00+02:00"); // Forventet løpsstart (CEST)
 
 const CREW = [
-  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600", photo: "assets/crew/filip.webp" },
+  { name: "Filip",      fullName: "Filip Johannes Grydeland", code: "GRY", number: 7,  home: "Trondheim",    role: "Teamsjef",       team: "#e10600", photo: "assets/crew/filip.webp",
+    photos: { close: "assets/crew/filip-close.webp", wide: "assets/crew/filip-wide.webp" } },
   { name: "Pål André",  fullName: "Pål André Weisethaunet",   code: "WEI", number: 16, home: "Trondheim",    role: "Strateg",        team: "#ff8000", photo: "assets/crew/pal-andre.webp" },
   { name: "Hans-Kristian", fullName: "Hans-Kristian Holthe",  code: "HOL", number: 44, home: "Oslo",         role: "Navigatør",      team: "#27f4d2", photo: "assets/crew/hans-kristian.webp" },
   { name: "Håvard",     fullName: "Håvard Åstum Wahl",        code: "WAH", number: 81, home: "Kristiansand", role: "Schnitzel-sjef", team: "#b64dff", photo: "assets/crew/havard.webp" },
@@ -228,13 +229,20 @@ function shot(kind, name) {
   return `<section class="ti-scene tr tr-${kind}" data-scene="${name}" aria-hidden="true">${body}</section>`;
 }
 
+// Ekstra bilder per fører (valgfritt i CREW): «close» er et tett portrett til nærbildet, «wide» et helfigurbilde
+// til den vide vinkelen. Uten dem brukes hovedbildet.
+function closePhoto(d) {
+  if (d.photos && d.photos.close) return `<img class="tz-face is-tight" src="${d.photos.close}" alt="">`;
+  return d.photo ? `<img class="tz-face" src="${d.photo}" alt="">` : "";
+}
+
 // Nærbilde før hovedscenen: mørkt, rødt kantlys, store bokstaver bak ansiktet (som Verstappen-introen).
 function closeupScene(d, i) {
   const L = splitName(d).last.toUpperCase();
   return `
     <section class="ti-scene tz" data-scene="d${i}a" style="--team:${d.team}">
       <div class="tz-word"><span>${L.slice(0, 3)}</span></div>
-      ${d.photo ? `<img class="tz-face" src="${d.photo}" alt="">` : ""}
+      ${closePhoto(d)}
       <i class="tx-tag" style="right:6%;top:9%">${d.number}</i>
     </section>`;
 }
@@ -263,7 +271,7 @@ function wideScene(d, i) {
       <div class="tw-cone"></div>
       <div class="tw-word"><span>${L}</span></div>
       <div class="tw-stage"></div>
-      ${d.photo ? `<img class="tw-driver" src="${d.photo}" alt="">` : ""}
+      ${d.photo ? `<img class="tw-driver" src="${(d.photos && d.photos.wide) || d.photo}" alt="">` : ""}
       <div class="tw-stats"><b>${d.number}</b><span>${d.role.toUpperCase()}</span><span>${d.home.toUpperCase()}</span></div>
       <i class="tx-tag" style="left:6%;top:9%">${d.code}</i>
     </section>`;

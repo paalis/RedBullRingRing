@@ -794,6 +794,7 @@ body.has-modal { overflow: hidden; }
 .tz-word span { font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 44vh; line-height: 1; color: #fff; letter-spacing: .02em; white-space: nowrap; }
 .tz-face { position: absolute; z-index: 2; left: 50%; top: -6vh; height: 230vh; width: auto; max-width: none; translate: -50% 0;
   filter: brightness(.55) contrast(1.25) saturate(.85) drop-shadow(-6px -4px 0 rgba(255, 40, 30, .85)) drop-shadow(0 0 40px rgba(255, 30, 20, .45)); }
+.tz-face.is-tight { top: 12vh; height: 90vh; }
 .tz .tx-tag { color: #fff; }
 .tz.is-on .tz-face { animation: tz-push 1s cubic-bezier(.2, .8, .2, 1) both; }
 .tz.is-on .tz-word span { animation: tz-word 1s cubic-bezier(.2, .8, .2, 1) both; }
@@ -859,6 +860,7 @@ body.has-modal { overflow: hidden; }
 
 @media (max-aspect-ratio: 4/5) {
   .tz-face { height: 150vh; top: 4vh; }
+  .tz-face.is-tight { height: 56vh; top: 16vh; }
   .tz-word span { font-size: 26vh; }
   .tw-driver { height: 52vh; bottom: 21.6vh; }
   .tw-stage { width: 90vw; bottom: 17vh; }
