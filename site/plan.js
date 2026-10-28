@@ -1,5 +1,5 @@
 // Planleggingstavla: forslag, stemmer og avkrysninger lagret i Firebase (Firestore).
-// Alle kan se. For å legge inn eller endre må man bli med med lagkoden.
+// Innloggingen (login.html) gjør deg til medlem; skjemaet her er reserve hvis Firebase-økten mangler.
 import {
   initializeApp, getAuth, signInAnonymously, onAuthStateChanged, signOut,
   initializeFirestore, collection, doc, getDocFromServer, setDoc, addDoc, updateDoc, deleteDoc,
@@ -63,6 +63,7 @@ function renderBars() {
           joinedAt: serverTimestamp(),
         });
         me = { uid: cred.user.uid, name: form.name.value };
+        syncWatchers();
         renderAll();
       } catch (ex) {
         console.error("Kunne ikke bli med:", ex);
@@ -74,6 +75,17 @@ function renderBars() {
   });
 }
 
+// Dataene kan bare leses av medlemmer, så lytterne startes når medlemskapet er bekreftet.
+let unwatch = [];
+function syncWatchers() {
+  if (me && !unwatch.length) unwatch = [watchCandidates(), watchTodos()];
+  if (!me && unwatch.length) {
+    unwatch.forEach((u) => u());
+    unwatch = [];
+    candidates = [];
+  }
+}
+
 onAuthStateChanged(auth, async (user) => {
   me = null;
   if (user) {
@@ -82,6 +94,7 @@ onAuthStateChanged(auth, async (user) => {
       if (snap.exists()) me = { uid: user.uid, name: snap.data().name };
     } catch (_) {}
   }
+  syncWatchers();
   renderAll();
 });
 
@@ -406,13 +419,15 @@ function renderAll() {
   document.querySelectorAll(".car-todo li").forEach((li) => (li.querySelector(".car-check").disabled = !me));
 }
 
-onSnapshot(collection(db, "candidates"), (snap) => {
-  candidates = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-  document.querySelectorAll(".plan-live").forEach(renderSlot);
-  renderBudget();
-  backfillPreviews();
-  renderMaps();
-});
+function watchCandidates() {
+  return onSnapshot(collection(db, "candidates"), (snap) => {
+    candidates = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    document.querySelectorAll(".plan-live").forEach(renderSlot);
+    renderBudget();
+    backfillPreviews();
+    renderMaps();
+  });
+}
 
 // ---------- Handlinger ----------
 document.addEventListener("click", async (e) => {
@@ -524,19 +539,21 @@ document.addEventListener("input", (e) => {
 });
 
 // ---------- Leiebil: avkrysning ----------
-onSnapshot(collection(db, "todos"), (snap) => {
-  const state = Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
-  let done = 0;
-  document.querySelectorAll(".car-todo li").forEach((li, i) => {
-    const s = state[li.dataset.todo];
-    const isDone = s ? s.done : CAR.todo[i].done;
-    li.classList.toggle("is-done", isDone);
-    li.title = s && s.by ? `Sist endret av ${s.by}` : "";
-    if (isDone) done++;
+function watchTodos() {
+  return onSnapshot(collection(db, "todos"), (snap) => {
+    const state = Object.fromEntries(snap.docs.map((d) => [d.id, d.data()]));
+    let done = 0;
+    document.querySelectorAll(".car-todo li").forEach((li, i) => {
+      const s = state[li.dataset.todo];
+      const isDone = s ? s.done : CAR.todo[i].done;
+      li.classList.toggle("is-done", isDone);
+      li.title = s && s.by ? `Sist endret av ${s.by}` : "";
+      if (isDone) done++;
+    });
+    const count = document.querySelector("[data-todo-count]");
+    if (count) count.textContent = `${done} / ${CAR.todo.length}`;
   });
-  const count = document.querySelector("[data-todo-count]");
-  if (count) count.textContent = `${done} / ${CAR.todo.length}`;
-});
+}
 
 document.addEventListener("click", async (e) => {
   const check = e.target.closest(".car-check");

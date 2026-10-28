@@ -183,6 +183,8 @@ h1, h2, h3 { line-height: 1.02; margin: 0; }
   .section-track .track { order: 2; }
 }
 .fineprint { color: var(--muted); font-size: 13px; margin-top: 18px; }
+.fineprint .logout { color: var(--text); font-weight: 700; }
+.fineprint .logout:hover { color: var(--red-hot); }
 
 /* ---------- SESSIONS ---------- */
 .sessions { list-style: none; margin: 48px 0 0; padding: 0; display: grid; gap: 14px; }

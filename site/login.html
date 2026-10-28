@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Paddock-pass · RBR '27</title>
+  <link rel="preload" href="assets/fonts/titillium-900.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    @font-face { font-family: "Titillium"; src: url("assets/fonts/titillium-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "Titillium"; src: url("assets/fonts/titillium-700.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+    @font-face { font-family: "Titillium"; src: url("assets/fonts/titillium-900.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+    @font-face { font-family: "Mr Dafoe"; src: url("assets/fonts/mr-dafoe-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    :root { --red: #e10600; --hot: #ff2a1f; --text: #f4f4f6; --muted: #a4a4b4; --line: rgba(255,255,255,.14); }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 24px 16px 40px;
+      background: #060608; color: var(--text); font-family: "Titillium", system-ui, sans-serif; overflow-x: hidden;
+    }
+
+    /* Studio: rød glød og horisontale lysstriper, som i førerintroene */
+    .glow { position: fixed; inset: 0; z-index: -2;
+      background:
+        radial-gradient(55% 40% at 50% 60%, rgba(225, 6, 0, .45), transparent 70%),
+        radial-gradient(120% 55% at 50% 100%, rgba(140, 0, 6, .55), transparent 62%),
+        linear-gradient(135deg, #17171c 0%, #08080b 38%, #12060a 70%, #1c0406 100%); }
+    .streaks { position: fixed; inset: 0; z-index: -1; mix-blend-mode: screen; pointer-events: none; }
+    .streaks i { position: absolute; left: -5%; right: -5%; top: var(--y); height: var(--h); opacity: var(--o); filter: blur(var(--b));
+      background: linear-gradient(90deg, transparent, #ff2a1f 22%, #ff6a5c 50%, #ff2a1f 78%, transparent);
+      animation: streak 1s cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--d); }
+    .streaks i:nth-child(1) { --y: 44%; --h: 3px; --b: 0px; --o: .8; --d: .1s; }
+    .streaks i:nth-child(2) { --y: 50%; --h: 18px; --b: 8px; --o: .6; --d: .2s; }
+    .streaks i:nth-child(3) { --y: 58%; --h: 5px; --b: 1px; --o: .7; --d: .3s; }
+    .streaks i:nth-child(4) { --y: 64%; --h: 110px; --b: 36px; --o: .45; --d: .4s; }
+    @keyframes streak { from { transform: scaleX(0); opacity: 0; } }
+
+    .wrap { width: min(440px, 100%); display: flex; flex-direction: column; align-items: center; gap: 22px; }
+
+    /* Startlysene: ett lys per steg, alle fem tennes ved riktig kode – så «lights out» */
+    .gantry { display: flex; gap: 10px; padding: 10px 14px; background: #0d0d12; border: 1px solid #222230; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+    .gantry span { width: 34px; height: 34px; border-radius: 50%; background: #1b1b22; box-shadow: inset 0 2px 6px rgba(0,0,0,.8);
+      transition: background .15s ease, box-shadow .15s ease; }
+    .gantry span.on { background: radial-gradient(circle at 40% 35%, #ff7a70, var(--hot) 45%, #a00400);
+      box-shadow: 0 0 18px 4px rgba(255, 42, 31, .65), inset 0 -3px 6px rgba(0,0,0,.35); }
+    .gantry.out span { background: #1b1b22; box-shadow: inset 0 2px 6px rgba(0,0,0,.8); transition: none; }
+
+    /* Paddock-pass: kortet med hologramkant */
+    .pass { position: relative; width: 100%; border-radius: 20px; padding: 2px; transform-origin: 50% -40px;
+      background: conic-gradient(from var(--a, 0deg), #ff2a1f, #ffd200, #27f4d2, #b64dff, #ff2a1f);
+      animation: holo 6s linear infinite, swing 1s cubic-bezier(.2,1.3,.4,1) both; box-shadow: 0 30px 80px rgba(0,0,0,.65); }
+    @property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+    @keyframes holo { to { --a: 360deg; } }
+    @keyframes swing { from { transform: translateY(-40px) rotate(-6deg); opacity: 0; } }
+    .pass::before { content: ""; position: absolute; left: 50%; top: -34px; width: 16px; height: 36px; margin-left: -8px;
+      border-radius: 4px 4px 0 0; background: linear-gradient(90deg, #7a0300, var(--red), #7a0300); }
+    .card { position: relative; overflow: hidden; border-radius: 18px; padding: 22px 22px 24px;
+      background: linear-gradient(160deg, #15151d 0%, #0d0d12 60%, #140709 100%); }
+    .card::after { content: ""; position: absolute; inset: -40%; pointer-events: none;
+      background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.07) 50%, transparent 58%);
+      animation: shine 4.5s ease-in-out infinite; }
+    @keyframes shine { from { transform: translateX(-30%); } to { transform: translateX(30%); } }
+    .slot { width: 64px; height: 8px; margin: -6px auto 16px; border-radius: 99px; background: #050507; box-shadow: inset 0 1px 3px rgba(0,0,0,.9); }
+
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: inline-flex; align-items: baseline; gap: 6px; }
+    .brand b { background: var(--red); color: #fff; font-weight: 900; font-style: italic; font-size: 22px; padding: 2px 10px; transform: skewX(-12deg); display: inline-block; }
+    .brand span { font-weight: 900; font-size: 22px; }
+    .tag { font-weight: 700; font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: #0b0b10; background: #ffd200; padding: 4px 8px; border-radius: 4px; }
+    h1 { margin: 18px 0 0; font-weight: 900; font-size: clamp(34px, 9vw, 46px); line-height: .95; text-transform: uppercase; transform: skewX(-8deg); transform-origin: left; }
+    .script { font-family: "Mr Dafoe", cursive; font-weight: 400; font-size: clamp(30px, 8vw, 40px); color: #fff; text-shadow: 0 0 16px rgba(255,40,30,.7);
+      margin: 0 0 -10px 4px; line-height: 1; }
+    .sub { margin: 8px 0 18px; color: var(--muted); font-weight: 600; font-size: 14px; }
+    .label { display: block; margin: 0 0 8px; font-weight: 700; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+
+    .drivers { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 0 18px; padding: 0; border: 0; }
+    .drivers input { position: absolute; opacity: 0; pointer-events: none; }
+    .drivers label { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      background: #1a1a22; border: 1px solid var(--line); border-left: 4px solid var(--team); font-weight: 700; transition: transform .15s, background .15s, border-color .15s; }
+    .drivers label i { font-style: normal; font-weight: 900; font-size: 20px; color: var(--team); min-width: 26px; }
+    .drivers label:hover { transform: translateY(-2px); }
+    .drivers input:checked + label { background: color-mix(in srgb, var(--team) 22%, #1a1a22); border-color: var(--team); box-shadow: 0 0 0 1px var(--team), 0 0 20px color-mix(in srgb, var(--team) 40%, transparent); }
+    .drivers input:focus-visible + label { outline: 2px solid #fff; outline-offset: 2px; }
+
+    .code { position: relative; }
+    .code input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--line); background: #08080b; color: #fff;
+      font: 700 18px/1 "Titillium", sans-serif; letter-spacing: .14em; }
+    .code input:focus { outline: none; border-color: var(--hot); box-shadow: 0 0 0 3px rgba(255,42,31,.25); }
+    .go { margin-top: 18px; width: 100%; position: relative; overflow: hidden; padding: 15px 18px; border: 0; border-radius: 10px; cursor: pointer;
+      background: var(--red); color: #fff; font: 900 18px/1 "Titillium", sans-serif; letter-spacing: .14em; text-transform: uppercase; transform: skewX(-6deg);
+      box-shadow: 0 10px 30px rgba(225, 6, 0, .45); transition: background .15s, transform .15s; }
+    .go:hover { background: var(--hot); transform: skewX(-6deg) translateY(-1px); }
+    .go:disabled { cursor: wait; opacity: .85; }
+    .go span { display: inline-block; transform: skewX(6deg); }
+    .err { min-height: 20px; margin: 10px 0 0; color: #ff8a80; font-weight: 700; font-size: 14px; }
+    .foot { color: var(--muted); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; text-align: center; }
+
+    .shake { animation: shake .45s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shake { 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+    /* Etter riktig kode: kortet flyr opp, skjermen blinker hvitt */
+    .launch .pass { animation: fly .6s cubic-bezier(.7,0,.9,.4) both; }
+    @keyframes fly { to { transform: translateY(-120vh) rotate(8deg); opacity: 0; } }
+    .flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 5; }
+    .launch .flash { animation: flash .5s ease-out .45s both; }
+    @keyframes flash { 0% { opacity: 0; } 30% { opacity: .9; } 100% { opacity: 0; } }
+    .lo { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 4; opacity: 0;
+      font-weight: 900; font-size: clamp(44px, 12vw, 120px); text-transform: uppercase; transform: skewX(-8deg); letter-spacing: -.01em; }
+    .launch .lo { animation: lo .9s cubic-bezier(.2,1.3,.4,1) .55s both; }
+    @keyframes lo { from { opacity: 0; transform: skewX(-8deg) scale(1.6); } to { opacity: 1; transform: skewX(-8deg); } }
+
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="streaks" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <div class="flash" aria-hidden="true"></div>
+  <p class="lo" aria-hidden="true">Lights out</p>
+
+  <main class="wrap">
+    <div class="gantry" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+    <div class="pass">
+      <form class="card" novalidate>
+        <div class="slot" aria-hidden="true"></div>
+        <div class="top">
+          <span class="brand"><b>RBR</b><span>'27</span></span>
+          <span class="tag">Paddock-pass</span>
+        </div>
+        <p class="script" aria-hidden="true">Velkommen</p>
+        <h1>Kun for teamet</h1>
+        <p class="sub">Østerrikes Grand Prix · Spielberg · 8.–12. juli 2027</p>
+
+        <fieldset class="drivers">
+          <legend class="label">Hvem er du?</legend>
+          <input type="radio" name="name" id="d7" value="Filip"><label for="d7" style="--team:#e10600"><i>7</i>Filip</label>
+          <input type="radio" name="name" id="d16" value="Pål André"><label for="d16" style="--team:#ff8000"><i>16</i>Pål André</label>
+          <input type="radio" name="name" id="d44" value="Hans-Kristian"><label for="d44" style="--team:#27f4d2"><i>44</i>Hans-Kristian</label>
+          <input type="radio" name="name" id="d81" value="Håvard"><label for="d81" style="--team:#b64dff"><i>81</i>Håvard</label>
+        </fieldset>
+
+        <label class="label" for="code">Lagkode</label>
+        <div class="code"><input id="code" name="code" type="password" autocomplete="current-password" required></div>
+
+        <button class="go" type="submit"><span>Lights out</span></button>
+        <p class="err" role="alert"></p>
+      </form>
+    </div>
+
+    <p class="foot">4 kamerater · 3 byer · 1 løp</p>
+  </main>
+
+  <script type="module">
+    const form = document.querySelector("form");
+    const lights = [...document.querySelectorAll(".gantry span")];
+    const err = document.querySelector(".err");
+    const btn = form.querySelector(".go");
+
+    // Et lys for valgt fører, resten fylles opp mens koden skrives.
+    const level = () => (form.name.value ? 1 : 0) + Math.min(3, form.code.value.length >> 1);
+    const paint = (n) => lights.forEach((l, i) => l.classList.toggle("on", i < n));
+    form.addEventListener("input", () => paint(level()));
+    try { const last = localStorage.getItem("rbr-name"); if (last) form.querySelector(`input[value="${CSS.escape(last)}"]`).checked = true; } catch (_) {}
+    paint(level());
+
+    const fail = (msg) => {
+      err.textContent = msg;
+      btn.disabled = false;
+      const pass = document.querySelector(".pass");
+      pass.classList.remove("shake"); void pass.offsetWidth; pass.classList.add("shake");
+      paint(0);
+    };
+
+    // Planleggingstavla bruker Firebase; samme lagkode gjør deg til medlem der også.
+    async function joinPlanner(name, code) {
+      const { initializeApp, getAuth, signInAnonymously, initializeFirestore, doc, setDoc, serverTimestamp } = await import("./assets/vendor/firebase.js");
+      const app = initializeApp({
+        apiKey: "AIzaSyBDU_0OTxTrH3Itn3mQ0yx3YOjug6L_lwc",
+        authDomain: "rbr27-70136e6c.firebaseapp.com",
+        projectId: "rbr27-70136e6c",
+        appId: "1:806780851873:web:8a265547a4428914ef02e0",
+      });
+      const auth = getAuth(app);
+      const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
+      const cred = auth.currentUser ? { user: auth.currentUser } : await signInAnonymously(auth);
+      await setDoc(doc(db, "members", cred.user.uid), { name, code, joinedAt: serverTimestamp() });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      err.textContent = "";
+      const name = form.name.value;
+      const code = form.code.value.trim();
+      if (!name) return fail("Velg hvem du er.");
+      if (!code) return fail("Skriv inn lagkoden.");
+      btn.disabled = true;
+      let res;
+      try {
+        res = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+      } catch (_) {
+        return fail("Fikk ikke kontakt – prøv igjen.");
+      }
+      if (!res.ok) return fail(res.status === 401 ? "Feil lagkode." : "Noe gikk galt – prøv igjen.");
+
+      try { localStorage.setItem("rbr-name", name); sessionStorage.setItem("rbr-fresh", "1"); } catch (_) {}
+      const joined = Promise.race([joinPlanner(name, code).catch((ex) => console.warn("Planlegger:", ex)), new Promise((r) => setTimeout(r, 4000))]);
+      // Fem røde lys, ett om gangen … og lights out.
+      for (let i = 1; i <= 5; i++) { paint(i); await new Promise((r) => setTimeout(r, 160)); }
+      await new Promise((r) => setTimeout(r, 450));
+      document.querySelector(".gantry").classList.add("out");
+      document.body.classList.add("launch");
+      await Promise.all([joined, new Promise((r) => setTimeout(r, 1400))]);
+      location.replace("/");
+    });
+  </script>
+</body>
+</html>

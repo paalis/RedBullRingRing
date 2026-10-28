@@ -649,6 +649,9 @@ if (video) {
   document.querySelector(".intro-replay").addEventListener("click", () => {
     startIntro({ sound: true }).catch(() => stopIntro());
   });
+  // Rett etter innlogging (et klikk på samme side) tillater nettleseren som regel lyd.
+  let fresh = false;
+  try { fresh = sessionStorage.getItem("rbr-fresh") === "1"; sessionStorage.removeItem("rbr-fresh"); } catch (_) {}
   if (reduceMotion) stopIntro();
-  else startIntro().catch(() => stopIntro()); // autoplay blokkert → rett til siden
+  else startIntro({ sound: fresh }).catch(() => stopIntro()); // autoplay blokkert → rett til siden
 }
