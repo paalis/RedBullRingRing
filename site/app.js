@@ -557,22 +557,8 @@ document.querySelectorAll("main section[id]").forEach((s) => navIo.observe(s));
 // Tidspunkter (sekunder) i assets/intro-theme.mp3: hornene starter teamintroen på 12 s,
 // bilen kommer inn rett før motorlyden topper (24,3 s), og siden åpnes på sluttslaget (25 s).
 const SITE_INTRO = [[12, "title"], [14, "d0"], [16, "d1"], [18, "d2"], [20, "d3"], [22, "grid"], [23.6, "car"], [25, "end"]];
-// Generisk F1-bil i mørkeblått, rødt og gult (ingen logoer), sett fra siden og på vei mot høyre.
-const CAR_SVG = `<svg class="si-car-svg" viewBox="0 0 600 150" aria-hidden="true">
-  <path d="M22 26h50v12H22z" fill="#1b2a5c"/><path d="M22 26h50v4H22z" fill="#d6001c"/>
-  <path d="M28 22h9v74h-9z" fill="#10172f"/><path d="M58 38l14 0-6 42h-8z" fill="#10172f"/>
-  <path d="M50 116L52 82l98-10 45-22 18-22h30l17 28 38 6 120 14 100 14 40 10-2 8-555 8z" fill="#1b2a5c"/>
-  <path d="M118 116l12-26q20-10 70-10l130 4q24 4 32 32z" fill="#14204a"/>
-  <path d="M136 98q40-8 110-6l120 6-4 6-120-4q-62-2-106 6z" fill="#d6001c"/>
-  <path d="M470 90l90 12 5 6-95-10z" fill="#ffcc00"/>
-  <path d="M213 28h30l6 10h-40z" fill="#d6001c"/>
-  <circle cx="286" cy="58" r="13" fill="#e9e9ec"/><path d="M280 52h17v8h-15z" fill="#10172f"/>
-  <path d="M258 60q34-26 76 4" fill="none" stroke="#0b0b10" stroke-width="5" stroke-linecap="round"/>
-  <path d="M40 116h520" stroke="#0b0b10" stroke-width="5"/>
-  <path d="M452 112h140v9H452z" fill="#10172f"/><path d="M452 112h140v3H452z" fill="#d6001c"/><path d="M584 96h9v26h-9z" fill="#10172f"/>
-  <g class="si-wheel"><circle cx="112" cy="106" r="36" fill="#111"/><circle cx="112" cy="106" r="22" fill="#2b2b33"/><path d="M112 86v40M92 106h40" stroke="#555" stroke-width="4"/><circle cx="112" cy="106" r="6" fill="#ffcc00"/></g>
-  <g class="si-wheel"><circle cx="476" cy="108" r="32" fill="#111"/><circle cx="476" cy="108" r="19" fill="#2b2b33"/><path d="M476 91v34M459 108h34" stroke="#555" stroke-width="4"/><circle cx="476" cy="108" r="6" fill="#ffcc00"/></g>
-</svg>`;
+// Bilen som suser over line-upen (utklippet bilde, kjører mot høyre).
+const CAR_IMG = `<img class="si-car-img" src="assets/car.webp" alt="" decoding="async">`;
 
 const hero = document.querySelector(".hero");
 const video = document.querySelector(".hero-video");
@@ -584,7 +570,7 @@ function startIntro({ sound = false } = {}) {
   el.className = "tintro is-site";
   el.setAttribute("role", "dialog");
   el.setAttribute("aria-label", "Intro: line-up RBR '27");
-  el.innerHTML = teamIntroMarkup(`<div class="si-car" aria-hidden="true"><div class="si-trail"></div>${CAR_SVG}</div>`);
+  el.innerHTML = teamIntroMarkup(`<div class="si-car" aria-hidden="true"><div class="si-trail"></div>${CAR_IMG}</div>`);
   const show = sceneSwitcher(el);
   const audio = sound ? new Audio("assets/intro-theme.mp3") : null;
   const run = { el, audio, raf: 0, next: 0, t0: 0, shown: false };
